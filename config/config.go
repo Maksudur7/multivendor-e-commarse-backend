@@ -199,6 +199,16 @@ func Load() (*Config, error) {
 		fmt.Printf("Warning: .env file not found, using environment variables\n")
 	}
 
+	dbURL := viper.GetString("DATABASE_URL")
+	if dbURL == "" {
+		dbURL = viper.GetString("DB_URL")
+	}
+
+	redisURL := viper.GetString("REDIS_URL")
+	if redisURL == "" && viper.GetString("REDIS_HOST") != "" {
+		redisURL = fmt.Sprintf("%s:%d", viper.GetString("REDIS_HOST"), viper.GetInt("REDIS_PORT"))
+	}
+
 	cfg := &Config{
 		App: AppConfig{
 			Env:  viper.GetString("APP_ENV"),
@@ -212,7 +222,7 @@ func Load() (*Config, error) {
 			IdleTimeout:  60 * time.Second,
 		},
 		DB: DatabaseConfig{
-			URL:             viper.GetString("DATABASE_URL"),
+			URL:             dbURL,
 			Host:            viper.GetString("DB_HOST"),
 			Port:            viper.GetInt("DB_PORT"),
 			User:            viper.GetString("DB_USER"),
@@ -226,7 +236,7 @@ func Load() (*Config, error) {
 			ConnMaxLifetime: 30 * time.Minute,
 		},
 		Redis: RedisConfig{
-			URL:        fmt.Sprintf("%s:%d", viper.GetString("REDIS_HOST"), viper.GetInt("REDIS_PORT")),
+			URL:        redisURL,
 			Host:       viper.GetString("REDIS_HOST"),
 			Port:       viper.GetInt("REDIS_PORT"),
 			MaxRetries: 3,
