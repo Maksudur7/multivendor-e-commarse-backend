@@ -91,11 +91,16 @@ func main() {
 	app.Use(middleware.RequestID())
 	app.Use(helmet.New())
 	app.Use(compress.New(compress.Config{Level: compress.LevelBestSpeed}))
+	allowCredentials := true
+	if cfg.CORS.AllowedOrigins == "*" || cfg.CORS.AllowedOrigins == "" {
+		allowCredentials = false
+	}
+
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     cfg.CORS.AllowedOrigins,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-		AllowCredentials: true,
+		AllowCredentials: allowCredentials,
 	}))
 
 	app.Get("/", func(c *fiber.Ctx) error {
