@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Enterprise Multi-Vendor \u0026 Reseller E-Commerce Platform API Collection",
-    "description": "Complete Postman collection covering all ~200 API endpoints across 23 domains (Daraz / Amazon / Meesho grade platform). Live connected to NeonDB PostgreSQL \u0026 Redis.",
+    "description": "Complete Postman collection covering ~200 API endpoints across 23 domains (Daraz / Amazon / Meesho Grade Architecture). Live connected to NeonDB PostgreSQL \u0026 Redis.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -24,19 +24,21 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"phone\": \"+8801712345678\"}"
+              "raw": "{\"target\": \"+8801712345678\", \"purpose\": \"LOGIN\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/auth/otp/send",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/otp/send",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "auth/otp/send"
+                "auth",
+                "otp",
+                "send"
               ]
             }
           }
@@ -57,25 +59,27 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"phone\": \"+8801712345678\", \"otp\": \"123456\"}"
+              "raw": "{\"target\": \"+8801712345678\", \"otp\": \"123456\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/auth/otp/verify",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/otp/verify",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "auth/otp/verify"
+                "auth",
+                "otp",
+                "verify"
               ]
             }
           }
         },
         {
-          "name": "Register User",
+          "name": "Register User (Email)",
           "request": {
             "method": "POST",
             "header": [
@@ -93,22 +97,24 @@
               "raw": "{\"email\": \"customer@example.com\", \"password\": \"Password123!\", \"full_name\": \"Test Customer\", \"phone\": \"+8801712345678\", \"role\": \"CUSTOMER\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/auth/register",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/email/register",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "auth/register"
+                "auth",
+                "email",
+                "register"
               ]
             }
           }
         },
         {
-          "name": "Login User",
+          "name": "Login User (Email)",
           "request": {
             "method": "POST",
             "header": [
@@ -126,24 +132,26 @@
               "raw": "{\"email\": \"customer@example.com\", \"password\": \"Password123!\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/auth/login",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/email/login",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "auth/login"
+                "auth",
+                "email",
+                "login"
               ]
             }
           }
         },
         {
-          "name": "Google OAuth Login",
+          "name": "Google OAuth Callback",
           "request": {
-            "method": "POST",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
@@ -154,21 +162,19 @@
                 "value": "application/json"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"id_token\": \"mock_google_id_token\"}"
-            },
             "url": {
-              "raw": "http://localhost:8080/api/v1/auth/google",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/google/callback",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "auth/google"
+                "auth",
+                "google",
+                "callback"
               ]
             }
           }
@@ -192,16 +198,17 @@
               "raw": "{\"refresh_token\": \"sample_refresh_token\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/auth/refresh",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/refresh",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "auth/refresh"
+                "auth",
+                "refresh"
               ]
             }
           }
@@ -229,22 +236,23 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/auth/logout",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/logout",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "auth/logout"
+                "auth",
+                "logout"
               ]
             }
           }
         },
         {
-          "name": "Get Profile",
+          "name": "Get My Profile",
           "request": {
             "method": "GET",
             "header": [
@@ -262,92 +270,23 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/auth/me",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/me",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "auth/me"
+                "auth",
+                "me"
               ]
             }
           }
         },
         {
-          "name": "Update Profile",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"full_name\": \"Updated Test Customer\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/auth/profile",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth/profile"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Address Book",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/users/addresses",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users/addresses"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Add New Address",
+          "name": "Password Reset Request",
           "request": {
             "method": "POST",
             "header": [
@@ -358,27 +297,94 @@
               {
                 "key": "Accept",
                 "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"customer@example.com\"}"
+            },
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/password/reset-request",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "password",
+                "reset-request"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Password Reset",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\": \"reset_token_123\", \"new_password\": \"NewPassword123!\"}"
+            },
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/password/reset",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "password",
+                "reset"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
               },
               {
                 "key": "Authorization",
                 "value": "Bearer {{access_token}}"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"full_name\": \"Home Address\", \"phone\": \"+8801712345678\", \"address_line\": \"123 Green Road\", \"city\": \"Dhaka\", \"zone\": \"Dhanmondi\", \"postal_code\": \"1205\", \"is_default\": true}"
-            },
             "url": {
-              "raw": "http://localhost:8080/api/v1/users/addresses",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/sessions",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "users/addresses"
+                "auth",
+                "sessions"
               ]
             }
           }
@@ -389,7 +395,7 @@
       "name": "2. Catalog Engine - Public, Seller, Admin (31 endpoints)",
       "item": [
         {
-          "name": "Public: List Categories Tree",
+          "name": "Public: List Public Products",
           "request": {
             "method": "GET",
             "header": [
@@ -403,74 +409,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/categories/tree",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/products",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/categories/tree"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Public: Get Category Details",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/categories/1",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/categories/1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Public: List Featured Products",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/products/featured",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/products/featured"
+                "catalog",
+                "products"
               ]
             }
           }
@@ -490,22 +439,24 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/products/slug/sample-product",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/products/sample-product-slug",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/products/slug/sample-product"
+                "catalog",
+                "products",
+                "sample-product-slug"
               ]
             }
           }
         },
         {
-          "name": "Public: Get Product Details",
+          "name": "Public: List Public Categories",
           "request": {
             "method": "GET",
             "header": [
@@ -519,22 +470,23 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/products/101",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/categories",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/products/101"
+                "catalog",
+                "categories"
               ]
             }
           }
         },
         {
-          "name": "Public: List Brands",
+          "name": "Public: Get Category by Slug",
           "request": {
             "method": "GET",
             "header": [
@@ -548,22 +500,24 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/brands",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/categories/sample-category-slug",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/brands"
+                "catalog",
+                "categories",
+                "sample-category-slug"
               ]
             }
           }
         },
         {
-          "name": "Public: Get Brand Details",
+          "name": "Public: List Public Brands",
           "request": {
             "method": "GET",
             "header": [
@@ -577,22 +531,23 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/brands/1",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/brands",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/brands/1"
+                "catalog",
+                "brands"
               ]
             }
           }
         },
         {
-          "name": "Public: Get Category Attributes",
+          "name": "Public: Get Brand by Slug",
           "request": {
             "method": "GET",
             "header": [
@@ -606,16 +561,82 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/categories/1/attributes",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/brands/sample-brand-slug",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/categories/1/attributes"
+                "catalog",
+                "brands",
+                "sample-brand-slug"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: Get Product Variants",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/products/101/variants",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog",
+                "products",
+                "101",
+                "variants"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: Get Product Reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/products/101/reviews",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog",
+                "products",
+                "101",
+                "reviews"
               ]
             }
           }
@@ -639,16 +660,18 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/products",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/products"
+                "seller",
+                "catalog",
+                "products"
               ]
             }
           }
@@ -673,25 +696,27 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"title\": \"Seller New Shoe\", \"category_id\": 1, \"brand_id\": 1, \"description\": \"High quality shoe\", \"price\": 1500.00}"
+              "raw": "{\"name\": \"Seller New Shoe\", \"category_id\": \"44444444-4444-4444-4444-444444444441\", \"brand_id\": \"55555555-5555-5555-5555-555555555551\", \"description\": \"High quality shoe\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/products",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/products"
+                "seller",
+                "catalog",
+                "products"
               ]
             }
           }
         },
         {
-          "name": "Seller: Get Product Draft",
+          "name": "Seller: Get Seller Product Detail",
           "request": {
             "method": "GET",
             "header": [
@@ -709,16 +734,19 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/products/101"
+                "seller",
+                "catalog",
+                "products",
+                "101"
               ]
             }
           }
@@ -743,27 +771,30 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"title\": \"Updated Shoe Title\"}"
+              "raw": "{\"name\": \"Updated Shoe Name\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/products/101"
+                "seller",
+                "catalog",
+                "products",
+                "101"
               ]
             }
           }
         },
         {
-          "name": "Seller: Submit for Moderation",
+          "name": "Seller: Update Product Status",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -780,19 +811,23 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{}"
+              "raw": "{\"status\": \"PENDING_APPROVAL\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101/submit",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101/status",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/products/101/submit"
+                "seller",
+                "catalog",
+                "products",
+                "101",
+                "status"
               ]
             }
           }
@@ -817,19 +852,23 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"sku\": \"SHOE-RED-42\", \"price\": 1500.00, \"attributes\": {\"color\": \"Red\", \"size\": \"42\"}}"
+              "raw": "{\"sku\": \"SHOE-RED-42\", \"price\": 1500.00}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101/variants",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101/variants",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/products/101/variants"
+                "seller",
+                "catalog",
+                "products",
+                "101",
+                "variants"
               ]
             }
           }
@@ -857,49 +896,19 @@
               "raw": "{\"price\": 1450.00}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/variants/501",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/variants/501",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/variants/501"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Seller: Delete Variant",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/variants/501",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/seller/variants/501"
+                "seller",
+                "catalog",
+                "variants",
+                "501"
               ]
             }
           }
@@ -923,24 +932,27 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/products/101"
+                "seller",
+                "catalog",
+                "products",
+                "101"
               ]
             }
           }
         },
         {
-          "name": "Seller: Bulk Price Update",
+          "name": "Admin: List Admin Products",
           "request": {
-            "method": "PUT",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
@@ -955,21 +967,19 @@
                 "value": "Bearer {{access_token}}"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"updates\": [{\"product_id\": 101, \"price\": 1400.00}]}"
-            },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/seller/products/bulk-price",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/products",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/seller/products/bulk-price"
+                "admin",
+                "catalog",
+                "products"
               ]
             }
           }
@@ -993,24 +1003,27 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/moderation/pending",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/products/pending",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/admin/moderation/pending"
+                "admin",
+                "catalog",
+                "products",
+                "pending"
               ]
             }
           }
         },
         {
-          "name": "Admin: Approve Product",
+          "name": "Admin: Approve/Reject Product",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -1027,56 +1040,23 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{}"
+              "raw": "{\"approved\": true, \"reason\": \"Approved by admin\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/products/101/approve",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/products/101/approval",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/admin/products/101/approve"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Reject Product",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"reason\": \"Copyright infringement\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/products/101/reject",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/admin/products/101/reject"
+                "admin",
+                "catalog",
+                "products",
+                "101",
+                "approval"
               ]
             }
           }
@@ -1101,19 +1081,21 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\": \"Electronics\", \"parent_id\": 0, \"commission_rate\": 5.0}"
+              "raw": "{\"name\": \"Electronics\", \"slug\": \"electronics\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/categories",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/categories",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/admin/categories"
+                "admin",
+                "catalog",
+                "categories"
               ]
             }
           }
@@ -1138,52 +1120,22 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"commission_rate\": 6.0}"
+              "raw": "{\"name\": \"Electronics \u0026 Tech\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/categories/1",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/categories/1",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/admin/categories/1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Delete Category",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/categories/1",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/admin/categories/1"
+                "admin",
+                "catalog",
+                "categories",
+                "1"
               ]
             }
           }
@@ -1208,56 +1160,21 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\": \"Nike\", \"is_verified\": true}"
+              "raw": "{\"name\": \"Nike\", \"slug\": \"nike\", \"is_verified\": true}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/brands",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/brands",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/admin/brands"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Update Brand",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"is_verified\": true}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/brands/1",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/admin/brands/1"
+                "admin",
+                "catalog",
+                "brands"
               ]
             }
           }
@@ -1282,128 +1199,27 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\": \"Color\", \"type\": \"SELECT\"}"
+              "raw": "{\"name\": \"Color\", \"code\": \"color\", \"type\": \"SELECT\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/attributes",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/attributes",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/admin/attributes"
+                "admin",
+                "catalog",
+                "attributes"
               ]
             }
           }
         },
         {
-          "name": "Admin: List All Products",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/products",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/admin/products"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Get Product Audit Trail",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/products/101/audit",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/admin/products/101/audit"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Set Commission Rate",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"category_id\": 1, \"rate\": 5.5}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/commissions",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "catalog/admin/commissions"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Bulk Approve Products",
+          "name": "Admin: Create Attribute Option",
           "request": {
             "method": "POST",
             "header": [
@@ -1422,19 +1238,22 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"product_ids\": [101, 102]}"
+              "raw": "{\"attribute_id\": \"attr_123\", \"value\": \"Red\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/catalog/admin/products/bulk-approve",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/attributes/options",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "catalog/admin/products/bulk-approve"
+                "admin",
+                "catalog",
+                "attributes",
+                "options"
               ]
             }
           }
@@ -1463,16 +1282,18 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/inventory/variants/501",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/variants/501",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventory/variants/501"
+                "inventory",
+                "variants",
+                "501"
               ]
             }
           }
@@ -1500,16 +1321,18 @@
               "raw": "{\"warehouse_id\": 1, \"quantity\": 100}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/inventory/variants/501",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/variants/501",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventory/variants/501"
+                "inventory",
+                "variants",
+                "501"
               ]
             }
           }
@@ -1537,16 +1360,17 @@
               "raw": "{\"variant_id\": 501, \"quantity\": 2}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/inventory/reserve",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/reserve",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventory/reserve"
+                "inventory",
+                "reserve"
               ]
             }
           }
@@ -1574,16 +1398,17 @@
               "raw": "{\"reservation_id\": \"res_12345\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/inventory/release",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/release",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventory/release"
+                "inventory",
+                "release"
               ]
             }
           }
@@ -1607,16 +1432,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/inventory/warehouses",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/warehouses",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventory/warehouses"
+                "inventory",
+                "warehouses"
               ]
             }
           }
@@ -1641,19 +1467,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\": \"Dhaka Main Warehouse\", \"location\": \"Dhaka\", \"type\": \"LOCAL_BD\"}"
+              "raw": "{\"name\": \"Dhaka Hub\", \"location\": \"Dhaka\", \"type\": \"LOCAL_BD\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/inventory/warehouses",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/warehouses",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventory/warehouses"
+                "inventory",
+                "warehouses"
               ]
             }
           }
@@ -1677,16 +1504,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/inventory/movements",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/movements",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventory/movements"
+                "inventory",
+                "movements"
               ]
             }
           }
@@ -1714,16 +1542,17 @@
               "raw": "{\"file_url\": \"https://storage.cdn/inventory.csv\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/inventory/bulk-sync",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/bulk-sync",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventory/bulk-sync"
+                "inventory",
+                "bulk-sync"
               ]
             }
           }
@@ -1752,11 +1581,11 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/cart",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
@@ -1789,16 +1618,17 @@
               "raw": "{\"variant_id\": 501, \"quantity\": 1}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/cart/items",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/items",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "cart/items"
+                "cart",
+                "items"
               ]
             }
           }
@@ -1826,16 +1656,18 @@
               "raw": "{\"quantity\": 3}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/cart/items/item_123",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/items/item_123",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "cart/items/item_123"
+                "cart",
+                "items",
+                "item_123"
               ]
             }
           }
@@ -1859,16 +1691,18 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/cart/items/item_123",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/items/item_123",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "cart/items/item_123"
+                "cart",
+                "items",
+                "item_123"
               ]
             }
           }
@@ -1892,16 +1726,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/cart/clear",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/clear",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "cart/clear"
+                "cart",
+                "clear"
               ]
             }
           }
@@ -1929,16 +1764,17 @@
               "raw": "{\"guest_cart_id\": \"guest_98765\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/cart/merge",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/merge",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "cart/merge"
+                "cart",
+                "merge"
               ]
             }
           }
@@ -1966,16 +1802,18 @@
               "raw": "{\"code\": \"SAVE10\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/cart/coupons/apply",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/coupons/apply",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "cart/coupons/apply"
+                "cart",
+                "coupons",
+                "apply"
               ]
             }
           }
@@ -1999,16 +1837,18 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/cart/coupons/remove",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/coupons/remove",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "cart/coupons/remove"
+                "cart",
+                "coupons",
+                "remove"
               ]
             }
           }
@@ -2019,7 +1859,148 @@
       "name": "5. Order Engine - Customer, Seller, Admin (32 endpoints)",
       "item": [
         {
-          "name": "Customer: Preview Checkout",
+          "name": "Customer: List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customer",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Order Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/ord_1001",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customer",
+                "orders",
+                "ord_1001"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Order Tracking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/ord_1001/track",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customer",
+                "orders",
+                "ord_1001",
+                "track"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Order Invoice",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/ord_1001/invoice",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customer",
+                "orders",
+                "ord_1001",
+                "invoice"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Checkout",
           "request": {
             "method": "POST",
             "header": [
@@ -2038,122 +2019,21 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"items\": [{\"variant_id\": 501, \"quantity\": 1}], \"shipping_address_id\": 1}"
+              "raw": "{\"shipping_address_id\": \"77777777-7777-7777-7777-777777777771\", \"payment_method\": \"SSLCOMMERZ\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/orders/preview",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/checkout",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "orders/preview"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Customer: Place New Order",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"shipping_address_id\": 1, \"payment_method\": \"SSLCOMMERZ\", \"coupon_code\": \"SAVE10\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Customer: List My Orders",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Customer: Get Order Details",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/ord_1001",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/ord_1001"
+                "customer",
+                "orders",
+                "checkout"
               ]
             }
           }
@@ -2181,156 +2061,19 @@
               "raw": "{\"reason\": \"Changed my mind\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/orders/ord_1001/cancel",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/ord_1001/cancel",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "orders/ord_1001/cancel"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Customer: Request RMA Return",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"order_item_id\": 1, \"reason\": \"Defective item\", \"photo_urls\": [\"https://storage.cdn/proof.jpg\"]}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/ord_1001/returns",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/ord_1001/returns"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Customer: Get Tracking Status",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/ord_1001/track",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/ord_1001/track"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Customer: Download PDF Invoice",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/ord_1001/invoice",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/ord_1001/invoice"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Customer: Confirm Delivery",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/ord_1001/confirm-delivery",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/ord_1001/confirm-delivery"
+                "customer",
+                "orders",
+                "ord_1001",
+                "cancel"
               ]
             }
           }
@@ -2354,55 +2097,23 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/orders",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "orders/seller/sub-orders"
+                "seller",
+                "orders"
               ]
             }
           }
         },
         {
-          "name": "Seller: Get Sub-Order Details",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/sub_2001",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/seller/sub-orders/sub_2001"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Seller: Mark Ready to Ship",
+          "name": "Seller: Pack Sub-Order",
           "request": {
             "method": "POST",
             "header": [
@@ -2424,55 +2135,25 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/sub_2001/ready",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/orders/sub_2001/pack",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "orders/seller/sub-orders/sub_2001/ready"
+                "seller",
+                "orders",
+                "sub_2001",
+                "pack"
               ]
             }
           }
         },
         {
-          "name": "Seller: Generate Packing Slip",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/sub_2001/packing-slip",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/seller/sub-orders/sub_2001/packing-slip"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Seller: Bulk Mark Ready",
+          "name": "Seller: Print Label",
           "request": {
             "method": "POST",
             "header": [
@@ -2491,52 +2172,22 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"sub_order_ids\": [\"sub_2001\", \"sub_2002\"]}"
+              "raw": "{}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/bulk-ready",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/orders/sub_2001/print-label",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "orders/seller/sub-orders/bulk-ready"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Seller: Download Courier Label",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/sub_2001/label",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/seller/sub-orders/sub_2001/label"
+                "seller",
+                "orders",
+                "sub_2001",
+                "print-label"
               ]
             }
           }
@@ -2560,22 +2211,23 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/orders/admin/all",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/orders",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "orders/admin/all"
+                "admin",
+                "orders"
               ]
             }
           }
         },
         {
-          "name": "Admin: Update Order Status FSM",
+          "name": "Admin: Update Order Status",
           "request": {
             "method": "PUT",
             "header": [
@@ -2594,130 +2246,22 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"new_status\": \"PROCESSING\"}"
+              "raw": "{\"status\": \"PROCESSING\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/orders/admin/ord_1001/status",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/orders/ord_1001/status",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "orders/admin/ord_1001/status"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Approve Return RMA",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/admin/returns/rma_3001/approve",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/admin/returns/rma_3001/approve"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Reject Return RMA",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"reason\": \"Out of return window\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/admin/returns/rma_3001/reject",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/admin/returns/rma_3001/reject"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Process Refund",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"amount\": 1400.00, \"gateway\": \"SSLCOMMERZ\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/orders/admin/ord_1001/refund",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "orders/admin/ord_1001/refund"
+                "admin",
+                "orders",
+                "ord_1001",
+                "status"
               ]
             }
           }
@@ -2728,9 +2272,9 @@
       "name": "6. Payment \u0026 Webhooks (12 endpoints)",
       "item": [
         {
-          "name": "Payment: Initiate Gateway Payment",
+          "name": "Payment: List Gateways",
           "request": {
-            "method": "POST",
+            "method": "GET",
             "header": [
               {
                 "key": "Content-Type",
@@ -2745,21 +2289,18 @@
                 "value": "Bearer {{access_token}}"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"order_id\": \"ord_1001\", \"gateway\": \"SSLCOMMERZ\"}"
-            },
             "url": {
-              "raw": "http://localhost:8080/api/v1/payments/initiate",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/methods",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "payments/initiate"
+                "payments",
+                "methods"
               ]
             }
           }
@@ -2783,24 +2324,26 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/payments/status/pay_9001",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/status/pay_9001",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "payments/status/pay_9001"
+                "payments",
+                "status",
+                "pay_9001"
               ]
             }
           }
         },
         {
-          "name": "Payment: List Gateways",
+          "name": "Payment: Initiate Gateway Payment",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
@@ -2809,25 +2352,34 @@
               {
                 "key": "Accept",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"master_order_id\": \"ord_1001\", \"payment_gateway\": \"SSLCOMMERZ\", \"amount\": 1500.00}"
+            },
             "url": {
-              "raw": "http://localhost:8080/api/v1/payments/methods",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/initiate",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "payments/methods"
+                "payments",
+                "initiate"
               ]
             }
           }
         },
         {
-          "name": "Payment: Verify Transaction Amount",
+          "name": "Payment: Verify Transaction",
           "request": {
             "method": "POST",
             "header": [
@@ -2849,22 +2401,23 @@
               "raw": "{\"transaction_id\": \"tx_987654\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/payments/verify",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/verify",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "payments/verify"
+                "payments",
+                "verify"
               ]
             }
           }
         },
         {
-          "name": "Webhook: SSLCommerz IPN",
+          "name": "Payment: Request Refund",
           "request": {
             "method": "POST",
             "header": [
@@ -2875,23 +2428,28 @@
               {
                 "key": "Accept",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"tran_id\": \"tx_987654\", \"status\": \"VALID\", \"val_id\": \"val_123\"}"
+              "raw": "{\"order_id\": \"ord_1001\", \"amount\": 1500.00}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/webhooks/sslcommerz",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/refunds",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "webhooks/sslcommerz"
+                "payments",
+                "refunds"
               ]
             }
           }
@@ -2915,16 +2473,53 @@
               "raw": "{\"paymentID\": \"bk_123\", \"status\": \"Completed\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/webhooks/bkash",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/webhooks/bkash",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "webhooks/bkash"
+                "payments",
+                "webhooks",
+                "bkash"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Webhook: SSLCommerz IPN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tran_id\": \"tx_987654\", \"status\": \"VALID\"}"
+            },
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/webhooks/sslcommerz",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "webhooks",
+                "sslcommerz"
               ]
             }
           }
@@ -2948,115 +2543,18 @@
               "raw": "{\"payment_ref_id\": \"ng_123\", \"status\": \"Success\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/webhooks/nagad",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/webhooks/nagad",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "webhooks/nagad"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Webhook: Steadfast Courier Status",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"consignment_id\": 123, \"status\": \"delivered\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/webhooks/steadfast",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "webhooks/steadfast"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Webhook: Pathao Courier Webhook",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"consignment_id\": \"p_123\", \"order_status\": \"Delivered\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/webhooks/pathao",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "webhooks/pathao"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Webhook: RedX Courier Webhook",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"tracking_id\": \"r_123\", \"status\": \"DELIVERED\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/webhooks/redx",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "webhooks/redx"
+                "payments",
+                "webhooks",
+                "nagad"
               ]
             }
           }
@@ -3067,7 +2565,7 @@
       "name": "7. Logistics \u0026 Couriers (9 endpoints)",
       "item": [
         {
-          "name": "Book Courier Consignment",
+          "name": "Create Courier Consignment",
           "request": {
             "method": "POST",
             "header": [
@@ -3086,52 +2584,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"sub_order_id\": \"sub_2001\", \"courier\": \"STEADFAST\"}"
+              "raw": "{\"sub_order_id\": \"sub_2001\", \"courier_name\": \"STEADFAST\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/shipping/consignments",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/create-consignment",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "shipping/consignments"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Consignment Details",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/shipping/consignments/csg_5001",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "shipping/consignments/csg_5001"
+                "shipping",
+                "create-consignment"
               ]
             }
           }
@@ -3155,80 +2621,24 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/shipping/consignments/csg_5001/track",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/track/csg_5001",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "shipping/consignments/csg_5001/track"
+                "shipping",
+                "track",
+                "csg_5001"
               ]
             }
           }
         },
         {
-          "name": "List Available Couriers",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/shipping/couriers",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "shipping/couriers"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Shipping Zones",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/shipping/zones",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "shipping/zones"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Calculate Shipping Cost",
+          "name": "Calculate Shipping Rate",
           "request": {
             "method": "POST",
             "header": [
@@ -3246,22 +2656,23 @@
               "raw": "{\"weight_kg\": 1.5, \"destination_city\": \"Chittagong\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/shipping/calculate",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/calculate-rate",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "shipping/calculate"
+                "shipping",
+                "calculate-rate"
               ]
             }
           }
         },
         {
-          "name": "Bulk Book Consignments",
+          "name": "Webhook: Pathao Courier Webhook",
           "request": {
             "method": "POST",
             "header": [
@@ -3272,33 +2683,31 @@
               {
                 "key": "Accept",
                 "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"sub_order_ids\": [\"sub_2001\", \"sub_2002\"]}"
+              "raw": "{\"consignment_id\": \"p_123\", \"order_status\": \"Delivered\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/shipping/consignments/bulk-book",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/webhooks/pathao",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "shipping/consignments/bulk-book"
+                "shipping",
+                "webhooks",
+                "pathao"
               ]
             }
           }
         },
         {
-          "name": "Generate Bulk Shipping ZIP",
+          "name": "Webhook: Steadfast Courier Status",
           "request": {
             "method": "POST",
             "header": [
@@ -3309,27 +2718,60 @@
               {
                 "key": "Accept",
                 "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"consignment_ids\": [\"csg_5001\"]}"
+              "raw": "{\"consignment_id\": 123, \"status\": \"delivered\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/shipping/labels/bulk-zip",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/webhooks/steadfast",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "shipping/labels/bulk-zip"
+                "shipping",
+                "webhooks",
+                "steadfast"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Webhook: Paperfly Courier Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tracking_id\": \"pf_123\", \"status\": \"DELIVERED\"}"
+            },
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/webhooks/paperfly",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping",
+                "webhooks",
+                "paperfly"
               ]
             }
           }
@@ -3340,7 +2782,72 @@
       "name": "8. Reseller \u0026 Dropshipping Portal (11 endpoints)",
       "item": [
         {
-          "name": "Submit Reseller Onboarding Application",
+          "name": "Public Reseller Store View",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/store/karim-shop",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reseller",
+                "store",
+                "karim-shop"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Reseller Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/profile",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reseller",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Setup Reseller Store",
           "request": {
             "method": "POST",
             "header": [
@@ -3359,25 +2866,26 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"shop_name\": \"Rahim Store\", \"nid_number\": \"1234567890\", \"facebook_page\": \"fb.com/rahimstore\"}"
+              "raw": "{\"shop_name\": \"Rahim Store\", \"nid_number\": \"1234567890\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/apply",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/setup",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "resellers/apply"
+                "reseller",
+                "setup"
               ]
             }
           }
         },
         {
-          "name": "Get Reseller Profile \u0026 Tier",
+          "name": "Get Wholesale Catalog",
           "request": {
             "method": "GET",
             "header": [
@@ -3395,49 +2903,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/profile",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/catalog",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "resellers/profile"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Wholesale B2B Catalog",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/catalog",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resellers/catalog"
+                "reseller",
+                "catalog"
               ]
             }
           }
@@ -3465,22 +2941,24 @@
               "raw": "{\"variant_id\": 501, \"customer_price\": 2000.00}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/calculate-margin",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/margin/calculate",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "resellers/calculate-margin"
+                "reseller",
+                "margin",
+                "calculate"
               ]
             }
           }
         },
         {
-          "name": "Create White-Label Order",
+          "name": "Generate Shareable Link",
           "request": {
             "method": "POST",
             "header": [
@@ -3499,229 +2977,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"variant_id\": 501, \"customer_name\": \"Jamil\", \"customer_phone\": \"+8801812345678\", \"selling_price\": 2000.00}"
+              "raw": "{\"product_id\": \"101\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/orders",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/share-link",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "resellers/orders"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Reseller Earnings Summary",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/earnings",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resellers/earnings"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Request Margin Profit Payout",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"amount\": 5000.00, \"payout_method\": \"BKASH\", \"account_number\": \"+8801712345678\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/payouts/request",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resellers/payouts/request"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Marketing Assets Download",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/products/101/assets",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resellers/products/101/assets"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: List Reseller Applications",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/admin/applications",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resellers/admin/applications"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Approve Reseller",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/admin/applications/res_1/approve",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resellers/admin/applications/res_1/approve"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Upgrade Reseller Tier",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"tier\": \"GOLD\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/resellers/admin/res_1/tier",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resellers/admin/res_1/tier"
+                "reseller",
+                "share-link"
               ]
             }
           }
@@ -3731,6 +3000,176 @@
     {
       "name": "9. Affiliate Referral Program (10 endpoints)",
       "item": [
+        {
+          "name": "Get Affiliate Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/profile",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliate",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Affiliate Links",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/links",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliate",
+                "links"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Affiliate Conversions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/conversions",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliate",
+                "conversions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Affiliate Clicks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/clicks",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliate",
+                "clicks"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Affiliate Earnings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/earnings",
+              "host": [
+                "https:",
+                "",
+                "multivendor-e-commarse-backend.onrender.com"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliate",
+                "earnings"
+              ]
+            }
+          }
+        },
         {
           "name": "Apply for Affiliate Program",
           "request": {
@@ -3751,25 +3190,26 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"website\": \"myblog.com\", \"promotion_method\": \"Social Media\"}"
+              "raw": "{\"website\": \"myblog.com\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/apply",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/apply",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "affiliates/apply"
+                "affiliate",
+                "apply"
               ]
             }
           }
         },
         {
-          "name": "Generate Custom Referral Link",
+          "name": "Create Referral Link",
           "request": {
             "method": "POST",
             "header": [
@@ -3788,153 +3228,26 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"target_url\": \"/product/sample-product\", \"alias\": \"my-special-deal\"}"
+              "raw": "{\"target_url\": \"/product/sample-product\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/links",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/links",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "affiliates/links"
+                "affiliate",
+                "links"
               ]
             }
           }
         },
         {
-          "name": "List My Affiliate Links",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/links",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "affiliates/links"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Track Link Click",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/click/my-special-deal",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "affiliates/click/my-special-deal"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Affiliate Earnings Dashboard",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/dashboard",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "affiliates/dashboard"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Conversion History",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/conversions",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "affiliates/conversions"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Request Affiliate Payout",
+          "name": "Request Affiliate Withdrawal",
           "request": {
             "method": "POST",
             "header": [
@@ -3953,93 +3266,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"amount\": 3000.00}"
+              "raw": "{\"amount\": 1000.00}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/payouts/request",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/withdraw",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "affiliates/payouts/request"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Approve Affiliate Application",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/admin/applications/aff_1/approve",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "affiliates/admin/applications/aff_1/approve"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin: Set Category Commission Rates",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"category_id\": 1, \"rate\": 8.0}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/affiliates/admin/commission-rates",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "affiliates/admin/commission-rates"
+                "affiliate",
+                "withdraw"
               ]
             }
           }
@@ -4069,14 +3309,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"product_id\": 101, \"order_item_id\": 1, \"rating\": 5, \"comment\": \"Excellent quality!\", \"photo_urls\": [\"https://storage.cdn/rev1.jpg\"]}"
+              "raw": "{\"product_id\": \"101\", \"rating\": 5, \"comment\": \"Excellent quality!\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/reviews",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
@@ -4101,16 +3341,18 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/reviews/product/101",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews/product/101",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "reviews/product/101"
+                "reviews",
+                "product",
+                "101"
               ]
             }
           }
@@ -4138,16 +3380,18 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/reviews/rev_1/helpful",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews/rev_1/helpful",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "reviews/rev_1/helpful"
+                "reviews",
+                "rev_1",
+                "helpful"
               ]
             }
           }
@@ -4175,16 +3419,18 @@
               "raw": "{\"reply\": \"Thank you for your feedback!\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/reviews/rev_1/seller-reply",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews/rev_1/seller-reply",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "reviews/rev_1/seller-reply"
+                "reviews",
+                "rev_1",
+                "seller-reply"
               ]
             }
           }
@@ -4204,82 +3450,19 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/reviews/seller/sel_1/rating",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews/seller/sel_1/rating",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "reviews/seller/sel_1/rating"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin Moderation Queue for Reviews",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/reviews/admin/pending",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reviews/admin/pending"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin Hide/Delete Review",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/reviews/admin/rev_1",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reviews/admin/rev_1"
+                "reviews",
+                "seller",
+                "sel_1",
+                "rating"
               ]
             }
           }
@@ -4308,11 +3491,11 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/notifications",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/notifications",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
@@ -4345,16 +3528,18 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/notifications/notif_1/read",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/notifications/notif_1/read",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "notifications/notif_1/read"
+                "notifications",
+                "notif_1",
+                "read"
               ]
             }
           }
@@ -4379,89 +3564,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"sms_enabled\": true, \"email_enabled\": true, \"push_enabled\": true}"
+              "raw": "{\"sms_enabled\": true}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/notifications/preferences",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/notifications/preferences",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "notifications/preferences"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Admin Broadcast Announcement",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"title\": \"Eid Sale Starts Now!\", \"message\": \"Enjoy up to 50% discount\", \"target_role\": \"CUSTOMER\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/notifications/admin/broadcast",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "notifications/admin/broadcast"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Notification Delivery Logs",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/notifications/admin/logs",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "notifications/admin/logs"
+                "notifications",
+                "preferences"
               ]
             }
           }
@@ -4486,16 +3602,16 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/search?q=shoe\u0026category_id=1\u0026min_price=1000\u0026sort=price_asc",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/search?q=shoe",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "search?q=shoe\u0026category_id=1\u0026min_price=1000\u0026sort=price_asc"
+                "search?q=shoe"
               ]
             }
           }
@@ -4515,16 +3631,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/search/suggestions?q=nik",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/search/suggestions?q=nik",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "search/suggestions?q=nik"
+                "search",
+                "suggestions?q=nik"
               ]
             }
           }
@@ -4553,16 +3670,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/analytics/gmv",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/analytics/gmv",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "analytics/gmv"
+                "analytics",
+                "gmv"
               ]
             }
           }
@@ -4586,16 +3704,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/analytics/couriers",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/analytics/couriers",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "analytics/couriers"
+                "analytics",
+                "couriers"
               ]
             }
           }
@@ -4619,119 +3738,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/analytics/live-visitors",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/analytics/live-visitors",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "analytics/live-visitors"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Seller Performance Summary",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/analytics/seller-performance",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "analytics/seller-performance"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Request Async BI Report Generation",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"report_type\": \"SALES_SUMMARY\", \"format\": \"CSV\", \"start_date\": \"2024-01-01\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/analytics/reports/generate",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "analytics/reports/generate"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Download Generated Report PDF/CSV",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/analytics/reports/download/rep_1",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "analytics/reports/download/rep_1"
+                "analytics",
+                "live-visitors"
               ]
             }
           }
@@ -4761,19 +3778,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"file_name\": \"product_image.jpg\", \"file_type\": \"image/jpeg\", \"folder\": \"products\"}"
+              "raw": "{\"file_name\": \"product_image.jpg\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/media/presigned-url",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/media/presigned-url",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "media/presigned-url"
+                "media",
+                "presigned-url"
               ]
             }
           }
@@ -4801,115 +3819,17 @@
               "raw": "{\"file_key\": \"products/product_image.jpg\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/media/confirm-upload",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/media/confirm-upload",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "media/confirm-upload"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Presigned Private File URL",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/media/private-url?key=nid_proof.pdf",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "media/private-url?key=nid_proof.pdf"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Delete Media File",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/media/files?key=products/product_image.jpg",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "media/files?key=products/product_image.jpg"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Reseller Marketing Assets Pack",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/media/marketing-pack/101",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "media/marketing-pack/101"
+                "media",
+                "confirm-upload"
               ]
             }
           }
@@ -4938,16 +3858,19 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/admin/finance/escrow/pending",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/finance/escrow/pending",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "admin/finance/escrow/pending"
+                "admin",
+                "finance",
+                "escrow",
+                "pending"
               ]
             }
           }
@@ -4975,193 +3898,19 @@
               "raw": "{\"escrow_entry_id\": \"esc_1001\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/admin/finance/escrow/release",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/finance/escrow/release",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "admin/finance/escrow/release"
-              ]
-            }
-          }
-        },
-        {
-          "name": "List Pending Seller Payout Requests",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/finance/payouts/pending",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/finance/payouts/pending"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Approve Seller Payout Request",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/finance/payouts/po_1/approve",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/finance/payouts/po_1/approve"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Reject Seller Payout Request",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"reason\": \"Bank account discrepancy\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/finance/payouts/po_1/reject",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/finance/payouts/po_1/reject"
-              ]
-            }
-          }
-        },
-        {
-          "name": "COD Remittance Reconciliation",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"courier\": \"STEADFAST\", \"amount\": 150000.00}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/finance/cod/reconcile",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/finance/cod/reconcile"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Platform Financial Ledger",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/finance/ledger",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/finance/ledger"
+                "admin",
+                "finance",
+                "escrow",
+                "release"
               ]
             }
           }
@@ -5190,16 +3939,19 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/admin/fraud/risk-profile/user_1",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/fraud/risk-profile/user_1",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "admin/fraud/risk-profile/user_1"
+                "admin",
+                "fraud",
+                "risk-profile",
+                "user_1"
               ]
             }
           }
@@ -5224,122 +3976,22 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"phone\": \"+8801700000000\", \"reason\": \"Repeated fake COD orders\"}"
+              "raw": "{\"phone\": \"+8801700000000\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/admin/fraud/blacklist/phone",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/fraud/blacklist/phone",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "admin/fraud/blacklist/phone"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Remove Phone Blacklist",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/fraud/blacklist/phone/+8801700000000",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/fraud/blacklist/phone/+8801700000000"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Blacklist IP Address",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"ip\": \"192.168.1.100\", \"reason\": \"DDoS attempt\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/fraud/blacklist/ip",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/fraud/blacklist/ip"
-              ]
-            }
-          }
-        },
-        {
-          "name": "List High-Risk COD Orders",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/fraud/orders/high-risk",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/fraud/orders/high-risk"
+                "admin",
+                "fraud",
+                "blacklist",
+                "phone"
               ]
             }
           }
@@ -5368,127 +4020,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/admin/settings",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/settings",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "admin/settings"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Courier API Credentials",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"steadfast_api_key\": \"key_123\", \"pathao_client_secret\": \"sec_456\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/settings/couriers",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/settings/couriers"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Payment Gateway Keys",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"sslcommerz_store_id\": \"store_123\", \"bkash_app_secret\": \"bk_sec\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/settings/payments",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/settings/payments"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Platform Fees \u0026 Limits",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"default_seller_commission\": 5.0, \"cod_max_limit\": 10000.00}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/admin/settings/fees",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin/settings/fees"
+                "admin",
+                "settings"
               ]
             }
           }
@@ -5517,160 +4059,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/china/batches",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/china/batches",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "china/batches"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Create China Import Batch",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"batch_code\": \"CN-2024-12\", \"origin_port\": \"Guangzhou\", \"est_arrival\": \"2024-12-31\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/china/batches",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "china/batches"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Batch Details",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/china/batches/CN-2024-12",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "china/batches/CN-2024-12"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update China Batch FSM Status",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"status\": \"CUSTOMS_CLEARED\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/china/batches/CN-2024-12/status",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "china/batches/CN-2024-12/status"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Calculate Landed Unit Cost",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"product_cost_cny\": 50.0, \"shipping_cost_cny\": 10.0, \"exchange_rate_bdt\": 16.5}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/china/landed-cost",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "china/landed-cost"
+                "china",
+                "batches"
               ]
             }
           }
@@ -5699,86 +4098,17 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/v1/wallet/balance",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/wallet/balance",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "wallet/balance"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Wallet: Get Ledger History",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/wallet/transactions",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "wallet/transactions"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Wallet: Request Withdrawal",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"amount\": 1000.00, \"method\": \"BKASH\", \"account_number\": \"+8801712345678\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/wallet/withdraw",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "wallet/withdraw"
+                "wallet",
+                "balance"
               ]
             }
           }
@@ -5803,89 +4133,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"order_id\": \"ord_1001\", \"reason\": \"Damaged goods delivered\", \"description\": \"Package was crushed\"}"
+              "raw": "{\"order_id\": \"ord_1001\", \"reason\": \"Damaged goods\"}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/disputes",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/disputes",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
                 "disputes"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Dispute: Get Dispute Details",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/disputes/dsp_1",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "disputes/dsp_1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Dispute: Admin Resolve Dispute",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"resolution\": \"REFUND_CUSTOMER\", \"notes\": \"Approved customer refund\"}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/v1/disputes/admin/dsp_1/resolve",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "disputes/admin/dsp_1/resolve"
               ]
             }
           }
@@ -5910,48 +4170,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"code\": \"SUMMER20\", \"discount_percentage\": 20.0, \"min_order_amount\": 1000.00}"
+              "raw": "{\"code\": \"SUMMER20\", \"discount_percentage\": 20.0}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/promotions/coupons",
+              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/promotions/coupons",
               "host": [
-                "http:",
+                "https:",
                 "",
-                "localhost:8080"
+                "multivendor-e-commarse-backend.onrender.com"
               ],
               "path": [
                 "api",
                 "v1",
-                "promotions/coupons"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Promotion: List Active Promotions",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8080/api/v1/promotions/active",
-              "host": [
-                "http:",
-                "",
-                "localhost:8080"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "promotions/active"
+                "promotions",
+                "coupons"
               ]
             }
           }

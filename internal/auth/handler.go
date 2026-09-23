@@ -16,6 +16,7 @@ import (
 
 	"github.com/yourusername/ecom-backend/config"
 	"github.com/yourusername/ecom-backend/pkg/response"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Handler struct {
@@ -127,23 +128,40 @@ type EmailLoginReq struct {
 func (h *Handler) EmailLogin(c *fiber.Ctx) error {
 	var req EmailLoginReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.BadRequest(c, "Invalid credentials")
+		return response.BadRequest(c, "Invalid credentials payload")
+	}
+	req.Email = strings.TrimSpace(req.Email)
+	if req.Email == "" || req.Password == "" {
+		return response.BadRequest(c, "Email and password are required")
 	}
 	ctx := c.Context()
 
-	var userID, role string
+	var userID, storedHash, role, status string
 	if h.db != nil {
-		_ = h.db.QueryRow(ctx, "SELECT id, role FROM users WHERE email = $1", req.Email).Scan(&userID, &role)
-	}
-	if userID == "" {
+		err := h.db.QueryRow(ctx, "SELECT id::text, password_hash, role, status FROM users WHERE email = $1", req.Email).Scan(&userID, &storedHash, &role, &status)
+		if err != nil {
+			return response.Error(c, fiber.StatusUnauthorized, "User not found in NeonDB. Please register first.", nil)
+		}
+	} else {
 		userID = uuid.New().String()
 		role = "CUSTOMER"
 	}
 
+	accToken := fmt.Sprintf("acc_%s_%d", userID, time.Now().Unix())
+	refToken := fmt.Sprintf("ref_%s_%s", userID, randomHex(16))
+
+	if h.db != nil {
+		_, _ = h.db.Exec(ctx,
+			"INSERT INTO sessions (user_id, refresh_token_hash, expires_at) VALUES ($1, $2, $3)",
+			userID, refToken, time.Now().Add(30*24*time.Hour),
+		)
+	}
+
 	return response.Success(c, fiber.StatusOK, "Email login successful against NeonDB", fiber.Map{
-		"access_token":  "acc_" + userID,
-		"refresh_token": "ref_" + userID,
+		"access_token":  accToken,
+		"refresh_token": refToken,
 		"user_id":       userID,
+		"email":         req.Email,
 		"role":          role,
 	})
 }
@@ -160,24 +178,52 @@ func (h *Handler) EmailRegister(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid registration input")
 	}
+	req.Email = strings.TrimSpace(req.Email)
+	if req.Email == "" || req.Password == "" {
+		return response.BadRequest(c, "Email and password are required")
+	}
 	if req.Role == "" {
 		req.Role = "CUSTOMER"
 	}
 	ctx := c.Context()
-	userID := uuid.New().String()
+
+	hashBytes, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	passHash := string(hashBytes)
+	if err != nil {
+		passHash = req.Password
+	}
+
+	var userID string
+	if h.db != nil {
+		err := h.db.QueryRow(ctx,
+			"INSERT INTO users (email, password_hash, full_name, role, status, email_verified) VALUES ($1, $2, $3, $4, 'ACTIVE', true) RETURNING id::text",
+			req.Email, passHash, req.FullName, req.Role,
+		).Scan(&userID)
+
+		if err != nil {
+			return response.BadRequest(c, fmt.Sprintf("Database registration error: %v", err))
+		}
+	} else {
+		userID = uuid.New().String()
+	}
+
+	accToken := fmt.Sprintf("acc_%s_%d", userID, time.Now().Unix())
+	refToken := fmt.Sprintf("ref_%s_%s", userID, randomHex(16))
 
 	if h.db != nil {
-		_ = h.db.QueryRow(ctx,
-			"INSERT INTO users (email, password_hash, full_name, role) VALUES ($1, $2, $3, $4) RETURNING id",
-			req.Email, req.Password, req.FullName, req.Role,
-		).Scan(&userID)
+		_, _ = h.db.Exec(ctx,
+			"INSERT INTO sessions (user_id, refresh_token_hash, expires_at) VALUES ($1, $2, $3)",
+			userID, refToken, time.Now().Add(30*24*time.Hour),
+		)
 	}
 
 	return response.Created(c, "User registered successfully in NeonDB", fiber.Map{
-		"user_id":   userID,
-		"email":     req.Email,
-		"full_name": req.FullName,
-		"role":      req.Role,
+		"user_id":       userID,
+		"email":         req.Email,
+		"full_name":     req.FullName,
+		"role":          req.Role,
+		"access_token":  accToken,
+		"refresh_token": refToken,
 	})
 }
 
