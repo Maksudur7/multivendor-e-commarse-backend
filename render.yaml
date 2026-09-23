@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ecom-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore
+    plan: free
+    branch: main
+    envVars:
+      - key: APP_PORT
+        value: 8080
+      - key: APP_ENV
+        value: production
+      - key: DB_URL
+        value: postgresql://neondb_owner:npg_1ZRTLU7NiYKh@ep-soft-salad-b59vli5z-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require
+      - key: JWT_ACCESS_SECRET
+        value: your_super_secret_access_key_2024_enterprise_ecommerce
+      - key: JWT_REFRESH_SECRET
+        value: your_super_secret_refresh_key_2024_enterprise_ecommerce
