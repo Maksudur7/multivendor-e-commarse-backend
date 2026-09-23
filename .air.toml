@@ -1,0 +1,71 @@
+# Air — Live Reload Configuration for Go
+# Docs: https://github.com/air-verse/air
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # Command to build the application
+  cmd = "go build -o ./tmp/main ./cmd/server"
+  
+  # Binary to run after build
+  bin = "tmp\\main"
+  
+  # Arguments to pass to the binary
+  args_bin = []
+  
+  # Watch these file extensions
+  include_ext = ["go", "tpl", "tmpl", "html"]
+  
+  # Exclude these directories
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "docs", "db/sqlc"]
+  
+  # Exclude these files
+  exclude_file = []
+  
+  # Watch these directories
+  include_dir = []
+  
+  # Delay after change detected before rebuild (ms)
+  delay = 1000
+  
+  # Stop previous run on error
+  stop_on_error = true
+  
+  # Kill delay after stop (ms)
+  kill_delay = "0s"
+  
+  # Send interrupt signal before kill
+  send_interrupt = false
+  
+  # Print logs on rebuild
+  log = "build-errors.log"
+  
+  # Include all files that match the pattern
+  include_file = []
+  
+  # Rerun even without file changes
+  rerun = false
+  rerun_delay = 500
+
+[log]
+  # Show the timestamp in log
+  time = false
+  
+  # Show log prefix color
+  main_only = false
+
+[color]
+  # Customize each part's color. If no color found, use the raw app log.
+  main = "magenta"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "green"
+
+[misc]
+  # Delete tmp directory on exit
+  clean_on_exit = true
+
+[screen]
+  clear_on_rebuild = true
+  keep_scroll = true

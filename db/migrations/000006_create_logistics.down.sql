@@ -1,0 +1,6 @@
+-- Migration 0006 DOWN
+DROP TABLE IF EXISTS courier_area_mapping CASCADE;
+DROP TABLE IF EXISTS courier_events CASCADE;
+DROP TABLE IF EXISTS consignments CASCADE;
+DELETE FROM couriers;
+DROP TABLE IF EXISTS couriers CASCADE;

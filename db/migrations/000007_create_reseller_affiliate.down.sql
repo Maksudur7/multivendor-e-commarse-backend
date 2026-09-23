@@ -1,0 +1,7 @@
+-- Migration 0007 DOWN
+DROP TABLE IF EXISTS affiliate_conversions CASCADE;
+DROP TABLE IF EXISTS link_clicks CASCADE;
+DROP TABLE IF EXISTS affiliate_links CASCADE;
+DROP TABLE IF EXISTS affiliates CASCADE;
+DROP TABLE IF EXISTS affiliate_applications CASCADE;
+DROP TABLE IF EXISTS resellers CASCADE;

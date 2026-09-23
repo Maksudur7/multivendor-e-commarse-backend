@@ -1,0 +1,7 @@
+-- Migration 0003 DOWN
+DROP TABLE IF EXISTS china_batch_items CASCADE;
+DROP TABLE IF EXISTS china_batches CASCADE;
+DROP TABLE IF EXISTS inventory_movements CASCADE;
+DROP TABLE IF EXISTS inventory_reservations CASCADE;
+DROP TABLE IF EXISTS inventory CASCADE;
+DROP TABLE IF EXISTS warehouses CASCADE;
