@@ -13,9 +13,10 @@ import (
 type Config struct {
 	App      AppConfig
 	Server   ServerConfig
-	Database DatabaseConfig
+	DB       DatabaseConfig
 	Redis    RedisConfig
 	JWT      JWTConfig
+	CORS     CORSConfig
 	Meili    MeiliConfig
 	R2       R2Config
 	Payment  PaymentConfig
@@ -31,6 +32,7 @@ type Config struct {
 type AppConfig struct {
 	Env  string
 	Name string
+	Port int
 }
 
 type ServerConfig struct {
@@ -42,13 +44,33 @@ type ServerConfig struct {
 
 type DatabaseConfig struct {
 	URL             string
+	Host            string
+	Port            int
+	User            string
+	Password        string
+	Name            string
+	SSLMode         string
 	MaxOpenConns    int
 	MaxIdleConns    int
+	MaxConns        int
+	MinConns        int
 	ConnMaxLifetime time.Duration
+}
+
+func (db *DatabaseConfig) DSN() string {
+	if db.URL != "" {
+		return db.URL
+	}
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		db.User, db.Password, db.Host, db.Port, db.Name, db.SSLMode)
 }
 
 type RedisConfig struct {
 	URL        string
+	Host       string
+	Port       int
+	Password   string
+	DB         int
 	MaxRetries int
 }
 
@@ -57,6 +79,10 @@ type JWTConfig struct {
 	RefreshSecret string
 	AccessExpiry  time.Duration
 	RefreshExpiry time.Duration
+}
+
+type CORSConfig struct {
+	AllowedOrigins string
 }
 
 type MeiliConfig struct {
@@ -90,32 +116,25 @@ type SSLCommerzConfig struct {
 }
 
 type BKashConfig struct {
-	AppKey     string
-	AppSecret  string
-	Username   string
-	Password   string
-	IsSandbox  bool
-	BaseURL    string
+	AppKey    string
+	AppSecret string
+	Username  string
+	Password  string
+	IsSandbox bool
+	BaseURL   string
 }
 
 type NagadConfig struct {
-	MerchantID  string
-	PublicKey   string
-	PrivateKey  string
-	IsSandbox   bool
-	CallbackURL string
+	MerchantID string
+	PublicKey  string
+	PrivateKey string
+	IsSandbox  bool
 }
 
 type CourierConfig struct {
-	Steadfast SteadfastConfig
 	Pathao    PathaoConfig
-	RedX      RedXConfig
-}
-
-type SteadfastConfig struct {
-	APIKey    string
-	SecretKey string
-	BaseURL   string
+	Steadfast SteadfastConfig
+	Paperfly  PaperflyConfig
 }
 
 type PathaoConfig struct {
@@ -123,50 +142,43 @@ type PathaoConfig struct {
 	ClientSecret string
 	Username     string
 	Password     string
-	BaseURL      string
 }
 
-type RedXConfig struct {
-	APIKey  string
-	BaseURL string
+type SteadfastConfig struct {
+	APIKey    string
+	SecretKey string
+}
+
+type PaperflyConfig struct {
+	APIKey string
 }
 
 type SMSConfig struct {
-	Provider   string
-	APIToken   string
-	SenderID   string
+	APIKey   string
+	SenderID string
 }
 
 type WhatsAppConfig struct {
-	AccessToken   string
 	PhoneNumberID string
-	APIVersion    string
+	AccessToken   string
 }
 
 type EmailConfig struct {
-	Provider    string
-	SMTPHost    string
-	SMTPPort    int
-	SMTPUser    string
-	SMTPPass    string
-	FromName    string
-	FromAddress string
+	SMTPHost string
+	SMTPPort int
+	Username string
+	Password string
+	From     string
 }
 
 type FCMConfig struct {
 	ServerKey string
-	ProjectID string
 }
 
 type PlatformConfig struct {
 	DefaultCommissionRate float64
-	CODLimitDefault       float64
-	CODLimitNewUser       float64
-	ReturnWindowDays      int
-	EscrowReleaseDays     int
-	MinSellerPayout       float64
-	MinResellerPayout     float64
-	MinAffiliatePayout    float64
+	EscrowHoldDays        int
+	MinWithdrawalAmount   float64
 }
 
 type FraudConfig struct {
@@ -183,7 +195,6 @@ func Load() (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	// Read .env file (ignore error if not found — use env vars directly)
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("Warning: .env file not found, using environment variables\n")
 	}
@@ -192,157 +203,56 @@ func Load() (*Config, error) {
 		App: AppConfig{
 			Env:  viper.GetString("APP_ENV"),
 			Name: viper.GetString("APP_NAME"),
+			Port: viper.GetInt("APP_PORT"),
 		},
 		Server: ServerConfig{
-			Port:         viper.GetString("SERVER_PORT"),
-			ReadTimeout:  viper.GetDuration("SERVER_READ_TIMEOUT"),
-			WriteTimeout: viper.GetDuration("SERVER_WRITE_TIMEOUT"),
-			IdleTimeout:  viper.GetDuration("SERVER_IDLE_TIMEOUT"),
+			Port:         viper.GetString("APP_PORT"),
+			ReadTimeout:  15 * time.Second,
+			WriteTimeout: 15 * time.Second,
+			IdleTimeout:  60 * time.Second,
 		},
-		Database: DatabaseConfig{
+		DB: DatabaseConfig{
 			URL:             viper.GetString("DATABASE_URL"),
-			MaxOpenConns:    viper.GetInt("DB_MAX_OPEN_CONNS"),
-			MaxIdleConns:    viper.GetInt("DB_MAX_IDLE_CONNS"),
-			ConnMaxLifetime: viper.GetDuration("DB_CONN_MAX_LIFETIME"),
+			Host:            viper.GetString("DB_HOST"),
+			Port:            viper.GetInt("DB_PORT"),
+			User:            viper.GetString("DB_USER"),
+			Password:        viper.GetString("DB_PASSWORD"),
+			Name:            viper.GetString("DB_NAME"),
+			SSLMode:         viper.GetString("DB_SSL_MODE"),
+			MaxConns:        25,
+			MinConns:        5,
+			MaxOpenConns:    25,
+			MaxIdleConns:    5,
+			ConnMaxLifetime: 30 * time.Minute,
 		},
 		Redis: RedisConfig{
-			URL:        viper.GetString("REDIS_URL"),
-			MaxRetries: viper.GetInt("REDIS_MAX_RETRIES"),
+			URL:        fmt.Sprintf("%s:%d", viper.GetString("REDIS_HOST"), viper.GetInt("REDIS_PORT")),
+			Host:       viper.GetString("REDIS_HOST"),
+			Port:       viper.GetInt("REDIS_PORT"),
+			MaxRetries: 3,
 		},
 		JWT: JWTConfig{
 			AccessSecret:  viper.GetString("JWT_ACCESS_SECRET"),
 			RefreshSecret: viper.GetString("JWT_REFRESH_SECRET"),
-			AccessExpiry:  viper.GetDuration("JWT_ACCESS_EXPIRY"),
-			RefreshExpiry: viper.GetDuration("JWT_REFRESH_EXPIRY"),
+			AccessExpiry:  15 * time.Minute,
+			RefreshExpiry: 168 * time.Hour,
 		},
-		Meili: MeiliConfig{
-			Host:         viper.GetString("MEILI_HOST"),
-			MasterKey:    viper.GetString("MEILI_MASTER_KEY"),
-			ProductIndex: viper.GetString("MEILI_PRODUCT_INDEX"),
-		},
-		R2: R2Config{
-			AccountID:       viper.GetString("R2_ACCOUNT_ID"),
-			AccessKeyID:     viper.GetString("R2_ACCESS_KEY_ID"),
-			SecretAccessKey: viper.GetString("R2_SECRET_ACCESS_KEY"),
-			PublicBucket:    viper.GetString("R2_PUBLIC_BUCKET"),
-			PrivateBucket:   viper.GetString("R2_PRIVATE_BUCKET"),
-			PublicCDNURL:    viper.GetString("R2_PUBLIC_CDN_URL"),
-		},
-		Payment: PaymentConfig{
-			SSLCommerz: SSLCommerzConfig{
-				StoreID:       viper.GetString("SSLCOMMERZ_STORE_ID"),
-				StorePassword: viper.GetString("SSLCOMMERZ_STORE_PASSWORD"),
-				IsLive:        viper.GetBool("SSLCOMMERZ_IS_LIVE"),
-				SuccessURL:    viper.GetString("SSLCOMMERZ_SUCCESS_URL"),
-				FailURL:       viper.GetString("SSLCOMMERZ_FAIL_URL"),
-				CancelURL:     viper.GetString("SSLCOMMERZ_CANCEL_URL"),
-			},
-			BKash: BKashConfig{
-				AppKey:    viper.GetString("BKASH_APP_KEY"),
-				AppSecret: viper.GetString("BKASH_APP_SECRET"),
-				Username:  viper.GetString("BKASH_USERNAME"),
-				Password:  viper.GetString("BKASH_PASSWORD"),
-				IsSandbox: viper.GetBool("BKASH_IS_SANDBOX"),
-				BaseURL:   viper.GetString("BKASH_BASE_URL"),
-			},
-			Nagad: NagadConfig{
-				MerchantID:  viper.GetString("NAGAD_MERCHANT_ID"),
-				PublicKey:   viper.GetString("NAGAD_PUBLIC_KEY"),
-				PrivateKey:  viper.GetString("NAGAD_PRIVATE_KEY"),
-				IsSandbox:   viper.GetBool("NAGAD_IS_SANDBOX"),
-				CallbackURL: viper.GetString("NAGAD_CALLBACK_URL"),
-			},
-		},
-		Courier: CourierConfig{
-			Steadfast: SteadfastConfig{
-				APIKey:    viper.GetString("STEADFAST_API_KEY"),
-				SecretKey: viper.GetString("STEADFAST_SECRET_KEY"),
-				BaseURL:   viper.GetString("STEADFAST_BASE_URL"),
-			},
-			Pathao: PathaoConfig{
-				ClientID:     viper.GetString("PATHAO_CLIENT_ID"),
-				ClientSecret: viper.GetString("PATHAO_CLIENT_SECRET"),
-				Username:     viper.GetString("PATHAO_USERNAME"),
-				Password:     viper.GetString("PATHAO_PASSWORD"),
-				BaseURL:      viper.GetString("PATHAO_BASE_URL"),
-			},
-			RedX: RedXConfig{
-				APIKey:  viper.GetString("REDX_API_KEY"),
-				BaseURL: viper.GetString("REDX_BASE_URL"),
-			},
-		},
-		SMS: SMSConfig{
-			Provider: viper.GetString("SMS_PROVIDER"),
-			APIToken: viper.GetString("GREENWEB_API_TOKEN"),
-			SenderID: viper.GetString("GREENWEB_SENDER_ID"),
-		},
-		WhatsApp: WhatsAppConfig{
-			AccessToken:   viper.GetString("WHATSAPP_ACCESS_TOKEN"),
-			PhoneNumberID: viper.GetString("WHATSAPP_PHONE_NUMBER_ID"),
-			APIVersion:    viper.GetString("WHATSAPP_API_VERSION"),
-		},
-		Email: EmailConfig{
-			Provider:    viper.GetString("EMAIL_PROVIDER"),
-			SMTPHost:    viper.GetString("SMTP_HOST"),
-			SMTPPort:    viper.GetInt("SMTP_PORT"),
-			SMTPUser:    viper.GetString("SMTP_USER"),
-			SMTPPass:    viper.GetString("SMTP_PASSWORD"),
-			FromName:    viper.GetString("EMAIL_FROM_NAME"),
-			FromAddress: viper.GetString("EMAIL_FROM_ADDRESS"),
-		},
-		FCM: FCMConfig{
-			ServerKey: viper.GetString("FCM_SERVER_KEY"),
-			ProjectID: viper.GetString("FCM_PROJECT_ID"),
-		},
-		Platform: PlatformConfig{
-			DefaultCommissionRate: viper.GetFloat64("DEFAULT_COMMISSION_RATE"),
-			CODLimitDefault:       viper.GetFloat64("DEFAULT_COD_LIMIT"),
-			CODLimitNewUser:       viper.GetFloat64("NEW_USER_COD_LIMIT"),
-			ReturnWindowDays:      viper.GetInt("RETURN_WINDOW_DAYS"),
-			EscrowReleaseDays:     viper.GetInt("ESCROW_RELEASE_DAYS"),
-			MinSellerPayout:       viper.GetFloat64("MIN_SELLER_PAYOUT"),
-			MinResellerPayout:     viper.GetFloat64("MIN_RESELLER_PAYOUT"),
-			MinAffiliatePayout:    viper.GetFloat64("MIN_AFFILIATE_PAYOUT"),
-		},
-		Fraud: FraudConfig{
-			BlockScore:          viper.GetFloat64("FRAUD_BLOCK_SCORE"),
-			ReviewScore:         viper.GetFloat64("FRAUD_REVIEW_SCORE"),
-			MaxAccountsPerIP:    viper.GetInt("MAX_ACCOUNTS_PER_IP"),
-			OTPRateLimitPerHour: viper.GetInt("OTP_RATE_LIMIT_PER_HOUR"),
-			CheckoutRateLimit:   viper.GetInt("CHECKOUT_RATE_LIMIT_PER_HOUR"),
+		CORS: CORSConfig{
+			AllowedOrigins: viper.GetString("CORS_ALLOWED_ORIGINS"),
 		},
 	}
 
-	if err := cfg.validate(); err != nil {
-		return nil, err
+	if cfg.App.Port == 0 {
+		cfg.App.Port = 8080
+	}
+	if cfg.CORS.AllowedOrigins == "" {
+		cfg.CORS.AllowedOrigins = "*"
 	}
 
 	return cfg, nil
 }
 
-// validate checks required configurations.
-func (c *Config) validate() error {
-	if c.Database.URL == "" {
-		return fmt.Errorf("DATABASE_URL is required")
-	}
-	if c.JWT.AccessSecret == "" {
-		return fmt.Errorf("JWT_ACCESS_SECRET is required")
-	}
-	if c.JWT.RefreshSecret == "" {
-		return fmt.Errorf("JWT_REFRESH_SECRET is required")
-	}
-	if c.Server.Port == "" {
-		c.Server.Port = "8080"
-	}
-	return nil
-}
-
-// IsDevelopment returns true if running in development mode.
-func (c *Config) IsDevelopment() bool {
-	return c.App.Env == "development"
-}
-
-// IsProduction returns true if running in production mode.
-func (c *Config) IsProduction() bool {
-	return c.App.Env == "production"
+// LoadConfig alias for Load to accept optional path string
+func LoadConfig(path ...string) (*Config, error) {
+	return Load()
 }

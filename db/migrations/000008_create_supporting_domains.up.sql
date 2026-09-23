@@ -88,7 +88,7 @@ CREATE INDEX idx_device_tokens_user ON device_tokens(user_id);
 
 -- ── notification_logs ─────────────────────────────────────────
 CREATE TABLE notification_logs (
-    id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    id               UUID        DEFAULT gen_random_uuid(),
     user_id          UUID        REFERENCES users(id) ON DELETE SET NULL,
     event_type       VARCHAR(100),
     channel          VARCHAR(20) NOT NULL,
@@ -103,6 +103,7 @@ CREATE TABLE notification_logs (
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
     sent_at          TIMESTAMPTZ,
 
+    PRIMARY KEY (id, created_at),
     CONSTRAINT chk_notif_status CHECK (status IN (
         'QUEUED','SENT','DELIVERED','FAILED'
     ))
@@ -182,7 +183,7 @@ CREATE INDEX idx_ip_blocks_addr ON ip_blocks(ip_address, blocked_until);
 
 -- ── search_logs ───────────────────────────────────────────────
 CREATE TABLE search_logs (
-    id                 UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                 UUID        DEFAULT gen_random_uuid(),
     query              VARCHAR(500) NOT NULL,
     user_id            UUID        REFERENCES users(id) ON DELETE SET NULL,
     result_count       INTEGER     NOT NULL DEFAULT 0,
@@ -190,7 +191,9 @@ CREATE TABLE search_logs (
     clicked_product_id UUID        REFERENCES products(id) ON DELETE SET NULL,
     position_clicked   INTEGER,
     session_id         VARCHAR(255),
-    searched_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+    searched_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (id, searched_at)
 ) PARTITION BY RANGE (searched_at);
 
 CREATE TABLE search_logs_2024 PARTITION OF search_logs

@@ -77,7 +77,7 @@ CREATE TRIGGER trg_wallets_updated_at
 
 -- ── wallet_transactions (immutable ledger) ────────────────────
 CREATE TABLE wallet_transactions (
-    id             UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+    id             UUID          DEFAULT gen_random_uuid(),
     wallet_id      UUID          NOT NULL REFERENCES wallets(id) ON DELETE RESTRICT,
     type           VARCHAR(10)   NOT NULL,
     category       VARCHAR(50)   NOT NULL,
@@ -88,6 +88,7 @@ CREATE TABLE wallet_transactions (
     description    TEXT,
     created_at     TIMESTAMPTZ   NOT NULL DEFAULT now(),
 
+    PRIMARY KEY (id, created_at),
     CONSTRAINT chk_wallet_tx_type CHECK (type IN ('CREDIT','DEBIT')),
     CONSTRAINT chk_wallet_tx_category CHECK (category IN (
         'ESCROW_RELEASE','COMMISSION_EARNED','REFUND_RECEIVED',

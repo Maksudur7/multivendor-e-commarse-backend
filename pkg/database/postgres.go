@@ -10,7 +10,7 @@ import (
 
 // NewPostgresPool creates a new PostgreSQL connection pool using pgx.
 // This pool is safe for concurrent use and handles reconnection automatically.
-func NewPostgresPool(ctx context.Context, databaseURL string, maxOpen, maxIdle int, maxLifetime time.Duration) (*pgxpool.Pool, error) {
+func NewPostgresPool(ctx context.Context, databaseURL string, maxOpen, maxIdle int) (*pgxpool.Pool, error) {
 	config, err := pgxpool.ParseConfig(databaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse database URL: %w", err)
@@ -19,7 +19,7 @@ func NewPostgresPool(ctx context.Context, databaseURL string, maxOpen, maxIdle i
 	// Connection pool settings
 	config.MaxConns = int32(maxOpen)
 	config.MinConns = int32(maxIdle)
-	config.MaxConnLifetime = maxLifetime
+	config.MaxConnLifetime = 30 * time.Minute
 	config.MaxConnIdleTime = 5 * time.Minute
 
 	// Health check interval
