@@ -123,7 +123,7 @@ CREATE INDEX idx_addresses_user ON addresses(user_id);
 
 -- ── audit_logs ───────────────────────────────────────────────
 CREATE TABLE audit_logs (
-    id          UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID         DEFAULT gen_random_uuid(),
     actor_id    UUID         REFERENCES users(id) ON DELETE SET NULL,
     actor_role  VARCHAR(30),
     action      VARCHAR(100) NOT NULL,
@@ -134,7 +134,9 @@ CREATE TABLE audit_logs (
     reason      TEXT,
     ip_address  INET,
     user_agent  TEXT,
-    timestamp   TIMESTAMPTZ  NOT NULL DEFAULT now()
+    timestamp   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (id, timestamp)
 ) PARTITION BY RANGE (timestamp);
 
 CREATE TABLE audit_logs_2024 PARTITION OF audit_logs

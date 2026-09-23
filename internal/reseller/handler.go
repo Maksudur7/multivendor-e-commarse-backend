@@ -144,7 +144,15 @@ func (h *Handler) GenerateShareableLink(c *fiber.Ctx) error {
 		return response.BadRequest(c, "Invalid request: "+err.Error())
 	}
 	userID := c.Locals("user_id").(string)
-	refCode := fmt.Sprintf("RES-%s-%s", userID[:8], req.ProductID[:8])
+	uLen := len(userID)
+	if uLen > 8 {
+		uLen = 8
+	}
+	pLen := len(req.ProductID)
+	if pLen > 8 {
+		pLen = 8
+	}
+	refCode := fmt.Sprintf("RES-%s-%s", userID[:uLen], req.ProductID[:pLen])
 
 	return response.Success(c, fiber.StatusOK, "White-labeled product share link generated", fiber.Map{
 		"share_link": fmt.Sprintf("https://buy.platform.com/p/%s?ref=%s", req.ProductID, refCode),

@@ -64,7 +64,7 @@ CREATE INDEX idx_reservations_expires  ON inventory_reservations(expires_at) WHE
 
 -- ── inventory_movements (immutable ledger) ────────────────────
 CREATE TABLE inventory_movements (
-    id             UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    id             UUID         DEFAULT gen_random_uuid(),
     variant_id     UUID         NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
     warehouse_id   UUID         NOT NULL REFERENCES warehouses(id) ON DELETE RESTRICT,
     movement_type  VARCHAR(50)  NOT NULL,
@@ -77,6 +77,7 @@ CREATE TABLE inventory_movements (
     performed_by   UUID         REFERENCES users(id) ON DELETE SET NULL,
     timestamp      TIMESTAMPTZ  NOT NULL DEFAULT now(),
 
+    PRIMARY KEY (id, timestamp),
     CONSTRAINT chk_movement_type CHECK (movement_type IN (
         'PURCHASE_RECEIVED','RETURN_RESTOCKED','MANUAL_ADJUSTMENT_IN','CHINA_BATCH_ARRIVED',
         'SALE_COMMITTED','SALE_COMPLETED','DAMAGE_WRITE_OFF','MANUAL_ADJUSTMENT_OUT',

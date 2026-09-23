@@ -1,0 +1,5962 @@
+{
+  "info": {
+    "name": "Enterprise Multi-Vendor \u0026 Reseller E-Commerce Platform API Collection",
+    "description": "Complete Postman collection covering all ~200 API endpoints across 23 domains (Daraz / Amazon / Meesho grade platform). Live connected to NeonDB PostgreSQL \u0026 Redis.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Auth \u0026 User Management (11 endpoints)",
+      "item": [
+        {
+          "name": "Request Phone OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"phone\": \"+8801712345678\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/otp/send",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/otp/send"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify Phone OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"phone\": \"+8801712345678\", \"otp\": \"123456\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/otp/verify",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/otp/verify"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"customer@example.com\", \"password\": \"Password123!\", \"full_name\": \"Test Customer\", \"phone\": \"+8801712345678\", \"role\": \"CUSTOMER\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/register",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"customer@example.com\", \"password\": \"Password123!\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/login",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Google OAuth Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id_token\": \"mock_google_id_token\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/google",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/google"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Refresh Access Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refresh_token\": \"sample_refresh_token\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/refresh",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/refresh"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/logout",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/logout"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/me",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"full_name\": \"Updated Test Customer\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/profile",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth/profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Address Book",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/addresses",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users/addresses"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add New Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"full_name\": \"Home Address\", \"phone\": \"+8801712345678\", \"address_line\": \"123 Green Road\", \"city\": \"Dhaka\", \"zone\": \"Dhanmondi\", \"postal_code\": \"1205\", \"is_default\": true}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/addresses",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users/addresses"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Catalog Engine - Public, Seller, Admin (31 endpoints)",
+      "item": [
+        {
+          "name": "Public: List Categories Tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/categories/tree",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/categories/tree"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: Get Category Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/categories/1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/categories/1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: List Featured Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/products/featured",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/products/featured"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: Get Product by Slug",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/products/slug/sample-product",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/products/slug/sample-product"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: Get Product Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/products/101",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/products/101"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: List Brands",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/brands",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/brands"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: Get Brand Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/brands/1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/brands/1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Public: Get Category Attributes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/categories/1/attributes",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/categories/1/attributes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: List Seller Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/products",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Create Product Draft",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Seller New Shoe\", \"category_id\": 1, \"brand_id\": 1, \"description\": \"High quality shoe\", \"price\": 1500.00}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/products",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Get Product Draft",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/products/101"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Updated Shoe Title\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/products/101"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Submit for Moderation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101/submit",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/products/101/submit"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Add Product Variant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sku\": \"SHOE-RED-42\", \"price\": 1500.00, \"attributes\": {\"color\": \"Red\", \"size\": \"42\"}}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101/variants",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/products/101/variants"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Update Variant",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"price\": 1450.00}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/variants/501",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/variants/501"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Delete Variant",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/variants/501",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/variants/501"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/products/101",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/products/101"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Bulk Price Update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"updates\": [{\"product_id\": 101, \"price\": 1400.00}]}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/seller/products/bulk-price",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/seller/products/bulk-price"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Pending Moderation Queue",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/moderation/pending",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/moderation/pending"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Approve Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/products/101/approve",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/products/101/approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Reject Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Copyright infringement\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/products/101/reject",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/products/101/reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Electronics\", \"parent_id\": 0, \"commission_rate\": 5.0}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/categories",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"commission_rate\": 6.0}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/categories/1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/categories/1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/categories/1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/categories/1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Create Brand",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Nike\", \"is_verified\": true}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/brands",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/brands"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Update Brand",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"is_verified\": true}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/brands/1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/brands/1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Create Attribute",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Color\", \"type\": \"SELECT\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/attributes",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/attributes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: List All Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/products",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Get Product Audit Trail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/products/101/audit",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/products/101/audit"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Set Commission Rate",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"category_id\": 1, \"rate\": 5.5}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/commissions",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/commissions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Bulk Approve Products",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_ids\": [101, 102]}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/catalog/admin/products/bulk-approve",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "catalog/admin/products/bulk-approve"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Inventory Management (8 endpoints)",
+      "item": [
+        {
+          "name": "Get Variant Inventory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/variants/501",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventory/variants/501"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Inventory Stock",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"warehouse_id\": 1, \"quantity\": 100}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/variants/501",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventory/variants/501"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reserve Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"variant_id\": 501, \"quantity\": 2}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/reserve",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventory/reserve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Release Stock Reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reservation_id\": \"res_12345\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/release",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventory/release"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Warehouses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/warehouses",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventory/warehouses"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Warehouse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Dhaka Main Warehouse\", \"location\": \"Dhaka\", \"type\": \"LOCAL_BD\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/warehouses",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventory/warehouses"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Movement Ledger",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/movements",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventory/movements"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bulk CSV Inventory Sync",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"file_url\": \"https://storage.cdn/inventory.csv\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/bulk-sync",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventory/bulk-sync"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Cart Engine (8 endpoints)",
+      "item": [
+        {
+          "name": "Get User Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/cart",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"variant_id\": 501, \"quantity\": 1}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/cart/items",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart/items"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Cart Item Quantity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\": 3}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/cart/items/item_123",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart/items/item_123"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove Item from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/cart/items/item_123",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart/items/item_123"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clear Entire Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/cart/clear",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart/clear"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Merge Guest Cart on Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"guest_cart_id\": \"guest_98765\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/cart/merge",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart/merge"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Apply Coupon Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\": \"SAVE10\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/cart/coupons/apply",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart/coupons/apply"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove Coupon Code",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/cart/coupons/remove",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart/coupons/remove"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Order Engine - Customer, Seller, Admin (32 endpoints)",
+      "item": [
+        {
+          "name": "Customer: Preview Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"items\": [{\"variant_id\": 501, \"quantity\": 1}], \"shipping_address_id\": 1}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/preview",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/preview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Place New Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shipping_address_id\": 1, \"payment_method\": \"SSLCOMMERZ\", \"coupon_code\": \"SAVE10\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: List My Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Get Order Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/ord_1001",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/ord_1001"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Changed my mind\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/ord_1001/cancel",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/ord_1001/cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Request RMA Return",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"order_item_id\": 1, \"reason\": \"Defective item\", \"photo_urls\": [\"https://storage.cdn/proof.jpg\"]}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/ord_1001/returns",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/ord_1001/returns"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Get Tracking Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/ord_1001/track",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/ord_1001/track"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Download PDF Invoice",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/ord_1001/invoice",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/ord_1001/invoice"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer: Confirm Delivery",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/ord_1001/confirm-delivery",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/ord_1001/confirm-delivery"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: List Sub-Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/seller/sub-orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Get Sub-Order Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/sub_2001",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/seller/sub-orders/sub_2001"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Mark Ready to Ship",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/sub_2001/ready",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/seller/sub-orders/sub_2001/ready"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Generate Packing Slip",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/sub_2001/packing-slip",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/seller/sub-orders/sub_2001/packing-slip"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Bulk Mark Ready",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sub_order_ids\": [\"sub_2001\", \"sub_2002\"]}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/bulk-ready",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/seller/sub-orders/bulk-ready"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller: Download Courier Label",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/seller/sub-orders/sub_2001/label",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/seller/sub-orders/sub_2001/label"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: List All Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/admin/all",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/admin/all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Update Order Status FSM",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"new_status\": \"PROCESSING\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/admin/ord_1001/status",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/admin/ord_1001/status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Approve Return RMA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/admin/returns/rma_3001/approve",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/admin/returns/rma_3001/approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Reject Return RMA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Out of return window\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/admin/returns/rma_3001/reject",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/admin/returns/rma_3001/reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Process Refund",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": 1400.00, \"gateway\": \"SSLCOMMERZ\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/orders/admin/ord_1001/refund",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders/admin/ord_1001/refund"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Payment \u0026 Webhooks (12 endpoints)",
+      "item": [
+        {
+          "name": "Payment: Initiate Gateway Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"order_id\": \"ord_1001\", \"gateway\": \"SSLCOMMERZ\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/payments/initiate",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments/initiate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payment: Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/payments/status/pay_9001",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments/status/pay_9001"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payment: List Gateways",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/payments/methods",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments/methods"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payment: Verify Transaction Amount",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"transaction_id\": \"tx_987654\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/payments/verify",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments/verify"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Webhook: SSLCommerz IPN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tran_id\": \"tx_987654\", \"status\": \"VALID\", \"val_id\": \"val_123\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/webhooks/sslcommerz",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks/sslcommerz"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Webhook: bKash Execute Callback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"paymentID\": \"bk_123\", \"status\": \"Completed\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/webhooks/bkash",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks/bkash"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Webhook: Nagad Callback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"payment_ref_id\": \"ng_123\", \"status\": \"Success\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/webhooks/nagad",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks/nagad"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Webhook: Steadfast Courier Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"consignment_id\": 123, \"status\": \"delivered\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/webhooks/steadfast",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks/steadfast"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Webhook: Pathao Courier Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"consignment_id\": \"p_123\", \"order_status\": \"Delivered\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/webhooks/pathao",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks/pathao"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Webhook: RedX Courier Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tracking_id\": \"r_123\", \"status\": \"DELIVERED\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/webhooks/redx",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks/redx"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Logistics \u0026 Couriers (9 endpoints)",
+      "item": [
+        {
+          "name": "Book Courier Consignment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sub_order_id\": \"sub_2001\", \"courier\": \"STEADFAST\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/shipping/consignments",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping/consignments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Consignment Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/shipping/consignments/csg_5001",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping/consignments/csg_5001"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Track Consignment Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/shipping/consignments/csg_5001/track",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping/consignments/csg_5001/track"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Available Couriers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/shipping/couriers",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping/couriers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Shipping Zones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/shipping/zones",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping/zones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Calculate Shipping Cost",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"weight_kg\": 1.5, \"destination_city\": \"Chittagong\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/shipping/calculate",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping/calculate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bulk Book Consignments",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sub_order_ids\": [\"sub_2001\", \"sub_2002\"]}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/shipping/consignments/bulk-book",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping/consignments/bulk-book"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Bulk Shipping ZIP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"consignment_ids\": [\"csg_5001\"]}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/shipping/labels/bulk-zip",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipping/labels/bulk-zip"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Reseller \u0026 Dropshipping Portal (11 endpoints)",
+      "item": [
+        {
+          "name": "Submit Reseller Onboarding Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shop_name\": \"Rahim Store\", \"nid_number\": \"1234567890\", \"facebook_page\": \"fb.com/rahimstore\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/apply",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/apply"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Reseller Profile \u0026 Tier",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/profile",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Wholesale B2B Catalog",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/catalog",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/catalog"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Calculate Margin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"variant_id\": 501, \"customer_price\": 2000.00}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/calculate-margin",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/calculate-margin"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create White-Label Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"variant_id\": 501, \"customer_name\": \"Jamil\", \"customer_phone\": \"+8801812345678\", \"selling_price\": 2000.00}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/orders",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Reseller Earnings Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/earnings",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/earnings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Request Margin Profit Payout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": 5000.00, \"payout_method\": \"BKASH\", \"account_number\": \"+8801712345678\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/payouts/request",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/payouts/request"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Marketing Assets Download",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/products/101/assets",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/products/101/assets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: List Reseller Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/admin/applications",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/admin/applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Approve Reseller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/admin/applications/res_1/approve",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/admin/applications/res_1/approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Upgrade Reseller Tier",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tier\": \"GOLD\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/resellers/admin/res_1/tier",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resellers/admin/res_1/tier"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Affiliate Referral Program (10 endpoints)",
+      "item": [
+        {
+          "name": "Apply for Affiliate Program",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"website\": \"myblog.com\", \"promotion_method\": \"Social Media\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/apply",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/apply"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Custom Referral Link",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"target_url\": \"/product/sample-product\", \"alias\": \"my-special-deal\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/links",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/links"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List My Affiliate Links",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/links",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/links"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Track Link Click",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/click/my-special-deal",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/click/my-special-deal"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Affiliate Earnings Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/dashboard",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Conversion History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/conversions",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/conversions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Request Affiliate Payout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": 3000.00}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/payouts/request",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/payouts/request"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Approve Affiliate Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/admin/applications/aff_1/approve",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/admin/applications/aff_1/approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin: Set Category Commission Rates",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"category_id\": 1, \"rate\": 8.0}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/affiliates/admin/commission-rates",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates/admin/commission-rates"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Ratings \u0026 Verified Reviews (7 endpoints)",
+      "item": [
+        {
+          "name": "Submit Product Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\": 101, \"order_item_id\": 1, \"rating\": 5, \"comment\": \"Excellent quality!\", \"photo_urls\": [\"https://storage.cdn/rev1.jpg\"]}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/reviews",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/reviews/product/101",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews/product/101"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Vote Helpful on Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/reviews/rev_1/helpful",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews/rev_1/helpful"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Seller Reply to Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reply\": \"Thank you for your feedback!\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/reviews/rev_1/seller-reply",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews/rev_1/seller-reply"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Seller Composite Rating",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/reviews/seller/sel_1/rating",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews/seller/sel_1/rating"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Moderation Queue for Reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/reviews/admin/pending",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews/admin/pending"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Hide/Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/reviews/admin/rev_1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews/admin/rev_1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Omnichannel Notifications (5 endpoints)",
+      "item": [
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/notifications",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/notifications/notif_1/read",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications/notif_1/read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Notification Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sms_enabled\": true, \"email_enabled\": true, \"push_enabled\": true}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/notifications/preferences",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications/preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Broadcast Announcement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Eid Sale Starts Now!\", \"message\": \"Enjoy up to 50% discount\", \"target_role\": \"CUSTOMER\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/notifications/admin/broadcast",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications/admin/broadcast"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Delivery Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/notifications/admin/logs",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications/admin/logs"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. MeiliSearch Engine (2 endpoints)",
+      "item": [
+        {
+          "name": "Search Products with Facets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/search?q=shoe\u0026category_id=1\u0026min_price=1000\u0026sort=price_asc",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search?q=shoe\u0026category_id=1\u0026min_price=1000\u0026sort=price_asc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Autocomplete Suggestions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/search/suggestions?q=nik",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search/suggestions?q=nik"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Executive Analytics \u0026 BI (6 endpoints)",
+      "item": [
+        {
+          "name": "Get Real-time GMV Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/analytics/gmv",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics/gmv"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Courier Delivery Success Rates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/analytics/couriers",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics/couriers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Live Active Visitors Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/analytics/live-visitors",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics/live-visitors"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Seller Performance Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/analytics/seller-performance",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics/seller-performance"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Request Async BI Report Generation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"report_type\": \"SALES_SUMMARY\", \"format\": \"CSV\", \"start_date\": \"2024-01-01\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/analytics/reports/generate",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics/reports/generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download Generated Report PDF/CSV",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/analytics/reports/download/rep_1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics/reports/download/rep_1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Media Engine \u0026 Presigned S3/R2 (5 endpoints)",
+      "item": [
+        {
+          "name": "Request Presigned Upload URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"file_name\": \"product_image.jpg\", \"file_type\": \"image/jpeg\", \"folder\": \"products\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/media/presigned-url",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media/presigned-url"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Confirm Upload \u0026 Process Image Pipeline",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"file_key\": \"products/product_image.jpg\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/media/confirm-upload",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media/confirm-upload"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Presigned Private File URL",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/media/private-url?key=nid_proof.pdf",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media/private-url?key=nid_proof.pdf"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Media File",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/media/files?key=products/product_image.jpg",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media/files?key=products/product_image.jpg"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Reseller Marketing Assets Pack",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/media/marketing-pack/101",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media/marketing-pack/101"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Admin Finance \u0026 Settlement (11 endpoints)",
+      "item": [
+        {
+          "name": "List Pending Escrow Entries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/finance/escrow/pending",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/finance/escrow/pending"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Release Escrow Manually",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"escrow_entry_id\": \"esc_1001\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/finance/escrow/release",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/finance/escrow/release"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Pending Seller Payout Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/finance/payouts/pending",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/finance/payouts/pending"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Seller Payout Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/finance/payouts/po_1/approve",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/finance/payouts/po_1/approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Seller Payout Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Bank account discrepancy\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/finance/payouts/po_1/reject",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/finance/payouts/po_1/reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "COD Remittance Reconciliation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"courier\": \"STEADFAST\", \"amount\": 150000.00}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/finance/cod/reconcile",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/finance/cod/reconcile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Platform Financial Ledger",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/finance/ledger",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/finance/ledger"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Admin Fraud \u0026 Risk Management (8 endpoints)",
+      "item": [
+        {
+          "name": "Get Customer Risk Score Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/fraud/risk-profile/user_1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/fraud/risk-profile/user_1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Blacklist Phone Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"phone\": \"+8801700000000\", \"reason\": \"Repeated fake COD orders\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/fraud/blacklist/phone",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/fraud/blacklist/phone"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove Phone Blacklist",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/fraud/blacklist/phone/+8801700000000",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/fraud/blacklist/phone/+8801700000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Blacklist IP Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"ip\": \"192.168.1.100\", \"reason\": \"DDoS attempt\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/fraud/blacklist/ip",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/fraud/blacklist/ip"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List High-Risk COD Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/fraud/orders/high-risk",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/fraud/orders/high-risk"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Admin System Settings \u0026 Config (6 endpoints)",
+      "item": [
+        {
+          "name": "Get System Settings Config",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/settings",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/settings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Courier API Credentials",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"steadfast_api_key\": \"key_123\", \"pathao_client_secret\": \"sec_456\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/settings/couriers",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/settings/couriers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Payment Gateway Keys",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sslcommerz_store_id\": \"store_123\", \"bkash_app_secret\": \"bk_sec\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/settings/payments",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/settings/payments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Platform Fees \u0026 Limits",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"default_seller_commission\": 5.0, \"cod_max_limit\": 10000.00}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/admin/settings/fees",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin/settings/fees"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. China Direct Sourcing Engine (9 endpoints)",
+      "item": [
+        {
+          "name": "List China Sourcing Batches",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/china/batches",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "china/batches"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create China Import Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"batch_code\": \"CN-2024-12\", \"origin_port\": \"Guangzhou\", \"est_arrival\": \"2024-12-31\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/china/batches",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "china/batches"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Batch Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/china/batches/CN-2024-12",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "china/batches/CN-2024-12"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update China Batch FSM Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"CUSTOMS_CLEARED\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/china/batches/CN-2024-12/status",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "china/batches/CN-2024-12/status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Calculate Landed Unit Cost",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_cost_cny\": 50.0, \"shipping_cost_cny\": 10.0, \"exchange_rate_bdt\": 16.5}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/china/landed-cost",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "china/landed-cost"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Wallet, Disputes \u0026 Promotions (20 endpoints)",
+      "item": [
+        {
+          "name": "Wallet: Get Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/wallet/balance",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "wallet/balance"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Wallet: Get Ledger History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/wallet/transactions",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "wallet/transactions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Wallet: Request Withdrawal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"amount\": 1000.00, \"method\": \"BKASH\", \"account_number\": \"+8801712345678\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/wallet/withdraw",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "wallet/withdraw"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dispute: Create Customer Dispute",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"order_id\": \"ord_1001\", \"reason\": \"Damaged goods delivered\", \"description\": \"Package was crushed\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/disputes",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "disputes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dispute: Get Dispute Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/disputes/dsp_1",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "disputes/dsp_1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dispute: Admin Resolve Dispute",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"resolution\": \"REFUND_CUSTOMER\", \"notes\": \"Approved customer refund\"}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/disputes/admin/dsp_1/resolve",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "disputes/admin/dsp_1/resolve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Promotion: Create Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\": \"SUMMER20\", \"discount_percentage\": 20.0, \"min_order_amount\": 1000.00}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/promotions/coupons",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "promotions/coupons"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Promotion: List Active Promotions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/promotions/active",
+              "host": [
+                "http:",
+                "",
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "promotions/active"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

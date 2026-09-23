@@ -114,7 +114,7 @@ CREATE INDEX idx_aff_links_active    ON affiliate_links(is_active, affiliate_id)
 
 -- ── link_clicks ───────────────────────────────────────────────
 CREATE TABLE link_clicks (
-    id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    id           UUID         DEFAULT gen_random_uuid(),
     link_id      UUID         NOT NULL REFERENCES affiliate_links(id) ON DELETE RESTRICT,
     affiliate_id UUID         NOT NULL REFERENCES affiliates(id) ON DELETE RESTRICT,
     fingerprint  VARCHAR(255),
@@ -123,7 +123,9 @@ CREATE TABLE link_clicks (
     referer      TEXT,
     is_unique    BOOLEAN      NOT NULL DEFAULT TRUE,
     user_id      UUID         REFERENCES users(id) ON DELETE SET NULL,
-    clicked_at   TIMESTAMPTZ  NOT NULL DEFAULT now()
+    clicked_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (id, clicked_at)
 ) PARTITION BY RANGE (clicked_at);
 
 CREATE TABLE link_clicks_2024 PARTITION OF link_clicks
