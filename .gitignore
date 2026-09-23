@@ -12,7 +12,8 @@ bin/
 coverage.out
 
 # ── Vendor ───────────────────────────────────────────────────
-vendor/
+/vendor/
+!internal/vendor/
 
 # ── Environment ──────────────────────────────────────────────
 .env
