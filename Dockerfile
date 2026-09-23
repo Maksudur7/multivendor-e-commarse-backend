@@ -23,9 +23,8 @@ RUN apk --no-cache add ca-certificates tzdata
 
 WORKDIR /app
 
-# Copy binary from build stage
+# Copy compiled binary from builder stage
 COPY --from=builder /app/server /app/server
-COPY --from=builder /app/.env /app/.env
 
 # Expose Render default port
 EXPOSE 8080
