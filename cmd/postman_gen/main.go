@@ -147,7 +147,7 @@ func createAuthFolder() *PostmanItem {
 			{Name: "Logout User", Request: req("POST", "auth/logout", `{}`, true)},
 			{Name: "Get My Profile", Request: req("GET", "auth/me", "", true)},
 			{Name: "Password Reset Request", Request: req("POST", "auth/password/reset-request", `{"email": "customer@example.com"}`, false)},
-			{Name: "Password Reset", Request: req("PUT", "auth/password/reset", `{"token": "reset_token_123", "new_password": "NewPassword123!"}`, false)},
+			{Name: "Password Reset", Request: req("PUT", "auth/password/reset", `{"email": "customer@example.com", "otp_code": "123456", "new_password": "NewPassword123!"}`, false)},
 			{Name: "Get User Sessions", Request: req("GET", "auth/sessions", "", true)},
 		},
 	}
