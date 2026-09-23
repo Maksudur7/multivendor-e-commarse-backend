@@ -1,45 +1,56 @@
-# ── Binaries ────────────────────────────────────────────────
+# ── Binaries & Executables ─────────────────────────────────────
 bin/
+server
+server.exe
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
 
-# ── Test artifacts ───────────────────────────────────────────
-*.test
-*.out
-coverage.out
-
-# ── Vendor ───────────────────────────────────────────────────
-/vendor/
-!internal/vendor/
-
-# ── Environment ──────────────────────────────────────────────
+# ── Environment & Secrets ──────────────────────────────────────
 .env
 .env.local
 .env.production
+.env.staging
+*.env
 
-# ── IDE ──────────────────────────────────────────────────────
+# ── Test Artifacts & Temporary Files ───────────────────────────
+*.test
+*.out
+*.log
+logs/
+coverage.out
+coverage.html
+all_handlers.txt
+scratch/
+tmp/
+.air/
+
+# ── IDE & Editor Settings ──────────────────────────────────────
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
+.project
+.settings/
 
-# ── OS ───────────────────────────────────────────────────────
+# ── OS Generated Files ─────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# ── Build cache ──────────────────────────────────────────────
-tmp/
-.air/
+# ── Vendor (Dependencies managed via go.mod) ───────────────────
+/vendor/
+!internal/vendor/
 
-# ── Generated docs ───────────────────────────────────────────
+# ── Generated Docs & Swagger (if built locally) ────────────────
 docs/swagger.json
 docs/swagger.yaml
 docs/docs.go
-
-# ── Logs ─────────────────────────────────────────────────────
-*.log
-logs/

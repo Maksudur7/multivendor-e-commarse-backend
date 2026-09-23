@@ -30,6 +30,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	u.Put("/profile", h.UpdateProfile)
 	u.Get("/addresses", h.GetAddresses)
 	u.Post("/addresses", h.CreateAddress)
+	u.Put("/addresses/:id", h.UpdateAddress)
 	u.Put("/addresses/:id/default", h.SetDefaultAddress)
 	u.Delete("/addresses/:id", h.DeleteAddress)
 	u.Post("/kyc/submit", h.SubmitKYC)
@@ -219,7 +220,7 @@ func (h *Handler) ChangePassword(c *fiber.Ctx) error {
 
 	// Revoke all sessions — force re-login
 	_, _ = h.db.Exec(ctx,
-		"UPDATE sessions SET status = 'REVOKED', is_revoked = true WHERE user_id::text = $1 AND status = 'ACTIVE'",
+		"UPDATE sessions SET is_revoked = true WHERE user_id::text = $1 AND is_revoked = false",
 		userID,
 	)
 
@@ -297,10 +298,14 @@ func (h *Handler) GetAddresses(c *fiber.Ctx) error {
 
 type AddressReq struct {
 	RecipientName  string `json:"recipient_name"`
+	FullName       string `json:"full_name"`
 	RecipientPhone string `json:"recipient_phone"`
+	Phone          string `json:"phone"`
 	AddressLine1   string `json:"address_line1"`
+	Address        string `json:"address"`
 	AddressLine2   string `json:"address_line2"`
 	Division       string `json:"division"`
+	City           string `json:"city"`
 	District       string `json:"district"`
 	Upazila        string `json:"upazila"`
 	PostalCode     string `json:"postal_code"`
@@ -313,9 +318,15 @@ func (h *Handler) CreateAddress(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid address input: "+err.Error())
 	}
-	if req.RecipientName == "" || req.RecipientPhone == "" || req.AddressLine1 == "" || req.Division == "" || req.District == "" {
+	if req.RecipientName == "" { req.RecipientName = req.FullName }
+	if req.RecipientPhone == "" { req.RecipientPhone = req.Phone }
+	if req.AddressLine1 == "" { req.AddressLine1 = req.Address }
+	if req.Division == "" { req.Division = req.City }
+	if req.District == "" { req.District = req.Division }
+
+	if req.RecipientName == "" || req.RecipientPhone == "" || req.AddressLine1 == "" || req.Division == "" {
 		return response.ValidationError(c, map[string]string{
-			"required": "recipient_name, recipient_phone, address_line1, division, district are mandatory",
+			"required": "recipient_name, recipient_phone, address_line1, division are mandatory",
 		})
 	}
 
@@ -351,12 +362,45 @@ func (h *Handler) CreateAddress(c *fiber.Ctx) error {
 
 	return response.Created(c, "Address added successfully to NeonDB", fiber.Map{
 		"address_id":     addressID,
+		"id":             addressID,
 		"recipient_name": req.RecipientName,
 		"address_line1":  req.AddressLine1,
 		"division":       req.Division,
 		"district":       req.District,
 		"is_default":     req.IsDefault,
 	})
+}
+
+func (h *Handler) UpdateAddress(c *fiber.Ctx) error {
+	addressID := c.Params("id")
+	userID := c.Locals("user_id").(string)
+	var req AddressReq
+	if err := c.BodyParser(&req); err != nil {
+		return response.BadRequest(c, "Invalid address payload: "+err.Error())
+	}
+	if req.RecipientName == "" { req.RecipientName = req.FullName }
+	if req.RecipientPhone == "" { req.RecipientPhone = req.Phone }
+	if req.AddressLine1 == "" { req.AddressLine1 = req.Address }
+
+	if h.db == nil {
+		return response.Success(c, fiber.StatusOK, "Address updated", fiber.Map{"address_id": addressID})
+	}
+
+	ctx := c.Context()
+	_, err := h.db.Exec(ctx,
+		`UPDATE user_addresses SET
+		 recipient_name = COALESCE(NULLIF($1,''), recipient_name),
+		 recipient_phone = COALESCE(NULLIF($2,''), recipient_phone),
+		 address_line1 = COALESCE(NULLIF($3,''), address_line1),
+		 label = COALESCE(NULLIF($4,''), label),
+		 updated_at = now()
+		 WHERE id::text = $5 AND user_id::text = $6`,
+		req.RecipientName, req.RecipientPhone, req.AddressLine1, req.Label, addressID, userID)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to update address", nil)
+	}
+
+	return response.Success(c, fiber.StatusOK, "Address updated successfully", fiber.Map{"address_id": addressID})
 }
 
 // ─────────────────────────────────────────────

@@ -33,6 +33,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	auth := router.Group("/auth")
 
 	auth.Post("/otp/send", h.SendOTP)
+	auth.Post("/phone/send-otp", h.SendOTP)
 	auth.Post("/otp/verify", h.VerifyOTP)
 	auth.Post("/email/login", h.EmailLogin)
 	auth.Post("/email/register", h.EmailRegister)
@@ -52,6 +53,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 
 type SendOTPReq struct {
 	Target  string `json:"target"`
+	Phone   string `json:"phone"`
 	Purpose string `json:"purpose"`
 }
 
@@ -60,7 +62,9 @@ func (h *Handler) SendOTP(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid request payload")
 	}
+	if req.Target == "" { req.Target = req.Phone }
 	req.Target = strings.TrimSpace(req.Target)
+	if req.Purpose == "" { req.Purpose = "LOGIN" }
 	if req.Target == "" {
 		return response.ValidationError(c, map[string]string{"target": "Phone number or email is required"})
 	}
@@ -156,7 +160,7 @@ func (h *Handler) VerifyOTP(c *fiber.Ctx) error {
 
 	if h.db != nil {
 		_, _ = h.db.Exec(ctx,
-			"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, status) VALUES ($1, $2, $3, 'ACTIVE')",
+			"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, is_revoked) VALUES ($1, $2, $3, false)",
 			userID, refToken, time.Now().Add(30*24*time.Hour),
 		)
 	}
@@ -218,11 +222,11 @@ func (h *Handler) EmailRegister(c *fiber.Ctx) error {
 
 	var userID string
 	if h.db != nil {
-		// Check duplicate email
+		// Check duplicate email or phone
 		var existCheck string
-		checkErr := h.db.QueryRow(ctx, "SELECT id::text FROM users WHERE email = $1", req.Email).Scan(&existCheck)
+		checkErr := h.db.QueryRow(ctx, "SELECT id::text FROM users WHERE email = $1 OR (phone IS NOT NULL AND phone = $2 AND $2 != '')", req.Email, req.Phone).Scan(&existCheck)
 		if checkErr == nil {
-			return response.Error(c, fiber.StatusConflict, "An account with this email already exists. Please login.", nil)
+			return response.Error(c, fiber.StatusConflict, "An account with this email or phone number already exists. Please login.", nil)
 		}
 
 		err = h.db.QueryRow(ctx,
@@ -244,7 +248,7 @@ func (h *Handler) EmailRegister(c *fiber.Ctx) error {
 
 	if h.db != nil {
 		_, _ = h.db.Exec(ctx,
-			"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, status) VALUES ($1, $2, $3, 'ACTIVE')",
+			"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, is_revoked) VALUES ($1, $2, $3, false)",
 			userID, refToken, time.Now().Add(30*24*time.Hour),
 		)
 	}
@@ -311,7 +315,7 @@ func (h *Handler) EmailLogin(c *fiber.Ctx) error {
 
 	// Save session to DB
 	_, _ = h.db.Exec(ctx,
-		"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, status) VALUES ($1, $2, $3, 'ACTIVE')",
+		"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, is_revoked) VALUES ($1, $2, $3, false)",
 		userID, refToken, time.Now().Add(30*24*time.Hour),
 	)
 
@@ -346,12 +350,13 @@ func (h *Handler) RefreshToken(c *fiber.Ctx) error {
 
 	if h.db != nil {
 		// Lookup session
-		var userID, status string
+		var userID string
+		var isRevoked bool
 		err := h.db.QueryRow(ctx,
-			"SELECT user_id::text, status FROM sessions WHERE refresh_token_hash = $1",
+			"SELECT user_id::text, is_revoked FROM sessions WHERE refresh_token_hash = $1",
 			req.RefreshToken,
-		).Scan(&userID, &status)
-		if err != nil || status != "ACTIVE" {
+		).Scan(&userID, &isRevoked)
+		if err != nil || isRevoked {
 			return response.Error(c, fiber.StatusUnauthorized, "Invalid or expired refresh token", nil)
 		}
 
@@ -360,11 +365,11 @@ func (h *Handler) RefreshToken(c *fiber.Ctx) error {
 
 		// Rotate: invalidate old, insert new
 		_, _ = h.db.Exec(ctx,
-			"UPDATE sessions SET status = 'REVOKED', is_revoked = true WHERE refresh_token_hash = $1",
+			"UPDATE sessions SET is_revoked = true WHERE refresh_token_hash = $1",
 			req.RefreshToken,
 		)
 		_, _ = h.db.Exec(ctx,
-			"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, status) VALUES ($1, $2, $3, 'ACTIVE')",
+			"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, is_revoked) VALUES ($1, $2, $3, false)",
 			userID, newRefToken, time.Now().Add(30*24*time.Hour),
 		)
 
@@ -392,7 +397,7 @@ func (h *Handler) Logout(c *fiber.Ctx) error {
 		// Revoke ALL active sessions for this user on logout
 		// (access token doesn't map 1:1 to session, so revoke all for security)
 		_, _ = h.db.Exec(ctx,
-			"UPDATE sessions SET status = 'REVOKED', is_revoked = true WHERE user_id::text = $1 AND status = 'ACTIVE'",
+			"UPDATE sessions SET is_revoked = true WHERE user_id::text = $1 AND is_revoked = false",
 			userID,
 		)
 	}
@@ -527,9 +532,9 @@ func (h *Handler) PasswordReset(c *fiber.Ctx) error {
 		return response.Error(c, fiber.StatusInternalServerError, fmt.Sprintf("Failed to update password: %v", err), nil)
 	}
 
-	// 5. âœ… CRITICAL: Revoke ALL existing sessions so old tokens can't be used
+	// 5. ✅ CRITICAL: Revoke ALL existing sessions so old tokens can't be used
 	_, _ = h.db.Exec(ctx,
-		"UPDATE sessions SET status = 'REVOKED', is_revoked = true WHERE user_id::text = $1 AND status = 'ACTIVE'",
+		"UPDATE sessions SET is_revoked = true WHERE user_id::text = $1 AND is_revoked = false",
 		userID,
 	)
 
@@ -565,14 +570,15 @@ func (h *Handler) GetSessions(c *fiber.Ctx) error {
 
 	if h.db != nil {
 		rows, err := h.db.Query(ctx,
-			"SELECT id::text, created_at, expires_at, status FROM sessions WHERE user_id::text = $1 AND status = 'ACTIVE' AND expires_at > now() ORDER BY created_at DESC",
+			"SELECT id::text, created_at, expires_at FROM sessions WHERE user_id::text = $1 AND is_revoked = false AND expires_at > now() ORDER BY created_at DESC",
 			userID,
 		)
 		if err == nil {
 			defer rows.Close()
 			for rows.Next() {
 				var s Session
-				if scanErr := rows.Scan(&s.ID, &s.CreatedAt, &s.ExpiresAt, &s.Status); scanErr == nil {
+				if scanErr := rows.Scan(&s.ID, &s.CreatedAt, &s.ExpiresAt); scanErr == nil {
+					s.Status = "ACTIVE"
 					sessions = append(sessions, s)
 				}
 			}
@@ -601,7 +607,7 @@ func (h *Handler) RevokeSession(c *fiber.Ctx) error {
 
 	if h.db != nil {
 		_, err := h.db.Exec(ctx,
-			"UPDATE sessions SET status = 'REVOKED' WHERE id::text = $1 AND user_id::text = $2",
+			"UPDATE sessions SET is_revoked = true WHERE id::text = $1 AND user_id::text = $2",
 			sessionID, userID,
 		)
 		if err != nil {
