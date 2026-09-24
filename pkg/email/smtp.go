@@ -15,6 +15,7 @@ import (
 	"html/template"
 	"net"
 	"net/smtp"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
