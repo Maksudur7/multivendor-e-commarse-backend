@@ -15,6 +15,7 @@ import (
 	"html/template"
 	"net"
 	"net/smtp"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -55,29 +56,33 @@ func (c *Client) send(_ context.Context, to, subject, htmlBody string) error {
 	}
 
 	addr := fmt.Sprintf("%s:%d", c.host, c.port)
-	auth := smtp.PlainAuth("", c.username, c.password, c.host)
+	cleanPass := strings.ReplaceAll(c.password, " ", "")
+	auth := smtp.PlainAuth("", c.username, cleanPass, c.host)
 
-	// from header — use display name if available, else plain username
-	fromHeader := c.from
-	if fromHeader == "" {
-		fromHeader = c.username
+	// from header — use clean username to satisfy Gmail SPF/DMARC alignment
+	fromAddr := c.from
+	if fromAddr == "" {
+		fromAddr = c.username
 	}
 
-	// Build RFC 5322 compliant headers to avoid spam filters
-	msgID := fmt.Sprintf("<%d.ecom@backend>", time.Now().UnixNano())
+	// Build RFC 5322 compliant headers with domain matching sender
+	domain := "gmail.com"
+	if parts := strings.Split(c.username, "@"); len(parts) == 2 {
+		domain = parts[1]
+	}
+	msgID := fmt.Sprintf("<%d.%s>", time.Now().UnixNano(), domain)
 	dateStr := time.Now().Format(time.RFC1123Z)
 
 	msg := fmt.Sprintf(
-		"From: E-Commerce <%s>\r\n"+
+		"From: %s\r\n"+
 			"To: %s\r\n"+
 			"Subject: %s\r\n"+
 			"Date: %s\r\n"+
 			"Message-ID: %s\r\n"+
 			"MIME-Version: 1.0\r\n"+
 			"Content-Type: text/html; charset=\"UTF-8\"\r\n"+
-			"X-Mailer: E-Commerce-Backend/1.0\r\n"+
 			"\r\n%s",
-		fromHeader, to, subject, dateStr, msgID, htmlBody,
+		fromAddr, to, subject, dateStr, msgID, htmlBody,
 	)
 
 	var err error
