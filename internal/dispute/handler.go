@@ -1,7 +1,6 @@
 package dispute
 
 import (
-		"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,11 +9,17 @@ import (
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{service: service}
+}
+
+func NewHandlerWithService(service *Service) *Handler {
+	return &Handler{service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
@@ -52,20 +57,7 @@ func (h *Handler) OpenDispute(c *fiber.Ctx) error {
 	}
 
 	customerID := c.Locals("user_id").(string)
-	ticketNo := fmt.Sprintf("TK-%d", time.Now().UnixNano()/1e6)
-
-	if h.db == nil {
-		return response.Created(c, "Dispute ticket opened", fiber.Map{"ticket_number": ticketNo, "status": "OPEN"})
-	}
-
-	ctx := c.Context()
-	var ticketID string
-	err := h.db.QueryRow(ctx, `
-		INSERT INTO disputes (ticket_number, customer_id, reason, description, status)
-		VALUES ($1, $2::uuid, $3, $4, 'OPEN')
-		RETURNING id::text`,
-		ticketNo, customerID, req.Reason, req.Description,
-	).Scan(&ticketID)
+	ticketID, ticketNo, err := h.service.OpenDispute(c.Context(), customerID, req.Reason, req.Description)
 	if err != nil {
 		return response.Error(c, fiber.StatusInternalServerError, "Failed to open dispute ticket: "+err.Error(), nil)
 	}
@@ -80,25 +72,9 @@ func (h *Handler) OpenDispute(c *fiber.Ctx) error {
 
 func (h *Handler) GetMyTickets(c *fiber.Ctx) error {
 	customerID := c.Locals("user_id").(string)
-	if h.db == nil {
-		return response.Success(c, fiber.StatusOK, "Dispute tickets list", fiber.Map{"tickets": []fiber.Map{}})
-	}
-	ctx := c.Context()
-	rows, err := h.db.Query(ctx, `
-		SELECT id::text, ticket_number, reason, description, status, created_at FROM disputes WHERE customer_id::text = $1 ORDER BY created_at DESC`, customerID)
+	tickets, err := h.service.GetMyTickets(c.Context(), customerID)
 	if err != nil {
-		return response.Error(c, fiber.StatusInternalServerError, "Failed to load tickets", nil)
-	}
-	defer rows.Close()
-
-	tickets := []fiber.Map{}
-	for rows.Next() {
-		var id, tNo, reason, desc, status string
-		var dt time.Time
-		rows.Scan(&id, &tNo, &reason, &desc, &status, &dt)
-		tickets = append(tickets, fiber.Map{
-			"ticket_id": id, "ticket_number": tNo, "reason": reason, "description": desc, "status": status, "created_at": dt.Format(time.RFC3339),
-		})
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load tickets: "+err.Error(), nil)
 	}
 	return response.Success(c, fiber.StatusOK, "Dispute tickets from NeonDB", fiber.Map{"tickets": tickets, "count": len(tickets)})
 }
@@ -137,10 +113,12 @@ func (h *Handler) ResolveDisputeAdmin(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid input: "+err.Error())
 	}
-	if req.Status == "" { req.Status = "RESOLVED_REFUND" }
-	if h.db != nil {
-		ctx := c.Context()
-		h.db.Exec(ctx, "UPDATE disputes SET status = $1, admin_resolution = $2 WHERE id::text = $3", req.Status, req.AdminResolution, ticketID)
+	if req.Status == "" {
+		req.Status = "RESOLVED_REFUND"
+	}
+	err := h.service.ResolveDispute(c.Context(), ticketID, req.Status, req.AdminResolution)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to resolve dispute: "+err.Error(), nil)
 	}
 	return response.Success(c, fiber.StatusOK, "Dispute ticket resolved by Admin in NeonDB", fiber.Map{
 		"ticket_id":        ticketID,
@@ -150,44 +128,18 @@ func (h *Handler) ResolveDisputeAdmin(c *fiber.Ctx) error {
 }
 
 func (h *Handler) GetAdminDisputes(c *fiber.Ctx) error {
-	if h.db == nil {
-		return response.Success(c, fiber.StatusOK, "All dispute tickets", fiber.Map{"tickets": []fiber.Map{}})
-	}
-	ctx := c.Context()
-	rows, err := h.db.Query(ctx, `
-		SELECT id::text, ticket_number, customer_id::text, reason, description, status, created_at FROM disputes ORDER BY created_at DESC LIMIT 50`)
+	tickets, err := h.service.GetAllDisputes(c.Context())
 	if err != nil {
-		return response.Success(c, fiber.StatusOK, "All dispute tickets", fiber.Map{"tickets": []fiber.Map{}, "count": 0})
-	}
-	defer rows.Close()
-
-	tickets := []fiber.Map{}
-	for rows.Next() {
-		var id, tNo, custID, reason, desc, status string
-		var dt time.Time
-		rows.Scan(&id, &tNo, &custID, &reason, &desc, &status, &dt)
-		tickets = append(tickets, fiber.Map{
-			"ticket_id": id, "ticket_number": tNo, "customer_id": custID, "reason": reason, "description": desc, "status": status, "created_at": dt.Format(time.RFC3339),
-		})
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load dispute tickets: "+err.Error(), nil)
 	}
 	return response.Success(c, fiber.StatusOK, "Dispute tickets from NeonDB", fiber.Map{"tickets": tickets, "count": len(tickets)})
 }
 
 func (h *Handler) GetDisputeByID(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if h.db == nil {
-		return response.Success(c, fiber.StatusOK, "Dispute detail", fiber.Map{"ticket_id": id, "status": "OPEN"})
-	}
-	ctx := c.Context()
-	var tNo, custID, reason, desc, status string
-	var dt time.Time
-	err := h.db.QueryRow(ctx, `
-		SELECT ticket_number, customer_id::text, reason, description, status, created_at FROM disputes WHERE id::text = $1 OR ticket_number = $1`, id).
-		Scan(&tNo, &custID, &reason, &desc, &status, &dt)
+	item, err := h.service.GetDisputeByID(c.Context(), id)
 	if err != nil {
-		return response.Success(c, fiber.StatusOK, "Dispute detail", fiber.Map{"ticket_id": id, "status": "OPEN"})
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to fetch dispute detail: "+err.Error(), nil)
 	}
-	return response.Success(c, fiber.StatusOK, "Dispute detail from NeonDB", fiber.Map{
-		"ticket_id": id, "ticket_number": tNo, "customer_id": custID, "reason": reason, "description": desc, "status": status, "created_at": dt.Format(time.RFC3339),
-	})
+	return response.Success(c, fiber.StatusOK, "Dispute detail from NeonDB", item)
 }

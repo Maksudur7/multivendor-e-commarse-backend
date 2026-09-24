@@ -117,8 +117,8 @@ CREATE TABLE IF NOT EXISTS china_sourcing_batches (
     created_at       TIMESTAMPTZ   NOT NULL DEFAULT now(),
     updated_at       TIMESTAMPTZ   NOT NULL DEFAULT now(),
     CONSTRAINT chk_batch_status CHECK (status IN (
-        'SOURCING','ORDERED','IN_TRANSIT_AIR','IN_TRANSIT_SEA',
-        'CUSTOMS','WAREHOUSE','COMPLETED','CANCELLED'
+        'SOURCING','ORDERED','SHIPPED','IN_TRANSIT_AIR','IN_TRANSIT_SEA',
+        'CUSTOMS','WAREHOUSE','DELIVERED','COMPLETED','CANCELLED'
     ))
 );
 

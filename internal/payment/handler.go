@@ -1,21 +1,23 @@
 package payment
 
 import (
-		"fmt"
-	"time"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{service: service}
+}
+
+func NewHandlerWithService(service *Service) *Handler {
+	return &Handler{service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
@@ -48,19 +50,11 @@ func (h *Handler) GetPaymentMethods(c *fiber.Ctx) error {
 
 func (h *Handler) GetPaymentStatus(c *fiber.Ctx) error {
 	txID := c.Params("id")
-	if h.db == nil {
-		return response.Success(c, fiber.StatusOK, "Payment status", fiber.Map{"transaction_id": txID, "status": "COMPLETED"})
-	}
-	ctx := c.Context()
-	var id, gateway, status string; var amt float64; var dt time.Time
-	err := h.db.QueryRow(ctx, "SELECT id::text, payment_gateway, amount, status, created_at FROM payments WHERE id::text = $1 OR transaction_ref = $1", txID).
-		Scan(&id, &gateway, &amt, &status, &dt)
+	item, err := h.service.GetPaymentStatus(c.Context(), txID)
 	if err != nil {
-		return response.Success(c, fiber.StatusOK, "Payment status", fiber.Map{"transaction_id": txID, "status": "COMPLETED"})
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to fetch payment status: "+err.Error(), nil)
 	}
-	return response.Success(c, fiber.StatusOK, "Payment transaction status from NeonDB", fiber.Map{
-		"payment_id": id, "transaction_id": txID, "gateway": gateway, "amount": amt, "status": status, "created_at": dt.Format(time.RFC3339),
-	})
+	return response.Success(c, fiber.StatusOK, "Payment transaction status", item)
 }
 
 type InitiatePaymentReq struct {
@@ -74,44 +68,24 @@ func (h *Handler) InitiatePayment(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid request body: "+err.Error())
 	}
-	if req.PaymentGateway == "" { req.PaymentGateway = "COD" }
 
-	txRef := fmt.Sprintf("TXN-%d", time.Now().UnixNano()/1e6)
-
-	if h.db != nil && req.MasterOrderID != "" {
-		ctx := c.Context()
-		h.db.Exec(ctx, `
-			INSERT INTO payments (master_order_id, transaction_ref, payment_gateway, amount, status)
-			VALUES ($1::uuid, $2, $3, $4, 'PENDING')`,
-			nullIfEmpty(req.MasterOrderID), txRef, req.PaymentGateway, req.Amount)
+	_, res, err := h.service.InitiatePayment(c.Context(), req.MasterOrderID, req.PaymentGateway, req.Amount)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to initiate payment: "+err.Error(), nil)
 	}
 
-	switch req.PaymentGateway {
-	case "BKASH":
-		return response.Success(c, fiber.StatusOK, "bKash payment URL created", fiber.Map{
-			"payment_gateway": "BKASH", "transaction_reference": txRef,
-			"bkash_payment_url": fmt.Sprintf("https://checkout.sandbox.bka.sh/v1.2.0-beta/pay/checkout?paymentID=BK-%s", uuid.New().String()[:8]),
-		})
-	case "SSLCOMMERZ":
-		return response.Success(c, fiber.StatusOK, "SSLCommerz gateway session initialized", fiber.Map{
-			"payment_gateway": "SSLCOMMERZ", "transaction_reference": txRef,
-			"ssl_redirect_url": fmt.Sprintf("https://sandbox.sslcommerz.com/gwprocess/v4/gw.php?Q=PAY&sessionkey=%s", uuid.New().String()),
-		})
-	case "NAGAD":
-		return response.Success(c, fiber.StatusOK, "Nagad payment session generated", fiber.Map{
-			"payment_gateway": "NAGAD", "transaction_reference": txRef,
-			"nagad_redirect_url": fmt.Sprintf("https://api.mynagad.com/pay/%s", txRef),
-		})
-	default:
-		return response.Success(c, fiber.StatusOK, "Cash on Delivery selected", fiber.Map{
-			"payment_gateway": "COD", "transaction_reference": txRef, "payment_status": "PENDING_COD_COLLECTION",
-		})
+	msg := "Payment initiated successfully"
+	if req.PaymentGateway == "BKASH" {
+		msg = "bKash payment URL created"
+	} else if req.PaymentGateway == "SSLCOMMERZ" {
+		msg = "SSLCommerz gateway session initialized"
+	} else if req.PaymentGateway == "NAGAD" {
+		msg = "Nagad payment session generated"
+	} else {
+		msg = "Cash on Delivery selected"
 	}
-}
 
-func nullIfEmpty(s string) *string {
-	if s == "" { return nil }
-	return &s
+	return response.Success(c, fiber.StatusOK, msg, res)
 }
 
 func (h *Handler) VerifyPayment(c *fiber.Ctx) error {
@@ -143,11 +117,9 @@ func (h *Handler) RequestRefund(c *fiber.Ctx) error {
 	}
 	customerID := c.Locals("user_id").(string)
 
-	if h.db != nil {
-		ctx := c.Context()
-		h.db.Exec(ctx, `
-			INSERT INTO refunds (user_id, amount, reason, status)
-			VALUES ($1::uuid, $2, $3, 'PROCESSING')`, customerID, req.Amount, req.Reason)
+	err := h.service.RequestRefund(c.Context(), customerID, req.Amount, req.Reason)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to request refund: "+err.Error(), nil)
 	}
 
 	return response.Created(c, "Refund request submitted in NeonDB", fiber.Map{

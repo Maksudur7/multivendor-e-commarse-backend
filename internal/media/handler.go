@@ -2,21 +2,22 @@ package media
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	repo    *Repository
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{repo: repo, service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
-	// 5 Media Endpoints
 	router.Get("/media/:id", h.GetMediaDetail)
 
 	m := router.Group("/media", authMiddleware)
@@ -27,14 +28,20 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 }
 
 func (h *Handler) GetMediaDetail(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Media metadata", fiber.Map{"media_id": c.Params("id"), "url": "https://r2.cdn.com/media.jpg"})
+	id := c.Params("id")
+	item, err := h.service.GetMediaDetail(c.Context(), id)
+	if err != nil {
+		return response.Error(c, fiber.StatusBadRequest, err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Media metadata", item)
 }
 
 func (h *Handler) UploadMedia(c *fiber.Ctx) error {
-	return response.Created(c, "File uploaded to Cloudflare R2", fiber.Map{
-		"media_id": uuid.New().String(),
-		"cdn_url":  "https://r2.cdn.com/product_image_1.jpg",
-	})
+	res, err := h.service.UploadMedia(c.Context())
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed upload", nil)
+	}
+	return response.Created(c, "File uploaded to Cloudflare R2", res)
 }
 
 func (h *Handler) GeneratePresignedURL(c *fiber.Ctx) error {

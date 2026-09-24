@@ -1,19 +1,20 @@
 package wallet
 
 import (
-		"time"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	repo    *Repository
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{repo: repo, service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
@@ -32,60 +33,35 @@ func (h *Handler) GetWalletBalance(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
 	role := c.Locals("role").(string)
 
-	if h.db == nil {
-		return response.Success(c, fiber.StatusOK, "Wallet summary loaded", fiber.Map{
-			"owner_id": userID, "available_balance": 0.0, "currency": "BDT",
-		})
-	}
-
-	ctx := c.Context()
-	var available, pending, totalWithdrawn float64
-	err := h.db.QueryRow(ctx, `
-		SELECT available_balance, pending_escrow, total_withdrawn FROM wallets WHERE user_id::text = $1`, userID).
-		Scan(&available, &pending, &totalWithdrawn)
+	summary, err := h.service.GetWalletBalance(c.Context(), userID)
 	if err != nil {
-		// Auto create wallet row if missing
-		h.db.Exec(ctx, "INSERT INTO wallets (user_id, available_balance, pending_escrow, total_withdrawn) VALUES ($1::uuid, 0, 0, 0) ON CONFLICT (user_id) DO NOTHING", userID)
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load wallet", nil)
 	}
 
-	return response.Success(c, fiber.StatusOK, "Wallet summary loaded from NeonDB", fiber.Map{
-		"owner_id":               userID,
+	return response.Success(c, fiber.StatusOK, "Wallet summary loaded", fiber.Map{
+		"owner_id":               summary.OwnerID,
 		"owner_type":             role,
-		"available_balance":      available,
-		"pending_escrow_balance": pending,
-		"locked_balance":         0.00,
-		"total_withdrawn":        totalWithdrawn,
-		"currency":               "BDT",
+		"available_balance":      summary.AvailableBalance,
+		"pending_escrow_balance": summary.PendingEscrowBalance,
+		"locked_balance":         summary.LockedBalance,
+		"total_withdrawn":        summary.TotalWithdrawn,
+		"currency":               summary.Currency,
 	})
 }
 
 func (h *Handler) GetLedgerHistory(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
-	if h.db == nil {
-		return response.Success(c, fiber.StatusOK, "Wallet ledger history", fiber.Map{"transactions": []fiber.Map{}})
-	}
-	ctx := c.Context()
-	rows, err := h.db.Query(ctx, `
-		SELECT t.id::text, t.amount, t.type, COALESCE(t.description, ''), t.created_at
-		FROM wallet_transactions t JOIN wallets w ON w.id = t.wallet_id WHERE w.user_id::text = $1 ORDER BY t.created_at DESC`, userID)
+	txs, err := h.service.GetLedgerHistory(c.Context(), userID)
 	if err != nil {
 		return response.Error(c, fiber.StatusInternalServerError, "Failed to load transactions", nil)
 	}
-	defer rows.Close()
-
-	txs := []fiber.Map{}
-	for rows.Next() {
-		var id, tType, desc string; var amt float64; var dt time.Time
-		rows.Scan(&id, &amt, &tType, &desc, &dt)
-		txs = append(txs, fiber.Map{"transaction_id": id, "amount": amt, "type": tType, "description": desc, "created_at": dt.Format(time.RFC3339)})
-	}
-	return response.Success(c, fiber.StatusOK, "Wallet ledger from NeonDB", fiber.Map{"transactions": txs, "count": len(txs)})
+	return response.Success(c, fiber.StatusOK, "Wallet ledger loaded", fiber.Map{"transactions": txs, "count": len(txs)})
 }
 
 type WithdrawReq struct {
 	Amount         float64 `json:"amount"`
-	PaymentMethod  string  `json:"payment_method"`  // BKASH_MERCHANT, NAGAD, BANK_TRANSFER
-	AccountDetails string  `json:"account_details"` // e.g. "Dutch-Bangla Bank A/C 123456789"
+	PaymentMethod  string  `json:"payment_method"`
+	AccountDetails string  `json:"account_details"`
 }
 
 func (h *Handler) RequestWithdrawal(c *fiber.Ctx) error {
@@ -100,23 +76,12 @@ func (h *Handler) RequestWithdrawal(c *fiber.Ctx) error {
 		})
 	}
 
-	if h.db == nil {
-		return response.Created(c, "Withdrawal requested", fiber.Map{"requested_amount": req.Amount, "status": "PENDING"})
-	}
-
-	ctx := c.Context()
-	var reqID string
-	err := h.db.QueryRow(ctx, `
-		INSERT INTO payout_requests (user_id, amount, payment_method, account_details, status)
-		VALUES ($1::uuid, $2, $3, $4, 'PENDING')
-		RETURNING id::text`,
-		userID, req.Amount, req.PaymentMethod, req.AccountDetails,
-	).Scan(&reqID)
+	reqID, err := h.service.RequestWithdrawal(c.Context(), userID, req.Amount, req.PaymentMethod, req.AccountDetails)
 	if err != nil {
 		return response.Error(c, fiber.StatusInternalServerError, "Failed to create withdrawal request: "+err.Error(), nil)
 	}
 
-	return response.Created(c, "Payout withdrawal request submitted in NeonDB", fiber.Map{
+	return response.Created(c, "Payout withdrawal request submitted", fiber.Map{
 		"withdrawal_id":    reqID,
 		"user_id":          userID,
 		"requested_amount": req.Amount,
@@ -126,33 +91,15 @@ func (h *Handler) RequestWithdrawal(c *fiber.Ctx) error {
 }
 
 func (h *Handler) ListWithdrawalRequestsAdmin(c *fiber.Ctx) error {
-	if h.db == nil {
-		return response.Success(c, fiber.StatusOK, "Withdrawal requests for admin review", fiber.Map{"requests": []fiber.Map{}})
-	}
-	ctx := c.Context()
-	rows, err := h.db.Query(ctx, `
-		SELECT p.id::text, p.user_id::text, p.amount, p.payment_method, p.account_details, p.status, p.created_at, COALESCE(u.email,'')
-		FROM payout_requests p LEFT JOIN users u ON u.id = p.user_id ORDER BY p.created_at DESC`)
+	reqs, err := h.service.ListWithdrawalRequestsAdmin(c.Context())
 	if err != nil {
 		return response.Error(c, fiber.StatusInternalServerError, "Failed to fetch payout requests", nil)
 	}
-	defer rows.Close()
-
-	reqs := []fiber.Map{}
-	for rows.Next() {
-		var id, uID, method, details, status, email string
-		var amt float64
-		var dt time.Time
-		rows.Scan(&id, &uID, &amt, &method, &details, &status, &dt, &email)
-		reqs = append(reqs, fiber.Map{
-			"withdrawal_id": id, "user_id": uID, "amount": amt, "payment_method": method, "account_details": details, "status": status, "email": email, "created_at": dt.Format(time.RFC3339),
-		})
-	}
-	return response.Success(c, fiber.StatusOK, "Payout requests from NeonDB", fiber.Map{"requests": reqs, "count": len(reqs)})
+	return response.Success(c, fiber.StatusOK, "Payout requests loaded", fiber.Map{"requests": reqs, "count": len(reqs)})
 }
 
 type ProcessWithdrawalReq struct {
-	Status              string `json:"status"` // APPROVED, REJECTED
+	Status              string `json:"status"`
 	TransactionProofRef string `json:"transaction_proof_ref"`
 }
 
@@ -162,13 +109,15 @@ func (h *Handler) ProcessWithdrawalAdmin(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid payload: "+err.Error())
 	}
-	if req.Status == "" { req.Status = "APPROVED" }
-
-	if h.db != nil {
-		ctx := c.Context()
-		h.db.Exec(ctx, "UPDATE payout_requests SET status = $1, transaction_proof_ref = $2 WHERE id::text = $3", req.Status, req.TransactionProofRef, withdrawalID)
+	if req.Status == "" {
+		req.Status = "APPROVED"
 	}
-	return response.Success(c, fiber.StatusOK, "Payout withdrawal processed in NeonDB", fiber.Map{
+
+	if err := h.service.ProcessWithdrawalAdmin(c.Context(), withdrawalID, req.Status, req.TransactionProofRef); err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to process withdrawal", nil)
+	}
+
+	return response.Success(c, fiber.StatusOK, "Payout withdrawal processed", fiber.Map{
 		"withdrawal_id":         withdrawalID,
 		"status":                req.Status,
 		"transaction_proof_ref": req.TransactionProofRef,
