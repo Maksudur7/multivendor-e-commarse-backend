@@ -56,6 +56,5 @@ docs/swagger.yaml
 docs/docs.go
 
 # ── Generated / Temporary Files ────────────────────────────────
-public/docs.html
 internal/auth/documentation.html
 test_otp_*.go
