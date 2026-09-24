@@ -24,7 +24,7 @@ services:
       - key: EMAIL_SMTP_HOST
         value: smtp.gmail.com
       - key: EMAIL_SMTP_PORT
-        value: "587"
+        value: "465"
       - key: EMAIL_USERNAME
         value: maksudurr538@gmail.com
       - key: EMAIL_PASSWORD
