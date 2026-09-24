@@ -26,6 +26,9 @@ WORKDIR /app
 # Copy compiled binary from builder stage
 COPY --from=builder /app/server /app/server
 
+# Copy public assets (docs.html, static files) into production image
+COPY --from=builder /app/public /app/public
+
 # Expose Render default port
 EXPOSE 8080
 
