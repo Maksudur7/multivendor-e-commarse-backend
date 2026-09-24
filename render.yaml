@@ -17,3 +17,7 @@ services:
         value: your_super_secret_access_key_2024_enterprise_ecommerce
       - key: JWT_REFRESH_SECRET
         value: your_super_secret_refresh_key_2024_enterprise_ecommerce
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
+      - key: CORS_ALLOW_CREDENTIALS
+        value: "false"

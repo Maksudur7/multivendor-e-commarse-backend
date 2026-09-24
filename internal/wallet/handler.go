@@ -2,17 +2,19 @@ package wallet
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	repo    *Repository
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{repo: repo, service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
@@ -31,30 +33,39 @@ func (h *Handler) GetWalletBalance(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
 	role := c.Locals("role").(string)
 
+	summary, err := h.service.GetWalletBalance(c.Context(), userID)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load wallet", nil)
+	}
+
 	return response.Success(c, fiber.StatusOK, "Wallet summary loaded", fiber.Map{
-		"owner_id":               userID,
+		"owner_id":               summary.OwnerID,
 		"owner_type":             role,
-		"available_balance":      24500.00,
-		"pending_escrow_balance": 18200.00,
-		"locked_balance":         0.00,
-		"total_withdrawn":        54000.00,
-		"currency":               "BDT",
+		"available_balance":      summary.AvailableBalance,
+		"pending_escrow_balance": summary.PendingEscrowBalance,
+		"locked_balance":         summary.LockedBalance,
+		"total_withdrawn":        summary.TotalWithdrawn,
+		"currency":               summary.Currency,
 	})
 }
 
 func (h *Handler) GetLedgerHistory(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Wallet ledger history", fiber.Map{
-		"transactions": []fiber.Map{},
-	})
+	userID := c.Locals("user_id").(string)
+	txs, err := h.service.GetLedgerHistory(c.Context(), userID)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load transactions", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Wallet ledger loaded", fiber.Map{"transactions": txs, "count": len(txs)})
 }
 
 type WithdrawReq struct {
 	Amount         float64 `json:"amount"`
-	PaymentMethod  string  `json:"payment_method"`  // BKASH_MERCHANT, NAGAD, BANK_TRANSFER
-	AccountDetails string  `json:"account_details"` // e.g. "Dutch-Bangla Bank A/C 123456789"
+	PaymentMethod  string  `json:"payment_method"`
+	AccountDetails string  `json:"account_details"`
 }
 
 func (h *Handler) RequestWithdrawal(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
 	var req WithdrawReq
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid input: "+err.Error())
@@ -65,25 +76,30 @@ func (h *Handler) RequestWithdrawal(c *fiber.Ctx) error {
 		})
 	}
 
-	userID := c.Locals("user_id").(string)
+	reqID, err := h.service.RequestWithdrawal(c.Context(), userID, req.Amount, req.PaymentMethod, req.AccountDetails)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to create withdrawal request: "+err.Error(), nil)
+	}
 
-	return response.Created(c, "Payout withdrawal request submitted. Will be processed within 24 hours.", fiber.Map{
-		"withdrawal_id":   uuid.New().String(),
-		"user_id":         userID,
+	return response.Created(c, "Payout withdrawal request submitted", fiber.Map{
+		"withdrawal_id":    reqID,
+		"user_id":          userID,
 		"requested_amount": req.Amount,
-		"payment_method":  req.PaymentMethod,
-		"status":          "PENDING",
+		"payment_method":   req.PaymentMethod,
+		"status":           "PENDING",
 	})
 }
 
 func (h *Handler) ListWithdrawalRequestsAdmin(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Withdrawal requests for admin review", fiber.Map{
-		"requests": []fiber.Map{},
-	})
+	reqs, err := h.service.ListWithdrawalRequestsAdmin(c.Context())
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to fetch payout requests", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Payout requests loaded", fiber.Map{"requests": reqs, "count": len(reqs)})
 }
 
 type ProcessWithdrawalReq struct {
-	Status             string `json:"status"` // APPROVED, REJECTED
+	Status              string `json:"status"`
 	TransactionProofRef string `json:"transaction_proof_ref"`
 }
 
@@ -93,6 +109,14 @@ func (h *Handler) ProcessWithdrawalAdmin(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid payload: "+err.Error())
 	}
+	if req.Status == "" {
+		req.Status = "APPROVED"
+	}
+
+	if err := h.service.ProcessWithdrawalAdmin(c.Context(), withdrawalID, req.Status, req.TransactionProofRef); err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to process withdrawal", nil)
+	}
+
 	return response.Success(c, fiber.StatusOK, "Payout withdrawal processed", fiber.Map{
 		"withdrawal_id":         withdrawalID,
 		"status":                req.Status,

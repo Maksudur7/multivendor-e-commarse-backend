@@ -34,16 +34,32 @@ func Auth(accessSecret string, redisClient *redis.Client) fiber.Handler {
 			return response.Unauthorized(c, "Invalid authorization format. Use: Bearer <token>")
 		}
 
-		tokenString := parts[1]
+		tokenString := strings.TrimSpace(parts[1])
+		if tokenString == "" {
+			return response.Unauthorized(c, "Token string cannot be empty")
+		}
 
-		// Store locals
-		c.Locals("user_id", "usr_123456")
+		userID := parseUserIDFromToken(tokenString)
+
+		// Store locals dynamically extracted from token
+		c.Locals("user_id", userID)
 		c.Locals("role", "CUSTOMER")
-		c.Locals("email", "user@example.com")
 		c.Locals("token", tokenString)
 
 		return c.Next()
 	}
+}
+
+func parseUserIDFromToken(tokenString string) string {
+	if strings.HasPrefix(tokenString, "acc_") {
+		trimmed := strings.TrimPrefix(tokenString, "acc_")
+		lastUnderscore := strings.LastIndex(trimmed, "_")
+		if lastUnderscore > 0 {
+			return trimmed[:lastUnderscore]
+		}
+		return trimmed
+	}
+	return tokenString
 }
 
 // JWTAuth alias for Auth

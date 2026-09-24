@@ -7,11 +7,14 @@ import (
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	repo    *Repository
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{repo: repo, service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
@@ -22,9 +25,12 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 
 func (h *Handler) GetNotifications(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
+	notifs, err := h.service.GetNotifications(c.Context(), userID)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to fetch notifications", nil)
+	}
 	return response.Success(c, fiber.StatusOK, "In-app notifications loaded", fiber.Map{
-		"user_id":       userID,
-		"notifications": []fiber.Map{},
+		"user_id": userID, "notifications": notifs, "count": len(notifs),
 	})
 }
 
@@ -39,12 +45,15 @@ func (h *Handler) SendTestSMS(c *fiber.Ctx) error {
 		return response.BadRequest(c, "Invalid request body: "+err.Error())
 	}
 	if req.PhoneNumber == "" || req.Message == "" {
-		return response.ValidationError(c, map[string]string{
-			"sms": "phone_number and message are required",
-		})
+		return response.ValidationError(c, map[string]string{"sms": "phone_number and message are required"})
 	}
+
+	status, err := h.service.SendSMS(req.PhoneNumber, req.Message)
+	if err != nil {
+		return response.BadRequest(c, err.Error())
+	}
+
 	return response.Success(c, fiber.StatusOK, "SMS dispatched via Greenweb / SSLWireless API gateway", fiber.Map{
-		"recipient": req.PhoneNumber,
-		"status":    "DELIVERED",
+		"recipient": req.PhoneNumber, "status": status,
 	})
 }

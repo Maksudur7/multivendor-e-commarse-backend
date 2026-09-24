@@ -336,7 +336,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"token\": \"reset_token_123\", \"new_password\": \"NewPassword123!\"}"
+              "raw": "{\"email\": \"customer@example.com\", \"otp_code\": \"123456\", \"new_password\": \"NewPassword123!\"}"
             },
             "url": {
               "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/password/reset",

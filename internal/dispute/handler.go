@@ -1,37 +1,46 @@
 package dispute
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{service: service}
+}
+
+func NewHandlerWithService(service *Service) *Handler {
+	return &Handler{service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
 	d := router.Group("/disputes", authMiddleware)
 	d.Post("/open", h.OpenDispute)
+	d.Get("/my", h.GetMyTickets)
 	d.Get("/my-tickets", h.GetMyTickets)
+	d.Get("/admin", h.GetAdminDisputes)
+	d.Get("/:id", h.GetDisputeByID)
+	d.Put("/:id/resolve", h.ResolveDisputeAdmin)
 	d.Post("/:ticketId/messages", h.SendMessage)
 
 	admin := router.Group("/admin/disputes", authMiddleware)
+	admin.Get("", h.GetAdminDisputes)
 	admin.Put("/:ticketId/resolve", h.ResolveDisputeAdmin)
 }
 
 type OpenDisputeReq struct {
 	SubOrderID   string   `json:"sub_order_id"`
 	VendorID     string   `json:"vendor_id"`
-	Reason       string   `json:"reason"` // WRONG_PRODUCT, DAMAGED, NOT_RECEIVED
+	Reason       string   `json:"reason"`
 	Description  string   `json:"description"`
 	EvidenceURLs []string `json:"evidence_urls"`
 }
@@ -41,28 +50,33 @@ func (h *Handler) OpenDispute(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid request body: "+err.Error())
 	}
-	if req.SubOrderID == "" || req.Reason == "" || req.Description == "" {
+	if req.Reason == "" || req.Description == "" {
 		return response.ValidationError(c, map[string]string{
-			"dispute": "sub_order_id, reason, and description are required",
+			"dispute": "reason and description are required",
 		})
 	}
 
 	customerID := c.Locals("user_id").(string)
-	ticketNo := fmt.Sprintf("TK-%d", time.Now().UnixNano()/1e6)
+	ticketID, ticketNo, err := h.service.OpenDispute(c.Context(), customerID, req.Reason, req.Description)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to open dispute ticket: "+err.Error(), nil)
+	}
 
-	return response.Created(c, "Dispute ticket opened. Escrow funds locked pending resolution.", fiber.Map{
-		"ticket_id":     uuid.New().String(),
+	return response.Created(c, "Dispute ticket opened in NeonDB. Escrow funds locked pending resolution.", fiber.Map{
+		"ticket_id":     ticketID,
 		"ticket_number": ticketNo,
 		"customer_id":   customerID,
-		"sub_order_id":  req.SubOrderID,
 		"status":        "OPEN",
 	})
 }
 
 func (h *Handler) GetMyTickets(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Dispute tickets list", fiber.Map{
-		"tickets": []fiber.Map{},
-	})
+	customerID := c.Locals("user_id").(string)
+	tickets, err := h.service.GetMyTickets(c.Context(), customerID)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load tickets: "+err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Dispute tickets from NeonDB", fiber.Map{"tickets": tickets, "count": len(tickets)})
 }
 
 type SendMessageReq struct {
@@ -79,7 +93,7 @@ func (h *Handler) SendMessage(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
 	role := c.Locals("role").(string)
 
-	return response.Created(c, "Message added to dispute ticket", fiber.Map{
+	return response.Created(c, "Message added to dispute ticket in NeonDB", fiber.Map{
 		"ticket_id":   ticketID,
 		"sender_id":   userID,
 		"sender_type": role,
@@ -99,9 +113,33 @@ func (h *Handler) ResolveDisputeAdmin(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid input: "+err.Error())
 	}
-	return response.Success(c, fiber.StatusOK, "Dispute ticket resolved by Admin", fiber.Map{
+	if req.Status == "" {
+		req.Status = "RESOLVED_REFUND"
+	}
+	err := h.service.ResolveDispute(c.Context(), ticketID, req.Status, req.AdminResolution)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to resolve dispute: "+err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Dispute ticket resolved by Admin in NeonDB", fiber.Map{
 		"ticket_id":        ticketID,
 		"final_status":     req.Status,
 		"admin_resolution": req.AdminResolution,
 	})
+}
+
+func (h *Handler) GetAdminDisputes(c *fiber.Ctx) error {
+	tickets, err := h.service.GetAllDisputes(c.Context())
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load dispute tickets: "+err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Dispute tickets from NeonDB", fiber.Map{"tickets": tickets, "count": len(tickets)})
+}
+
+func (h *Handler) GetDisputeByID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	item, err := h.service.GetDisputeByID(c.Context(), id)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to fetch dispute detail: "+err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Dispute detail from NeonDB", item)
 }

@@ -1,7 +1,6 @@
 package order
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,15 +10,17 @@ import (
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
-	// Customer Orders - 10 Endpoints
+	// Customer Orders
 	cust := router.Group("/customer/orders", authMiddleware)
 	cust.Get("/", h.GetCustomerOrders)
 	cust.Get("/:id", h.GetCustomerOrderDetail)
@@ -32,7 +33,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	cust.Put("/:id/address", h.UpdateCustomerOrderAddress)
 	cust.Delete("/:id/draft", h.DeleteCustomerDraftOrder)
 
-	// Seller Orders - 9 Endpoints
+	// Seller Orders
 	seller := router.Group("/seller/orders", authMiddleware)
 	seller.Get("/", h.GetSellerOrders)
 	seller.Get("/:id", h.GetSellerOrderDetail)
@@ -44,7 +45,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	seller.Put("/:id/status", h.UpdateSellerOrderStatus)
 	seller.Put("/:id/tracking", h.UpdateSellerOrderTracking)
 
-	// Admin Orders - 13 Endpoints
+	// Admin Orders
 	admin := router.Group("/admin/orders", authMiddleware)
 	admin.Get("/", h.ListAdminOrders)
 	admin.Get("/:id", h.GetAdminOrderDetail)
@@ -61,25 +62,47 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	admin.Put("/:id/refund-override", h.RefundOverrideAdmin)
 }
 
-// Customer Handlers
 func (h *Handler) GetCustomerOrders(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Customer order history", fiber.Map{"orders": []fiber.Map{}})
+	userID := c.Locals("user_id").(string)
+	orders, err := h.service.GetCustomerOrders(c.Context(), userID)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to fetch orders: "+err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Customer orders retrieved", fiber.Map{"orders": orders, "count": len(orders)})
 }
 
 func (h *Handler) GetCustomerOrderDetail(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Order detail", fiber.Map{"order_id": c.Params("id")})
+	userID := c.Locals("user_id").(string)
+	orderID := c.Params("id")
+	detail, err := h.service.GetCustomerOrderDetail(c.Context(), orderID, userID)
+	if err != nil {
+		return response.Error(c, fiber.StatusNotFound, "Order not found", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Order detail retrieved", detail)
 }
 
 func (h *Handler) TrackCustomerOrder(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Live tracking status", fiber.Map{"order_id": c.Params("id"), "status": "IN_TRANSIT"})
+	orderID := c.Params("id")
+	return response.Success(c, fiber.StatusOK, "Live tracking status", fiber.Map{
+		"order_id": orderID, "status": "IN_TRANSIT", "carrier": "Steadfast Courier",
+		"tracking_code": "ST-" + orderID[:8], "estimated_delivery": time.Now().AddDate(0, 0, 2).Format("2006-01-02"),
+	})
 }
 
 func (h *Handler) GetCustomerInvoice(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Invoice URL generated", fiber.Map{"invoice_url": "https://cdn.com/inv.pdf"})
+	orderID := c.Params("id")
+	return response.Success(c, fiber.StatusOK, "Invoice URL generated", fiber.Map{
+		"order_id": orderID, "invoice_number": "INV-" + orderID[:8], "invoice_url": "https://api.ecom.com/invoices/" + orderID + ".pdf",
+	})
 }
 
 func (h *Handler) GetCustomerOrderItems(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Order items list", fiber.Map{"items": []fiber.Map{}})
+	orderID := c.Params("id")
+	items, err := h.service.GetOrderItems(c.Context(), orderID)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load order items", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Order items retrieved", fiber.Map{"items": items})
 }
 
 type CheckoutReq struct {
@@ -88,27 +111,24 @@ type CheckoutReq struct {
 }
 
 func (h *Handler) Checkout(c *fiber.Ctx) error {
-	orderID := uuid.New().String()
-	orderNo := fmt.Sprintf("ORD-%d", time.Now().UnixNano()/1e6)
-	ctx := c.Context()
+	userID := c.Locals("user_id").(string)
+	var req CheckoutReq
+	_ = c.BodyParser(&req)
 
-	if h.db != nil {
-		_ = h.db.QueryRow(ctx,
-			"INSERT INTO master_orders (master_order_number, total_amount, shipping_fee, grand_total, payment_status, payment_method, shipping_address) VALUES ($1, 1000, 60, 1060, 'UNPAID', 'BKASH', 'Dhaka') RETURNING id",
-			orderNo,
-		).Scan(&orderID)
+	result, err := h.service.ProcessCheckout(c.Context(), userID, req.ShippingAddress, req.PaymentMethod)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Checkout failed: "+err.Error(), nil)
 	}
-
-	return response.Created(c, "Master order & multi-vendor sub-orders created in NeonDB", fiber.Map{
-		"order_id":             orderID,
-		"master_order_number": orderNo,
-		"grand_total":          1060.0,
-		"payment_status":       "UNPAID",
-	})
+	return response.Created(c, "Checkout completed successfully", result)
 }
 
 func (h *Handler) CancelCustomerOrder(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Order cancelled", fiber.Map{"order_id": c.Params("id")})
+	userID := c.Locals("user_id").(string)
+	orderID := c.Params("id")
+	if err := h.service.CancelCustomerOrder(c.Context(), orderID, userID); err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Cancel failed", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Order cancelled successfully", fiber.Map{"order_id": orderID, "status": "CANCELLED"})
 }
 
 func (h *Handler) ReorderCustomerOrder(c *fiber.Ctx) error {
@@ -116,16 +136,22 @@ func (h *Handler) ReorderCustomerOrder(c *fiber.Ctx) error {
 }
 
 func (h *Handler) UpdateCustomerOrderAddress(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Delivery address updated", fiber.Map{"order_id": c.Params("id")})
+	orderID := c.Params("id")
+	return response.Success(c, fiber.StatusOK, "Delivery address updated", fiber.Map{"order_id": orderID})
 }
 
 func (h *Handler) DeleteCustomerDraftOrder(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Draft order deleted", fiber.Map{"order_id": c.Params("id")})
+	orderID := c.Params("id")
+	return response.Success(c, fiber.StatusOK, "Draft order deleted", fiber.Map{"order_id": orderID})
 }
 
 // Seller Handlers
 func (h *Handler) GetSellerOrders(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Seller sub-orders list", fiber.Map{"sub_orders": []fiber.Map{}})
+	orders, err := h.service.ListSellerOrders(c.Context())
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load seller orders", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Seller orders retrieved", fiber.Map{"sub_orders": orders})
 }
 
 func (h *Handler) GetSellerOrderDetail(c *fiber.Ctx) error {
@@ -162,7 +188,11 @@ func (h *Handler) UpdateSellerOrderTracking(c *fiber.Ctx) error {
 
 // Admin Handlers
 func (h *Handler) ListAdminOrders(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "All platform orders", fiber.Map{"orders": []fiber.Map{}})
+	orders, err := h.service.ListAdminOrders(c.Context())
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load admin orders", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "All platform orders retrieved", fiber.Map{"orders": orders, "count": len(orders)})
 }
 
 func (h *Handler) GetAdminOrderDetail(c *fiber.Ctx) error {
@@ -202,7 +232,18 @@ func (h *Handler) BatchAssignCourierAdmin(c *fiber.Ctx) error {
 }
 
 func (h *Handler) UpdateOrderStatusAdmin(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Order status updated by Admin", fiber.Map{"order_id": c.Params("id")})
+	orderID := c.Params("id")
+	var req struct {
+		Status string `json:"status"`
+	}
+	_ = c.BodyParser(&req)
+	if req.Status == "" {
+		req.Status = "PROCESSING"
+	}
+	if err := h.service.UpdateOrderStatusAdmin(c.Context(), orderID, req.Status); err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to update order status", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Order status updated by Admin", fiber.Map{"order_id": orderID, "new_status": req.Status})
 }
 
 func (h *Handler) HoldOrderAdmin(c *fiber.Ctx) error {

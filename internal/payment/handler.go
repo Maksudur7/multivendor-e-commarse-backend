@@ -1,37 +1,40 @@
 package payment
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{service: service}
+}
+
+func NewHandlerWithService(service *Service) *Handler {
+	return &Handler{service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
-	p := router.Group("/payments", authMiddleware)
-	p.Get("/methods", h.GetPaymentMethods)
-	p.Get("/status/:id", h.GetPaymentStatus)
-	p.Post("/initiate", h.InitiatePayment)
-	p.Post("/verify", h.VerifyPayment)
-	p.Post("/refunds", h.RequestRefund)
-	p.Post("/escrow/release", h.ReleaseEscrow)
-
-	// Webhooks / IPN endpoints (public - signature verified)
 	webhooks := router.Group("/payments/webhooks")
 	webhooks.Post("/bkash", h.BkashWebhook)
 	webhooks.Post("/sslcommerz", h.SSLCommerzWebhook)
 	webhooks.Post("/nagad", h.NagadWebhook)
+
+	p := router.Group("/payments")
+	p.Get("/methods", h.GetPaymentMethods)
+	p.Get("/status/:id", h.GetPaymentStatus)
+
+	protected := p.Group("", authMiddleware)
+	protected.Post("/initiate", h.InitiatePayment)
+	protected.Post("/verify", h.VerifyPayment)
+	protected.Post("/refunds", h.RequestRefund)
+	protected.Post("/escrow/release", h.ReleaseEscrow)
 }
 
 func (h *Handler) GetPaymentMethods(c *fiber.Ctx) error {
@@ -46,10 +49,12 @@ func (h *Handler) GetPaymentMethods(c *fiber.Ctx) error {
 }
 
 func (h *Handler) GetPaymentStatus(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Payment transaction status", fiber.Map{
-		"transaction_id": c.Params("id"),
-		"status":         "COMPLETED",
-	})
+	txID := c.Params("id")
+	item, err := h.service.GetPaymentStatus(c.Context(), txID)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to fetch payment status: "+err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Payment transaction status", item)
 }
 
 type InitiatePaymentReq struct {
@@ -63,42 +68,24 @@ func (h *Handler) InitiatePayment(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return response.BadRequest(c, "Invalid request body: "+err.Error())
 	}
-	if req.MasterOrderID == "" || req.Amount <= 0 {
-		return response.ValidationError(c, map[string]string{
-			"payment": "master_order_id and valid amount are required",
-		})
+
+	_, res, err := h.service.InitiatePayment(c.Context(), req.MasterOrderID, req.PaymentGateway, req.Amount)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to initiate payment: "+err.Error(), nil)
 	}
 
-	txRef := fmt.Sprintf("TXN-%d", time.Now().UnixNano()/1e6)
-
-	switch req.PaymentGateway {
-	case "BKASH":
-		return response.Success(c, fiber.StatusOK, "bKash payment URL created", fiber.Map{
-			"payment_gateway":       "BKASH",
-			"transaction_reference": txRef,
-			"bkash_payment_url":     fmt.Sprintf("https://checkout.sandbox.bka.sh/v1.2.0-beta/pay/checkout?paymentID=BK-%s", uuid.New().String()[:8]),
-		})
-	case "SSLCOMMERZ":
-		return response.Success(c, fiber.StatusOK, "SSLCommerz gateway session initialized", fiber.Map{
-			"payment_gateway":       "SSLCOMMERZ",
-			"transaction_reference": txRef,
-			"ssl_redirect_url":      fmt.Sprintf("https://sandbox.sslcommerz.com/gwprocess/v4/gw.php?Q=PAY&sessionkey=%s", uuid.New().String()),
-		})
-	case "NAGAD":
-		return response.Success(c, fiber.StatusOK, "Nagad payment session generated", fiber.Map{
-			"payment_gateway":       "NAGAD",
-			"transaction_reference": txRef,
-			"nagad_redirect_url":    fmt.Sprintf("https://api.mynagad.com/pay/%s", txRef),
-		})
-	case "COD":
-		return response.Success(c, fiber.StatusOK, "Cash on Delivery selected - escrow & order locked until delivery confirmation", fiber.Map{
-			"payment_gateway":       "COD",
-			"transaction_reference": txRef,
-			"payment_status":        "PENDING_COD_COLLECTION",
-		})
-	default:
-		return response.BadRequest(c, "Unsupported payment gateway: "+req.PaymentGateway)
+	msg := "Payment initiated successfully"
+	if req.PaymentGateway == "BKASH" {
+		msg = "bKash payment URL created"
+	} else if req.PaymentGateway == "SSLCOMMERZ" {
+		msg = "SSLCommerz gateway session initialized"
+	} else if req.PaymentGateway == "NAGAD" {
+		msg = "Nagad payment session generated"
+	} else {
+		msg = "Cash on Delivery selected"
 	}
+
+	return response.Success(c, fiber.StatusOK, msg, res)
 }
 
 func (h *Handler) VerifyPayment(c *fiber.Ctx) error {
@@ -106,24 +93,15 @@ func (h *Handler) VerifyPayment(c *fiber.Ctx) error {
 }
 
 func (h *Handler) BkashWebhook(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status": "COMPLETED",
-		"msg":    "bKash callback received",
-	})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "COMPLETED", "msg": "bKash callback received"})
 }
 
 func (h *Handler) SSLCommerzWebhook(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status": "VALIDATED",
-		"msg":    "SSLCommerz IPN verified",
-	})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "VALIDATED", "msg": "SSLCommerz IPN verified"})
 }
 
 func (h *Handler) NagadWebhook(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status": "SUCCESS",
-		"msg":    "Nagad callback received",
-	})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "SUCCESS", "msg": "Nagad callback received"})
 }
 
 type RequestRefundReq struct {
@@ -138,12 +116,14 @@ func (h *Handler) RequestRefund(c *fiber.Ctx) error {
 		return response.BadRequest(c, "Invalid input: "+err.Error())
 	}
 	customerID := c.Locals("user_id").(string)
-	return response.Created(c, "Refund request submitted. Escrow payout held until dispute resolution.", fiber.Map{
-		"refund_id":    uuid.New().String(),
-		"customer_id":  customerID,
-		"sub_order_id": req.SubOrderID,
-		"amount":       req.Amount,
-		"status":       "PROCESSING",
+
+	err := h.service.RequestRefund(c.Context(), customerID, req.Amount, req.Reason)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to request refund: "+err.Error(), nil)
+	}
+
+	return response.Created(c, "Refund request submitted in NeonDB", fiber.Map{
+		"customer_id": customerID, "amount": req.Amount, "status": "PROCESSING",
 	})
 }
 

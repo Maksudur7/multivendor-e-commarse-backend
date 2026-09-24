@@ -1,24 +1,23 @@
 package catalog
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
 type Handler struct {
-	db *pgxpool.Pool
+	repo    *Repository
+	service *Service
 }
 
 func NewHandler(db *pgxpool.Pool) *Handler {
-	return &Handler{db: db}
+	repo := NewRepository(db)
+	service := NewService(repo)
+	return &Handler{repo: repo, service: service}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handler) {
-	// Catalog (Public) - 8 Endpoints
 	pub := router.Group("/catalog")
 	pub.Get("/products", h.ListPublicProducts)
 	pub.Get("/products/:slug", h.GetPublicProductDetail)
@@ -29,7 +28,6 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	pub.Get("/products/:id/variants", h.GetProductVariants)
 	pub.Get("/products/:id/reviews", h.GetProductReviews)
 
-	// Catalog (Seller) - 10 Endpoints
 	seller := router.Group("/seller/catalog", authMiddleware)
 	seller.Get("/products", h.ListSellerProducts)
 	seller.Get("/products/:id", h.GetSellerProductDetail)
@@ -42,7 +40,6 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	seller.Put("/products/:id/status", h.UpdateSellerProductStatus)
 	seller.Delete("/products/:id", h.DeleteSellerProduct)
 
-	// Catalog (Admin) - 13 Endpoints
 	admin := router.Group("/admin/catalog", authMiddleware)
 	admin.Get("/products", h.ListAdminProducts)
 	admin.Get("/products/pending", h.ListPendingProductsAdmin)
@@ -59,30 +56,29 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	admin.Delete("/products/:id", h.DeleteProductAdmin)
 }
 
-// Public Catalog Handlers
 func (h *Handler) ListPublicProducts(c *fiber.Ctx) error {
-	ctx := c.Context()
-	products := []fiber.Map{}
-	if h.db != nil {
-		rows, err := h.db.Query(ctx, "SELECT id, title, slug FROM products LIMIT 20")
-		if err == nil {
-			defer rows.Close()
-			for rows.Next() {
-				var id, title, slug string
-				rows.Scan(&id, &title, &slug)
-				products = append(products, fiber.Map{"id": id, "title": title, "slug": slug})
-			}
-		}
+	products, err := h.service.ListPublicProducts(c.Context())
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load products", nil)
 	}
-	return response.Success(c, fiber.StatusOK, "Public products loaded from NeonDB", fiber.Map{"products": products})
+	return response.Success(c, fiber.StatusOK, "Public products loaded", fiber.Map{"products": products, "count": len(products)})
 }
 
 func (h *Handler) GetPublicProductDetail(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Product detail retrieved", fiber.Map{"slug": c.Params("slug")})
+	slug := c.Params("slug")
+	product, err := h.service.GetPublicProductDetail(c.Context(), slug)
+	if err != nil {
+		return response.Error(c, fiber.StatusNotFound, "Product not found", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Product detail loaded", product)
 }
 
 func (h *Handler) ListPublicCategories(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Categories tree", fiber.Map{"categories": []fiber.Map{}})
+	cats, err := h.service.ListPublicCategories(c.Context())
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to load categories", nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Categories loaded", fiber.Map{"categories": cats})
 }
 
 func (h *Handler) GetCategoryBySlug(c *fiber.Ctx) error {
@@ -132,21 +128,20 @@ type CreateProductReq struct {
 func (h *Handler) CreateSellerProduct(c *fiber.Ctx) error {
 	var req CreateProductReq
 	_ = c.BodyParser(&req)
-	ctx := c.Context()
-	prodID := uuid.New().String()
-
-	if h.db != nil && req.Title != "" && req.Slug != "" {
-		_ = h.db.QueryRow(ctx,
-			"INSERT INTO products (title, slug) VALUES ($1, $2) RETURNING id",
-			req.Title, req.Slug,
-		).Scan(&prodID)
+	if req.Title == "" {
+		return response.ValidationError(c, map[string]string{"title": "is required"})
 	}
 
-	return response.Created(c, "Product created in NeonDB", fiber.Map{"product_id": prodID, "title": req.Title})
+	prodID, slug, err := h.service.CreateSellerProduct(c.Context(), req.Title, req.Slug, req.RetailPrice)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to create product: "+err.Error(), nil)
+	}
+
+	return response.Created(c, "Product created successfully", fiber.Map{"product_id": prodID, "title": req.Title, "slug": slug})
 }
 
 func (h *Handler) CreateSellerVariant(c *fiber.Ctx) error {
-	return response.Created(c, "Product variant created", fiber.Map{"variant_id": uuid.New().String()})
+	return response.Created(c, "Product variant created", fiber.Map{"status": "CREATED"})
 }
 
 func (h *Handler) UpdateSellerProduct(c *fiber.Ctx) error {
@@ -191,37 +186,39 @@ func (h *Handler) GetAdminCategoryDetail(c *fiber.Ctx) error {
 }
 
 func (h *Handler) CreateCategoryAdmin(c *fiber.Ctx) error {
-	catID := uuid.New().String()
-	ctx := c.Context()
-	name := fmt.Sprintf("Category-%s", catID[:6])
-	slug := fmt.Sprintf("cat-%s", catID[:6])
-
-	if h.db != nil {
-		_ = h.db.QueryRow(ctx, "INSERT INTO categories (name, slug) VALUES ($1, $2) RETURNING id", name, slug).Scan(&catID)
+	var req struct {
+		Name string `json:"name"`
+		Slug string `json:"slug"`
 	}
-	return response.Created(c, "Category created in NeonDB", fiber.Map{"category_id": catID, "name": name})
+	_ = c.BodyParser(&req)
+
+	catID, slug, err := h.service.CreateCategoryAdmin(c.Context(), req.Name, req.Slug)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to create category: "+err.Error(), nil)
+	}
+	return response.Created(c, "Category created successfully", fiber.Map{"category_id": catID, "name": req.Name, "slug": slug})
 }
 
 func (h *Handler) CreateBrandAdmin(c *fiber.Ctx) error {
-	return response.Created(c, "Brand created", fiber.Map{"brand_id": uuid.New().String()})
+	return response.Created(c, "Brand created", fiber.Map{"status": "CREATED"})
 }
 
 func (h *Handler) CreateAttributeAdmin(c *fiber.Ctx) error {
-	return response.Created(c, "Attribute set created", fiber.Map{"attribute_id": uuid.New().String()})
+	return response.Created(c, "Attribute created", fiber.Map{"status": "CREATED"})
 }
 
 func (h *Handler) CreateAttributeOptionAdmin(c *fiber.Ctx) error {
-	return response.Created(c, "Attribute option added", fiber.Map{"option_id": uuid.New().String()})
+	return response.Created(c, "Attribute option created", fiber.Map{"status": "CREATED"})
 }
 
 func (h *Handler) ApproveProductAdmin(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Product approved by Admin", fiber.Map{"product_id": c.Params("id")})
+	return response.Success(c, fiber.StatusOK, "Product approval status updated", fiber.Map{"id": c.Params("id")})
 }
 
 func (h *Handler) UpdateCategoryAdmin(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Category updated", fiber.Map{"category_id": c.Params("id")})
+	return response.Success(c, fiber.StatusOK, "Category updated", fiber.Map{"id": c.Params("id")})
 }
 
 func (h *Handler) DeleteProductAdmin(c *fiber.Ctx) error {
-	return response.Success(c, fiber.StatusOK, "Product deleted by Admin", fiber.Map{"product_id": c.Params("id")})
+	return response.Success(c, fiber.StatusOK, "Product deleted by admin", fiber.Map{"id": c.Params("id")})
 }
