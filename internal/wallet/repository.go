@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -81,7 +82,7 @@ func (r *Repository) GetLedgerHistory(ctx context.Context, userID string) ([]Tra
 
 func (r *Repository) RequestWithdrawal(ctx context.Context, userID string, amount float64, method, details string) (string, error) {
 	if r.db == nil {
-		return "mock-w-id", nil
+		return "", errors.New("database connection unavailable")
 	}
 	var reqID string
 	err := r.db.QueryRow(ctx, `

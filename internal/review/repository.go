@@ -2,6 +2,7 @@ package review
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -86,7 +87,7 @@ func (r *Repository) GetMyReviews(ctx context.Context, userID string) ([]UserRev
 
 func (r *Repository) CreateReview(ctx context.Context, productID, userID string, rating int, title, comment string) (string, error) {
 	if r.db == nil {
-		return "mock-review-id", nil
+		return "", errors.New("database connection unavailable")
 	}
 	var reviewID string
 	err := r.db.QueryRow(ctx, `

@@ -2,6 +2,7 @@ package affiliate
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
