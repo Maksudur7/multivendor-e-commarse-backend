@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -275,11 +277,11 @@ func Load() (*Config, error) {
 			SenderID: viper.GetString("SMS_SENDER_ID"),
 		},
 		Email: EmailConfig{
-			SMTPHost: viper.GetString("EMAIL_SMTP_HOST"),
-			SMTPPort: viper.GetInt("EMAIL_SMTP_PORT"),
-			Username: viper.GetString("EMAIL_USERNAME"),
-			Password: viper.GetString("EMAIL_PASSWORD"),
-			From:     viper.GetString("EMAIL_FROM"),
+			SMTPHost: getEnvString("EMAIL_SMTP_HOST", "smtp.gmail.com"),
+			SMTPPort: getEnvInt("EMAIL_SMTP_PORT", 465),
+			Username: getEnvString("EMAIL_USERNAME", "maksudurr538@gmail.com"),
+			Password: getEnvString("EMAIL_PASSWORD", "uehb zuuw bria cmll"),
+			From:     getEnvString("EMAIL_FROM", "maksudurr538@gmail.com"),
 		},
 		Google: GoogleOAuthConfig{
 			ClientID:     viper.GetString("GOOGLE_CLIENT_ID"),
@@ -301,4 +303,28 @@ func Load() (*Config, error) {
 // LoadConfig alias for Load to accept optional path string
 func LoadConfig(path ...string) (*Config, error) {
 	return Load()
+}
+
+func getEnvString(key, fallback string) string {
+	val := viper.GetString(key)
+	if val == "" {
+		val = os.Getenv(key)
+	}
+	if val == "" {
+		val = fallback
+	}
+	return val
+}
+
+func getEnvInt(key string, fallback int) int {
+	val := viper.GetInt(key)
+	if val == 0 {
+		if envVal := os.Getenv(key); envVal != "" {
+			if parsed, err := strconv.Atoi(envVal); err == nil {
+				return parsed
+			}
+		}
+		val = fallback
+	}
+	return val
 }
