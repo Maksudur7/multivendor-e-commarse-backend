@@ -2,105 +2,153 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Repository handles all DB operations for the auth domain.
 type Repository struct {
 	db *pgxpool.Pool
 }
 
+// NewRepository constructs a Repository.
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) InsertOTP(ctx context.Context, target, otpCode, purpose string, expiresAt time.Time) error {
+// ── OTP operations ───────────────────────────────────────────────────────────
+
+// InsertOTP inserts a new OTP row.
+// IMPORTANT: otpHash must already be SHA-256 hashed by the caller (service layer).
+func (r *Repository) InsertOTP(ctx context.Context, target, otpHash, purpose string, expiresAt time.Time) error {
 	if r.db == nil {
-		return nil
+		return fmt.Errorf("database not connected")
 	}
 	_, err := r.db.Exec(ctx,
-		"INSERT INTO otp_requests (phone, otp_hash, purpose, expires_at) VALUES ($1, $2, $3, $4)",
-		target, otpCode, purpose, expiresAt,
+		`INSERT INTO otp_requests (phone, otp_hash, purpose, expires_at)
+		 VALUES ($1, $2, $3, $4)`,
+		target, otpHash, purpose, expiresAt,
 	)
 	return err
 }
 
-func (r *Repository) GetLatestOTP(ctx context.Context, target, purpose string) (string, time.Time, error) {
-	var storedOTP string
-	var expiresAt time.Time
+// GetLatestOTP retrieves the hash and expiry of the most recent unused, non-expired OTP.
+// Returns the stored hash for comparison in the service layer.
+func (r *Repository) GetLatestOTP(ctx context.Context, target, purpose string) (otpHash string, expiresAt time.Time, err error) {
 	if r.db == nil {
-		return "", time.Now(), nil
+		return "", time.Time{}, fmt.Errorf("database not connected")
 	}
-	err := r.db.QueryRow(ctx,
-		`SELECT otp_hash, expires_at FROM otp_requests
-		 WHERE phone = $1 AND purpose = $2
-		 ORDER BY created_at DESC LIMIT 1`,
+	err = r.db.QueryRow(ctx,
+		`SELECT otp_hash, expires_at
+		 FROM otp_requests
+		 WHERE phone = $1
+		   AND purpose = $2
+		   AND used = FALSE
+		   AND expires_at > now()
+		 ORDER BY created_at DESC
+		 LIMIT 1`,
 		target, purpose,
-	).Scan(&storedOTP, &expiresAt)
-	return storedOTP, expiresAt, err
+	).Scan(&otpHash, &expiresAt)
+	return
 }
 
+// IncrementOTPAttempt increments the attempt_count on the latest active OTP row.
+// Used to support future brute-force lockout policies.
+func (r *Repository) IncrementOTPAttempt(ctx context.Context, target, purpose string) error {
+	if r.db == nil {
+		return nil
+	}
+	_, err := r.db.Exec(ctx,
+		`UPDATE otp_requests
+		 SET attempt_count = attempt_count + 1
+		 WHERE id = (
+		     SELECT id FROM otp_requests
+		     WHERE phone = $1 AND purpose = $2 AND used = FALSE
+		     ORDER BY created_at DESC LIMIT 1
+		 )`,
+		target, purpose,
+	)
+	return err
+}
+
+// DeleteOTP marks the OTP as used (soft-delete), preventing replay attacks.
 func (r *Repository) DeleteOTP(ctx context.Context, target, purpose string) error {
 	if r.db == nil {
 		return nil
 	}
-	_, err := r.db.Exec(ctx, "DELETE FROM otp_requests WHERE phone = $1 AND purpose = $2", target, purpose)
-	return err
-}
-
-func (r *Repository) FindOrCreateUserByPhone(ctx context.Context, phone string) (string, error) {
-	if r.db == nil {
-		return "", nil
-	}
-	var existingID string
-	err := r.db.QueryRow(ctx, "SELECT id::text FROM users WHERE phone = $1", phone).Scan(&existingID)
-	if err == nil {
-		return existingID, nil
-	}
-
-	var newID string
-	err = r.db.QueryRow(ctx,
-		"INSERT INTO users (phone, full_name, role, status) VALUES ($1, $2, 'CUSTOMER', 'ACTIVE') RETURNING id::text",
-		phone, "User-"+phone[len(phone)-4:],
-	).Scan(&newID)
-	return newID, err
-}
-
-func (r *Repository) CheckDuplicateAccount(ctx context.Context, email, phone string) bool {
-	if r.db == nil {
-		return false
-	}
-	var existCheck string
-	err := r.db.QueryRow(ctx, "SELECT id::text FROM users WHERE email = $1 OR (phone IS NOT NULL AND phone = $2 AND $2 != '')", email, phone).Scan(&existCheck)
-	return err == nil
-}
-
-func (r *Repository) CreateEmailUser(ctx context.Context, email string, phoneVal *string, passHash, fullName, role string) (string, error) {
-	if r.db == nil {
-		return "", nil
-	}
-	var userID string
-	err := r.db.QueryRow(ctx,
-		`INSERT INTO users (email, phone, password_hash, full_name, role, status, email_verified, phone_verified)
-		 VALUES ($1, $2, $3, $4, $5, 'ACTIVE', true, true)
-		 RETURNING id::text`,
-		email, phoneVal, passHash, fullName, role,
-	).Scan(&userID)
-	return userID, err
-}
-
-func (r *Repository) SaveSession(ctx context.Context, userID, refreshToken string, expiresAt time.Time) error {
-	if r.db == nil {
-		return nil
-	}
 	_, err := r.db.Exec(ctx,
-		"INSERT INTO sessions (user_id, refresh_token_hash, expires_at, is_revoked) VALUES ($1, $2, $3, false)",
-		userID, refreshToken, expiresAt,
+		`UPDATE otp_requests
+		 SET used = TRUE
+		 WHERE phone = $1 AND purpose = $2 AND used = FALSE`,
+		target, purpose,
 	)
 	return err
 }
 
+// ── User operations ──────────────────────────────────────────────────────────
+
+// FindOrCreateUserByPhone finds an existing user by phone or creates a new CUSTOMER.
+func (r *Repository) FindOrCreateUserByPhone(ctx context.Context, phone string) (string, error) {
+	if r.db == nil {
+		return "", fmt.Errorf("database not connected")
+	}
+
+	// Try existing user first.
+	var existingID string
+	err := r.db.QueryRow(ctx,
+		`SELECT id::text FROM users WHERE phone = $1`,
+		phone,
+	).Scan(&existingID)
+	if err == nil {
+		return existingID, nil
+	}
+
+	// Create new user.
+	var newID string
+	err = r.db.QueryRow(ctx,
+		`INSERT INTO users (phone, full_name, role, status, phone_verified)
+		 VALUES ($1, $2, 'CUSTOMER', 'ACTIVE', TRUE)
+		 RETURNING id::text`,
+		phone, "User-"+phone[max(0, len(phone)-4):],
+	).Scan(&newID)
+	return newID, err
+}
+
+// CheckDuplicateAccount returns true if a user with email or phone already exists.
+func (r *Repository) CheckDuplicateAccount(ctx context.Context, email, phone string) bool {
+	if r.db == nil {
+		return false
+	}
+	var id string
+	err := r.db.QueryRow(ctx,
+		`SELECT id::text FROM users
+		 WHERE email = $1
+		    OR (phone IS NOT NULL AND phone = $2 AND $2 != '')`,
+		email, phone,
+	).Scan(&id)
+	return err == nil
+}
+
+// CreateEmailUser inserts a new user with email/password credentials.
+// email_verified is FALSE — the user must verify their email separately.
+func (r *Repository) CreateEmailUser(ctx context.Context, email string, phone *string, passHash, fullName, role string) (string, error) {
+	if r.db == nil {
+		return "", fmt.Errorf("database not connected")
+	}
+	var userID string
+	err := r.db.QueryRow(ctx,
+		`INSERT INTO users
+		     (email, phone, password_hash, full_name, role, status, email_verified, phone_verified)
+		 VALUES ($1, $2, $3, $4, $5, 'ACTIVE', FALSE, FALSE)
+		 RETURNING id::text`,
+		email, phone, passHash, fullName, role,
+	).Scan(&userID)
+	return userID, err
+}
+
+// UserLoginRecord contains the fields needed to authenticate a login request.
 type UserLoginRecord struct {
 	ID           string
 	PasswordHash string
@@ -109,21 +157,26 @@ type UserLoginRecord struct {
 	Phone        string
 }
 
+// GetUserByEmail retrieves the login record for a given email.
 func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*UserLoginRecord, error) {
 	if r.db == nil {
-		return nil, nil
+		return nil, fmt.Errorf("database not connected")
 	}
 	var id, storedHash, role, status string
 	var phone *string
 	err := r.db.QueryRow(ctx,
-		"SELECT id::text, password_hash, role, status, phone FROM users WHERE email = $1",
+		`SELECT id::text, password_hash, role, status, phone
+		 FROM users
+		 WHERE email = $1`,
 		email,
 	).Scan(&id, &storedHash, &role, &status, &phone)
 	if err != nil {
 		return nil, err
 	}
 	phoneStr := ""
-	if phone != nil { phoneStr = *phone }
+	if phone != nil {
+		phoneStr = *phone
+	}
 	return &UserLoginRecord{
 		ID:           id,
 		PasswordHash: storedHash,
@@ -133,48 +186,99 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*UserLog
 	}, nil
 }
 
-func (r *Repository) GetSessionByToken(ctx context.Context, refreshToken string) (string, bool, error) {
-	if r.db == nil {
-		return "", false, nil
-	}
-	var userID string
-	var isRevoked bool
-	err := r.db.QueryRow(ctx,
-		"SELECT user_id::text, is_revoked FROM sessions WHERE refresh_token_hash = $1",
-		refreshToken,
-	).Scan(&userID, &isRevoked)
-	return userID, isRevoked, err
-}
+// ── Session operations ───────────────────────────────────────────────────────
 
-func (r *Repository) RevokeSessionByToken(ctx context.Context, refreshToken string) error {
+// SaveSession persists a new session with the hashed refresh token.
+// IMPORTANT: refreshTokenHash must already be SHA-256 hashed by the caller.
+func (r *Repository) SaveSession(ctx context.Context, userID, refreshTokenHash string, expiresAt time.Time) error {
 	if r.db == nil {
-		return nil
+		return fmt.Errorf("database not connected")
 	}
-	_, err := r.db.Exec(ctx, "UPDATE sessions SET is_revoked = true WHERE refresh_token_hash = $1", refreshToken)
+	_, err := r.db.Exec(ctx,
+		`INSERT INTO sessions (user_id, refresh_token_hash, expires_at, is_revoked)
+		 VALUES ($1, $2, $3, FALSE)`,
+		userID, refreshTokenHash, expiresAt,
+	)
 	return err
 }
 
+// GetSessionByToken looks up an active session by its hashed refresh token.
+// Also returns the user's role via a JOIN — needed for token rotation.
+func (r *Repository) GetSessionByToken(ctx context.Context, hashedRefreshToken string) (userID, role string, isRevoked bool, err error) {
+	if r.db == nil {
+		return "", "", false, fmt.Errorf("database not connected")
+	}
+	err = r.db.QueryRow(ctx,
+		`SELECT s.user_id::text, u.role, s.is_revoked
+		 FROM sessions s
+		 JOIN users u ON u.id = s.user_id
+		 WHERE s.refresh_token_hash = $1
+		   AND s.expires_at > now()`,
+		hashedRefreshToken,
+	).Scan(&userID, &role, &isRevoked)
+	return
+}
+
+// RevokeSessionByToken marks a single session revoked (used during token rotation).
+func (r *Repository) RevokeSessionByToken(ctx context.Context, hashedRefreshToken string) error {
+	if r.db == nil {
+		return nil
+	}
+	_, err := r.db.Exec(ctx,
+		`UPDATE sessions SET is_revoked = TRUE
+		 WHERE refresh_token_hash = $1`,
+		hashedRefreshToken,
+	)
+	return err
+}
+
+// RevokeAllUserSessions revokes every active session for the user (used on logout / password change).
 func (r *Repository) RevokeAllUserSessions(ctx context.Context, userID string) error {
 	if r.db == nil {
 		return nil
 	}
-	_, err := r.db.Exec(ctx, "UPDATE sessions SET is_revoked = true WHERE user_id::text = $1 AND is_revoked = false", userID)
+	_, err := r.db.Exec(ctx,
+		`UPDATE sessions SET is_revoked = TRUE
+		 WHERE user_id::text = $1 AND is_revoked = FALSE`,
+		userID,
+	)
 	return err
 }
 
+// UpdatePasswordAndRevoke atomically updates the password hash and revokes all sessions.
 func (r *Repository) UpdatePasswordAndRevoke(ctx context.Context, userID, passHash, email string) error {
 	if r.db == nil {
-		return nil
+		return fmt.Errorf("database not connected")
 	}
-	_, err := r.db.Exec(ctx, "UPDATE users SET password_hash = $1, updated_at = now() WHERE id::text = $2", passHash, userID)
+
+	// Update password.
+	_, err := r.db.Exec(ctx,
+		`UPDATE users SET password_hash = $1, updated_at = now() WHERE id::text = $2`,
+		passHash, userID,
+	)
 	if err != nil {
 		return err
 	}
-	_, _ = r.db.Exec(ctx, "UPDATE sessions SET is_revoked = true WHERE user_id::text = $1 AND is_revoked = false", userID)
-	_, _ = r.db.Exec(ctx, "DELETE FROM otp_requests WHERE phone = $1 AND purpose = 'PASSWORD_RESET'", email)
+
+	// Revoke all sessions so stolen tokens cannot be reused after reset.
+	_, _ = r.db.Exec(ctx,
+		`UPDATE sessions SET is_revoked = TRUE
+		 WHERE user_id::text = $1 AND is_revoked = FALSE`,
+		userID,
+	)
+
+	// Consume the password-reset OTP so it cannot be reused.
+	_, _ = r.db.Exec(ctx,
+		`UPDATE otp_requests SET used = TRUE
+		 WHERE phone = $1 AND purpose = 'PASSWORD_RESET' AND used = FALSE`,
+		email,
+	)
 	return nil
 }
 
+// ── GetUser / Sessions for profile & session management ─────────────────────
+
+// DBUser is the full user profile returned by GetUserByID.
 type DBUser struct {
 	ID                string
 	Email             string
@@ -188,9 +292,10 @@ type DBUser struct {
 	CreatedAt         time.Time
 }
 
+// GetUserByID fetches the full user profile by UUID string.
 func (r *Repository) GetUserByID(ctx context.Context, userID string) (*DBUser, error) {
 	if r.db == nil {
-		return nil, nil
+		return nil, fmt.Errorf("database not connected")
 	}
 	var id, fullName, role, status string
 	var email, phone, profilePic *string
@@ -200,16 +305,25 @@ func (r *Repository) GetUserByID(ctx context.Context, userID string) (*DBUser, e
 	err := r.db.QueryRow(ctx,
 		`SELECT id::text, email, phone, full_name, role, status,
 		        email_verified, phone_verified, profile_picture_url, created_at
-		 FROM users WHERE id::text = $1`,
+		 FROM users
+		 WHERE id::text = $1`,
 		userID,
-	).Scan(&id, &email, &phone, &fullName, &role, &status, &emailVerified, &phoneVerified, &profilePic, &createdAt)
+	).Scan(&id, &email, &phone, &fullName, &role, &status,
+		&emailVerified, &phoneVerified, &profilePic, &createdAt)
 	if err != nil {
 		return nil, err
 	}
+
 	emailStr, phoneStr, picStr := "", "", ""
-	if email != nil { emailStr = *email }
-	if phone != nil { phoneStr = *phone }
-	if profilePic != nil { picStr = *profilePic }
+	if email != nil {
+		emailStr = *email
+	}
+	if phone != nil {
+		phoneStr = *phone
+	}
+	if profilePic != nil {
+		picStr = *profilePic
+	}
 
 	return &DBUser{
 		ID:                id,
@@ -225,6 +339,7 @@ func (r *Repository) GetUserByID(ctx context.Context, userID string) (*DBUser, e
 	}, nil
 }
 
+// DBSession is the session info returned by GetActiveSessions.
 type DBSession struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -232,16 +347,22 @@ type DBSession struct {
 	Status    string    `json:"status"`
 }
 
+// GetActiveSessions returns all non-revoked, non-expired sessions for a user.
 func (r *Repository) GetActiveSessions(ctx context.Context, userID string) ([]DBSession, error) {
 	if r.db == nil {
 		return []DBSession{}, nil
 	}
 	rows, err := r.db.Query(ctx,
-		"SELECT id::text, created_at, expires_at FROM sessions WHERE user_id::text = $1 AND is_revoked = false AND expires_at > now() ORDER BY created_at DESC",
+		`SELECT id::text, created_at, expires_at
+		 FROM sessions
+		 WHERE user_id::text = $1
+		   AND is_revoked = FALSE
+		   AND expires_at > now()
+		 ORDER BY created_at DESC`,
 		userID,
 	)
 	if err != nil {
-		return []DBSession{}, nil
+		return []DBSession{}, err
 	}
 	defer rows.Close()
 
@@ -253,14 +374,162 @@ func (r *Repository) GetActiveSessions(ctx context.Context, userID string) ([]DB
 			sessions = append(sessions, s)
 		}
 	}
-	if sessions == nil { sessions = []DBSession{} }
-	return sessions, nil
+	if sessions == nil {
+		sessions = []DBSession{}
+	}
+	return sessions, rows.Err()
 }
 
+// RevokeSessionByID revokes a specific session owned by the given user.
 func (r *Repository) RevokeSessionByID(ctx context.Context, sessionID, userID string) error {
 	if r.db == nil {
-		return nil
+		return fmt.Errorf("database not connected")
 	}
-	_, err := r.db.Exec(ctx, "UPDATE sessions SET is_revoked = true WHERE id::text = $1 AND user_id::text = $2", sessionID, userID)
+	_, err := r.db.Exec(ctx,
+		`UPDATE sessions SET is_revoked = TRUE
+		 WHERE id::text = $1 AND user_id::text = $2`,
+		sessionID, userID,
+	)
 	return err
+}
+
+// GetOTPAttemptCount returns the current attempt_count for the latest active OTP.
+func (r *Repository) GetOTPAttemptCount(ctx context.Context, target, purpose string) (int, error) {
+	if r.db == nil {
+		return 0, fmt.Errorf("database not connected")
+	}
+	var count int
+	err := r.db.QueryRow(ctx,
+		`SELECT attempt_count
+		 FROM otp_requests
+		 WHERE phone = $1 AND purpose = $2 AND used = FALSE
+		 ORDER BY created_at DESC LIMIT 1`,
+		target, purpose,
+	).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// FindOrCreateGoogleUser finds a user by Google ID or email, or creates a new one.
+// Returns (userID, isNew, error).
+func (r *Repository) FindOrCreateGoogleUser(ctx context.Context, googleID, email, name, picture string) (string, bool, error) {
+	if r.db == nil {
+		return "", false, fmt.Errorf("database not connected")
+	}
+
+	// Try by Google ID first.
+	var existingID string
+	err := r.db.QueryRow(ctx,
+		`SELECT id::text FROM users WHERE google_id = $1`,
+		googleID,
+	).Scan(&existingID)
+	if err == nil {
+		// Update last login info.
+		_, _ = r.db.Exec(ctx,
+			`UPDATE users SET last_login_at = now(), updated_at = now() WHERE id::text = $1`,
+			existingID,
+		)
+		return existingID, false, nil
+	}
+
+	// Try by email (link existing account with Google).
+	err = r.db.QueryRow(ctx,
+		`SELECT id::text FROM users WHERE email = $1`,
+		email,
+	).Scan(&existingID)
+	if err == nil {
+		// Link Google ID to existing account.
+		_, _ = r.db.Exec(ctx,
+			`UPDATE users
+			 SET google_id = $1, email_verified = TRUE,
+			     last_login_at = now(), updated_at = now()
+			 WHERE id::text = $2`,
+			googleID, existingID,
+		)
+		return existingID, false, nil
+	}
+
+	// Create new user.
+	var newID string
+	err = r.db.QueryRow(ctx,
+		`INSERT INTO users
+		     (email, google_id, full_name, profile_picture_url,
+		      role, status, email_verified, phone_verified, last_login_at)
+		 VALUES ($1, $2, $3, $4, 'CUSTOMER', 'ACTIVE', TRUE, FALSE, now())
+		 RETURNING id::text`,
+		email, googleID, name, picture,
+	).Scan(&newID)
+	if err != nil {
+		return "", false, fmt.Errorf("failed to create Google user: %w", err)
+	}
+	return newID, true, nil
+}
+
+// SaveEmailVerificationToken stores a hashed email verification token.
+func (r *Repository) SaveEmailVerificationToken(ctx context.Context, userID, hashedToken string, expiresAt time.Time) error {
+	if r.db == nil {
+		return fmt.Errorf("database not connected")
+	}
+	// Upsert into otp_requests table using purpose='EMAIL_VERIFY'.
+	_, err := r.db.Exec(ctx,
+		`INSERT INTO otp_requests (phone, otp_hash, purpose, expires_at)
+		 VALUES ($1, $2, 'EMAIL_VERIFY', $3)`,
+		userID, hashedToken, expiresAt,
+	)
+	return err
+}
+
+// VerifyEmail marks the user's email as verified after checking the hashed token.
+func (r *Repository) VerifyEmail(ctx context.Context, userID, hashedToken string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not connected")
+	}
+
+	// Validate token.
+	var storedHash string
+	var expiresAt time.Time
+	err := r.db.QueryRow(ctx,
+		`SELECT otp_hash, expires_at
+		 FROM otp_requests
+		 WHERE phone = $1 AND purpose = 'EMAIL_VERIFY'
+		   AND used = FALSE AND expires_at > now()
+		 ORDER BY created_at DESC LIMIT 1`,
+		userID,
+	).Scan(&storedHash, &expiresAt)
+	if err != nil {
+		return fmt.Errorf("invalid or expired verification link")
+	}
+	if storedHash != hashedToken {
+		return fmt.Errorf("invalid verification token")
+	}
+	if time.Now().After(expiresAt) {
+		return fmt.Errorf("verification link has expired: please request a new one")
+	}
+
+	// Mark verified.
+	_, err = r.db.Exec(ctx,
+		`UPDATE users SET email_verified = TRUE, updated_at = now() WHERE id::text = $1`,
+		userID,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to mark email as verified: %w", err)
+	}
+
+	// Consume the token.
+	_, _ = r.db.Exec(ctx,
+		`UPDATE otp_requests SET used = TRUE
+		 WHERE phone = $1 AND purpose = 'EMAIL_VERIFY' AND used = FALSE`,
+		userID,
+	)
+	return nil
+}
+
+// max is a helper for older Go versions where built-in max may not be available.
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
