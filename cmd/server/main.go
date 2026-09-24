@@ -130,6 +130,12 @@ func main() {
 	app.Get("/docs", func(c *fiber.Ctx) error {
 		return c.SendFile("./public/docs.html")
 	})
+	app.Get("/documentation", func(c *fiber.Ctx) error {
+		return c.SendFile("./public/documentation.html")
+	})
+	app.Get("/auth/docs", func(c *fiber.Ctx) error {
+		return c.SendFile("./internal/auth/documentation.html")
+	})
 
 	v1 := app.Group("/api/v1")
 	authMw := middleware.JWTAuth(cfg.JWT.AccessSecret, redisClient)

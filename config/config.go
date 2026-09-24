@@ -27,12 +27,14 @@ type Config struct {
 	FCM      FCMConfig
 	Platform PlatformConfig
 	Fraud    FraudConfig
+	Google   GoogleOAuthConfig
 }
 
 type AppConfig struct {
-	Env  string
-	Name string
-	Port int
+	Env     string
+	Name    string
+	Port    int
+	BaseURL string // e.g. https://api.yourdomain.com — used for email verification links
 }
 
 type ServerConfig struct {
@@ -79,6 +81,13 @@ type JWTConfig struct {
 	RefreshSecret string
 	AccessExpiry  time.Duration
 	RefreshExpiry time.Duration
+}
+
+// GoogleOAuthConfig holds Google OAuth 2.0 credentials.
+type GoogleOAuthConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
 }
 
 type CORSConfig struct {
@@ -206,14 +215,25 @@ func Load() (*Config, error) {
 
 	redisURL := viper.GetString("REDIS_URL")
 	if redisURL == "" && viper.GetString("REDIS_HOST") != "" {
-		redisURL = fmt.Sprintf("%s:%d", viper.GetString("REDIS_HOST"), viper.GetInt("REDIS_PORT"))
+		redisPass := viper.GetString("REDIS_PASSWORD")
+		redisHost := viper.GetString("REDIS_HOST")
+		redisPort := viper.GetInt("REDIS_PORT")
+		if redisPort == 0 {
+			redisPort = 6379
+		}
+		if redisPass != "" {
+			redisURL = fmt.Sprintf("redis://:%s@%s:%d", redisPass, redisHost, redisPort)
+		} else {
+			redisURL = fmt.Sprintf("redis://%s:%d", redisHost, redisPort)
+		}
 	}
 
 	cfg := &Config{
 		App: AppConfig{
-			Env:  viper.GetString("APP_ENV"),
-			Name: viper.GetString("APP_NAME"),
-			Port: viper.GetInt("APP_PORT"),
+			Env:     viper.GetString("APP_ENV"),
+			Name:    viper.GetString("APP_NAME"),
+			Port:    viper.GetInt("APP_PORT"),
+			BaseURL: viper.GetString("APP_BASE_URL"),
 		},
 		Server: ServerConfig{
 			Port:         viper.GetString("APP_PORT"),
@@ -249,6 +269,22 @@ func Load() (*Config, error) {
 		},
 		CORS: CORSConfig{
 			AllowedOrigins: viper.GetString("CORS_ALLOWED_ORIGINS"),
+		},
+		SMS: SMSConfig{
+			APIKey:   viper.GetString("SMS_API_KEY"),
+			SenderID: viper.GetString("SMS_SENDER_ID"),
+		},
+		Email: EmailConfig{
+			SMTPHost: viper.GetString("EMAIL_SMTP_HOST"),
+			SMTPPort: viper.GetInt("EMAIL_SMTP_PORT"),
+			Username: viper.GetString("EMAIL_USERNAME"),
+			Password: viper.GetString("EMAIL_PASSWORD"),
+			From:     viper.GetString("EMAIL_FROM"),
+		},
+		Google: GoogleOAuthConfig{
+			ClientID:     viper.GetString("GOOGLE_CLIENT_ID"),
+			ClientSecret: viper.GetString("GOOGLE_CLIENT_SECRET"),
+			RedirectURL:  viper.GetString("GOOGLE_REDIRECT_URL"),
 		},
 	}
 

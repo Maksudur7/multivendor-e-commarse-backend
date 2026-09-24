@@ -3,12 +3,16 @@ package database
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/redis/go-redis/v9"
 )
 
 // NewRedisClient creates and verifies a Redis client connection.
 func NewRedisClient(ctx context.Context, redisURL string, maxRetries int) (*redis.Client, error) {
+	if !strings.HasPrefix(redisURL, "redis://") && !strings.HasPrefix(redisURL, "rediss://") {
+		redisURL = "redis://" + redisURL
+	}
 	opts, err := redis.ParseURL(redisURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse Redis URL: %w", err)
