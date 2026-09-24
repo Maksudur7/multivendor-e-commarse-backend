@@ -92,12 +92,14 @@ func main() {
 	app.Use(helmet.New())
 	app.Use(compress.New(compress.Config{Level: compress.LevelBestSpeed}))
 	allowCredentials := true
-	if cfg.CORS.AllowedOrigins == "*" || cfg.CORS.AllowedOrigins == "" {
+	corsOrigins := cfg.CORS.AllowedOrigins
+	if corsOrigins == "*" || corsOrigins == "" {
+		corsOrigins = "*"
 		allowCredentials = false
 	}
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     cfg.CORS.AllowedOrigins,
+		AllowOrigins:     corsOrigins,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
 		AllowCredentials: allowCredentials,
@@ -105,14 +107,14 @@ func main() {
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return response.Success(c, fiber.StatusOK, "Welcome to Enterprise Multi-Vendor & Reseller E-Commerce API Server (Daraz / Amazon / Meesho Grade Architecture)", fiber.Map{
-			"app_name":       cfg.App.Name,
-			"version":        "1.0.0",
-			"status":         "RUNNING",
-			"health_check":   "/health",
-			"api_base":       "/api/v1",
-			"documentation":  "Import 'ecom_postman_collection.json' into Postman for full API access",
-			"active_domains": 23,
-			"database":       "NeonDB PostgreSQL (Connected)",
+			"app_name":          cfg.App.Name,
+			"version":           "1.0.0",
+			"status":            "RUNNING",
+			"health_check":      "/health",
+			"api_base":          "/api/v1",
+			"api_documentation": "/docs",
+			"active_domains":    23,
+			"database":          "NeonDB PostgreSQL (Connected)",
 		})
 	})
 
@@ -123,6 +125,10 @@ func main() {
 			"timestamp":   time.Now().Format(time.RFC3339),
 			"version":     "1.0.0",
 		})
+	})
+
+	app.Get("/docs", func(c *fiber.Ctx) error {
+		return c.SendFile("./public/docs.html")
 	})
 
 	v1 := app.Group("/api/v1")
