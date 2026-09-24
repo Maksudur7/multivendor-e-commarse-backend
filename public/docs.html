@@ -3225,7 +3225,7 @@
     <!-- URL BAR -->
     <div class="url-bar">
       <span class="url-method-pill ${method}">${method}</span>
-      <input class="url-input" id="url-${id}" value="${fullUrl}" readonly/>
+      <input class="url-input" id="url-${id}" value="${fullUrl}"/>
       <button class="btn-send ${method}" onclick="sendRequest('${id}','${method}','${path}','${auth}')">
         ${method === 'GET' ? '🚀 GET' : method === 'POST' ? '📤 POST' : method === 'PUT' ? '✏️ PUT' : method === 'DELETE' ? '🗑️ DELETE' : '▶ SEND'}
       </button>
