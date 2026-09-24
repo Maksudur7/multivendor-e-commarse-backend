@@ -478,7 +478,7 @@ func (h *Handler) GetSessions(c *fiber.Ctx) error {
 
 // RevokeSession revokes a specific session owned by the authenticated user.
 func (h *Handler) RevokeSession(c *fiber.Ctx) error {
-	sessionID := c.Params("sessionId")
+	sessionID := strings.TrimPrefix(strings.TrimSpace(c.Params("sessionId")), ":")
 	userID, ok := c.Locals("user_id").(string)
 	if !ok || userID == "" {
 		return response.Unauthorized(c, "Authentication required")
