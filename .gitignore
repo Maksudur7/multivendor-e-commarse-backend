@@ -9,10 +9,6 @@ server.exe
 *.dylib
 
 # ── Environment & Secrets ──────────────────────────────────────
-.env
-.env.local
-.env.production
-.env.staging
 *.env
 
 # ── Test Artifacts & Temporary Files ───────────────────────────
@@ -29,7 +25,6 @@ tmp/
 
 # ── IDE & Editor Settings ──────────────────────────────────────
 .idea/
-.vscode/
 *.swp
 *.swo
 *~
@@ -58,3 +53,5 @@ docs/docs.go
 # ── Generated / Temporary Files ────────────────────────────────
 internal/auth/documentation.html
 test_otp_*.go
+config.bat
+node_modules
