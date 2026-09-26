@@ -31,24 +31,21 @@ func initApp() {
 func Handler(w http.ResponseWriter, r *http.Request) {
 	once.Do(initApp)
 
-	// Ensure Vercel query string is preserved for Fiber adaptor
-	if r.URL.RawQuery == "" {
-		if reqURI := r.RequestURI; reqURI != "" {
-			if u, err := url.ParseRequestURI(reqURI); err == nil && u.RawQuery != "" {
-				r.URL.RawQuery = u.RawQuery
-			}
-		}
-		if fwd := r.Header.Get("X-Forwarded-Uri"); fwd != "" {
-			if u, err := url.Parse(fwd); err == nil && u.RawQuery != "" {
-				r.URL.RawQuery = u.RawQuery
-			}
-		}
-	} else if fwd := r.Header.Get("X-Forwarded-Uri"); fwd != "" {
+	// Ensure Vercel query string and original path are preserved for Fiber adaptor
+	if fwd := r.Header.Get("X-Forwarded-Uri"); fwd != "" {
 		if u, err := url.Parse(fwd); err == nil {
-			r.URL.Path = u.Path
-			if u.RawQuery != "" && r.URL.RawQuery == "" {
+			if u.Path != "" {
+				r.URL.Path = u.Path
+			}
+			if u.RawQuery != "" {
 				r.URL.RawQuery = u.RawQuery
 			}
+		}
+	}
+
+	if r.URL.RawQuery == "" && r.RequestURI != "" {
+		if u, err := url.ParseRequestURI(r.RequestURI); err == nil && u.RawQuery != "" {
+			r.URL.RawQuery = u.RawQuery
 		}
 	}
 
