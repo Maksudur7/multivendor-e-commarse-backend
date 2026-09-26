@@ -15,7 +15,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/yourusername/ecom-backend/config"
@@ -622,12 +621,12 @@ func (s *Service) PasswordResetRequest(ctx context.Context, email string) (*Pass
 
 	// Send password-reset OTP via email asynchronously in a background goroutine.
 	go func() {
-		bgCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		bgCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		if err := s.email.SendPasswordResetOTP(bgCtx, email, otpCode); err != nil {
-			log.Error().Err(err).Str("to", email).Msg("🚨 [EMAIL DISPATCH FAILED]")
+			fmt.Printf("[EMAIL-ERR] Failed to send password reset email to %s: %v\n", email, err)
 		} else {
-			log.Info().Str("to", email).Msg("✅ [EMAIL DISPATCH SUCCESSFUL]")
+			fmt.Printf("[EMAIL-OK] Password reset email sent to %s\n", email)
 		}
 	}()
 
