@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -369,6 +370,29 @@ func (h *Handler) VerifyEmail(c *fiber.Ctx) error {
 	uid := strings.TrimSpace(c.Query("uid"))
 	if uid == "" {
 		uid = strings.TrimSpace(c.Query("amp;uid"))
+	}
+
+	// Fallback: Parse query parameters directly from OriginalURL (fixes Vercel serverless query string rewriting)
+	if token == "" || uid == "" {
+		origURL := c.OriginalURL()
+		if idx := strings.Index(origURL, "?"); idx != -1 {
+			qStr := origURL[idx+1:]
+			parsed, err := url.ParseQuery(qStr)
+			if err == nil {
+				if token == "" {
+					token = strings.TrimSpace(parsed.Get("token"))
+					if token == "" {
+						token = strings.TrimSpace(parsed.Get("amp;token"))
+					}
+				}
+				if uid == "" {
+					uid = strings.TrimSpace(parsed.Get("uid"))
+					if uid == "" {
+						uid = strings.TrimSpace(parsed.Get("amp;uid"))
+					}
+				}
+			}
+		}
 	}
 
 	wantsJSON := c.Get("Accept") == "application/json" || c.Query("format") == "json"
