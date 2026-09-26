@@ -76,3 +76,12 @@ func (s *Service) GenerateShareableLink(userID, productID, channel string) (stri
 	shareLink := fmt.Sprintf("https://buy.platform.com/p/%s?ref=%s", productID, refCode)
 	return shareLink, refCode
 }
+
+func (s *Service) ListResellersAdmin(ctx context.Context, status string) ([]ResellerAdminListItem, error) {
+	return s.repo.ListResellersAdmin(ctx, status)
+}
+
+func (s *Service) VerifyReseller(ctx context.Context, resellerID, status string) (int64, error) {
+	return s.repo.VerifyReseller(ctx, resellerID, status)
+}
+

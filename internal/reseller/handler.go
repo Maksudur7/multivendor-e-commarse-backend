@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/yourusername/ecom-backend/pkg/middleware"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
@@ -30,6 +31,10 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	r.Delete("/catalog/:productId", h.RemoveFromCatalog)
 	r.Post("/margin/calculate", h.CalculateMargin)
 	r.Post("/share-link", h.GenerateShareableLink)
+
+	admin := router.Group("/admin/resellers", authMiddleware, middleware.RequireRole("ADMIN", "SUPER_ADMIN", "ADMIN_OPS"))
+	admin.Get("/", h.ListResellersAdmin)
+	admin.Put("/:id/verify", h.VerifyReseller)
 }
 
 func (h *Handler) GetPublicStore(c *fiber.Ctx) error {
@@ -131,3 +136,43 @@ func (h *Handler) GenerateShareableLink(c *fiber.Ctx) error {
 		"share_link": shareLink, "ref_code": refCode, "channel": req.Channel,
 	})
 }
+
+func (h *Handler) ListResellersAdmin(c *fiber.Ctx) error {
+	status := c.Query("status")
+	list, err := h.service.ListResellersAdmin(c.Context(), status)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to list resellers: "+err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Reseller accounts fetched", fiber.Map{
+		"resellers": list,
+		"count":     len(list),
+	})
+}
+
+type VerifyResellerReq struct {
+	Status string `json:"status"`
+}
+
+func (h *Handler) VerifyReseller(c *fiber.Ctx) error {
+	resellerID := c.Params("id")
+	var req VerifyResellerReq
+	if err := c.BodyParser(&req); err != nil {
+		return response.BadRequest(c, "Invalid request payload: "+err.Error())
+	}
+	if req.Status != "ACTIVE" && req.Status != "REJECTED" && req.Status != "SUSPENDED" {
+		return response.BadRequest(c, "Status must be ACTIVE, REJECTED, or SUSPENDED")
+	}
+
+	affected, err := h.service.VerifyReseller(c.Context(), resellerID, req.Status)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to verify reseller: "+err.Error(), nil)
+	}
+	if affected == 0 {
+		return response.NotFound(c, "Reseller application not found")
+	}
+
+	return response.Success(c, fiber.StatusOK, "Reseller status updated and user role updated", fiber.Map{
+		"reseller_id": resellerID,
+		"new_status":  req.Status,
+	})
+}

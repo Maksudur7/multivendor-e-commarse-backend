@@ -2,6 +2,7 @@ package reseller
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -79,3 +80,58 @@ func (r *Repository) CreateStore(ctx context.Context, userID, name string) (stri
 	}
 	return storeID, nil
 }
+
+type ResellerAdminListItem struct {
+	ID           string    `json:"id"`
+	UserID       string    `json:"user_id"`
+	BusinessName string    `json:"business_name"`
+	Status       string    `json:"status"`
+	Tier         string    `json:"tier"`
+	TotalOrders  int       `json:"total_orders"`
+	TotalEarned  float64   `json:"total_earned"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+func (r *Repository) ListResellersAdmin(ctx context.Context, status string) ([]ResellerAdminListItem, error) {
+	if r.db == nil {
+		return []ResellerAdminListItem{}, nil
+	}
+	whereClause := ""
+	args := []interface{}{}
+	if status != "" {
+		whereClause = " WHERE status = $1"
+		args = append(args, status)
+	}
+
+	rows, err := r.db.Query(ctx, "SELECT id::text, user_id::text, COALESCE(business_name, ''), status, reseller_tier, total_orders, total_earned, created_at FROM resellers"+whereClause+" ORDER BY created_at DESC", args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []ResellerAdminListItem{}
+	for rows.Next() {
+		var item ResellerAdminListItem
+		if err := rows.Scan(&item.ID, &item.UserID, &item.BusinessName, &item.Status, &item.Tier, &item.TotalOrders, &item.TotalEarned, &item.CreatedAt); err != nil {
+			return nil, err
+		}
+		list = append(list, item)
+	}
+	return list, nil
+}
+
+func (r *Repository) VerifyReseller(ctx context.Context, resellerID, status string) (int64, error) {
+	if r.db == nil {
+		return 0, nil
+	}
+	var userID string
+	err := r.db.QueryRow(ctx, "UPDATE resellers SET status = $1, updated_at = now() WHERE id::text = $2 RETURNING user_id::text", status, resellerID).Scan(&userID)
+	if err != nil {
+		return 0, err
+	}
+	if status == "ACTIVE" && userID != "" {
+		_, _ = r.db.Exec(ctx, "UPDATE users SET role = 'RESELLER', updated_at = now() WHERE id::text = $1", userID)
+	}
+	return 1, nil
+}
+

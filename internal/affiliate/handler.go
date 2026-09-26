@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/yourusername/ecom-backend/pkg/middleware"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
@@ -33,6 +34,10 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	aff.Post("/withdraw", h.Withdraw)
 	aff.Put("/profile", h.UpdateProfile)
 	aff.Delete("/links/:id", h.DeleteLink)
+
+	admin := router.Group("/admin/affiliates", authMiddleware, middleware.RequireRole("ADMIN", "SUPER_ADMIN", "ADMIN_OPS"))
+	admin.Get("/applications", h.ListApplicationsAdmin)
+	admin.Put("/applications/:id/review", h.ReviewApplicationAdmin)
 }
 
 func (h *Handler) GetProfile(c *fiber.Ctx) error {
@@ -185,3 +190,44 @@ func (h *Handler) DeleteLink(c *fiber.Ctx) error {
 		"link_id": linkID,
 	})
 }
+
+func (h *Handler) ListApplicationsAdmin(c *fiber.Ctx) error {
+	status := c.Query("status")
+	apps, err := h.service.ListApplicationsAdmin(c.Context(), status)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to list affiliate applications: "+err.Error(), nil)
+	}
+	return response.Success(c, fiber.StatusOK, "Affiliate applications fetched", fiber.Map{
+		"applications": apps,
+		"count":        len(apps),
+	})
+}
+
+type ReviewAffiliateAppReq struct {
+	Status string `json:"status"`
+}
+
+func (h *Handler) ReviewApplicationAdmin(c *fiber.Ctx) error {
+	appID := c.Params("id")
+	var req ReviewAffiliateAppReq
+	if err := c.BodyParser(&req); err != nil {
+		return response.BadRequest(c, "Invalid input payload: "+err.Error())
+	}
+	if req.Status != "APPROVED" && req.Status != "REJECTED" {
+		return response.BadRequest(c, "Status must be APPROVED or REJECTED")
+	}
+
+	affected, err := h.service.ReviewApplicationAdmin(c.Context(), appID, req.Status)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to review affiliate application: "+err.Error(), nil)
+	}
+	if affected == 0 {
+		return response.NotFound(c, "Affiliate application profile not found")
+	}
+
+	return response.Success(c, fiber.StatusOK, "Affiliate application reviewed and user role updated", fiber.Map{
+		"application_id": appID,
+		"new_status":     req.Status,
+	})
+}
+

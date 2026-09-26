@@ -1596,6 +1596,27 @@
               class="endpoint-desc">Admin: Review KYC</span><span class="endpoint-chevron">▾</span></div>
           <div class="endpoint-body"></div>
         </div>
+        <div class="endpoint" data-method="GET" data-path="/api/v1/admin/users" data-auth="bearer"
+          data-role="Admin" data-params='{"role":"","kyc_status":"","status":"","search":"","page":"1","limit":"20"}' data-body="">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)"><span class="method GET">GET</span><span
+              class="endpoint-path">/api/v1/admin/users</span><span
+              class="endpoint-desc">Admin: List & Filter Users</span><span class="endpoint-chevron">▾</span></div>
+          <div class="endpoint-body"></div>
+        </div>
+        <div class="endpoint" data-method="PUT" data-path="/api/v1/admin/users/:id/role" data-auth="bearer"
+          data-role="Admin" data-body='{"role":"ADMIN"}'>
+          <div class="endpoint-header" onclick="toggleEndpoint(this)"><span class="method PUT">PUT</span><span
+              class="endpoint-path">/api/v1/admin/users/<span class="param">:id</span>/role</span><span
+              class="endpoint-desc">Admin: Update User Role</span><span class="endpoint-chevron">▾</span></div>
+          <div class="endpoint-body"></div>
+        </div>
+        <div class="endpoint" data-method="PUT" data-path="/api/v1/admin/users/:id/status" data-auth="bearer"
+          data-role="Admin" data-body='{"status":"SUSPENDED"}'>
+          <div class="endpoint-header" onclick="toggleEndpoint(this)"><span class="method PUT">PUT</span><span
+              class="endpoint-path">/api/v1/admin/users/<span class="param">:id</span>/status</span><span
+              class="endpoint-desc">Admin: Update User Status</span><span class="endpoint-chevron">▾</span></div>
+          <div class="endpoint-body"></div>
+        </div>
       </section>
 
       <!-- ═══ PRODUCTS ═══ -->
@@ -2407,6 +2428,20 @@
               link</span><span class="endpoint-chevron">▾</span></div>
           <div class="endpoint-body"></div>
         </div>
+        <div class="endpoint" data-method="GET" data-path="/api/v1/admin/resellers" data-auth="bearer" data-role="Admin"
+          data-params='{"status":""}' data-body="">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)"><span class="method GET">GET</span><span
+              class="endpoint-path">/api/v1/admin/resellers</span><span class="endpoint-desc">Admin: List
+              Resellers</span><span class="endpoint-chevron">▾</span></div>
+          <div class="endpoint-body"></div>
+        </div>
+        <div class="endpoint" data-method="PUT" data-path="/api/v1/admin/resellers/:id/verify" data-auth="bearer" data-role="Admin"
+          data-body='{"status":"ACTIVE"}'>
+          <div class="endpoint-header" onclick="toggleEndpoint(this)"><span class="method PUT">PUT</span><span
+              class="endpoint-path">/api/v1/admin/resellers/<span class="param">:id</span>/verify</span><span class="endpoint-desc">Admin:
+              Verify Reseller</span><span class="endpoint-chevron">▾</span></div>
+          <div class="endpoint-body"></div>
+        </div>
       </section>
 
       <!-- ═══ AFFILIATE ═══ -->
@@ -2482,6 +2517,18 @@
           <div class="endpoint-header" onclick="toggleEndpoint(this)"><span class="method DELETE">DELETE</span><span
               class="endpoint-path">/api/v1/affiliate/links/<span class="param">:id</span></span><span
               class="endpoint-desc">Delete referral link</span><span class="endpoint-chevron">▾</span></div>
+          <div class="endpoint-body"></div>
+        </div>
+        <div class="endpoint" data-method="GET" data-path="/api/v1/admin/affiliates/applications" data-auth="bearer" data-role="Admin"
+          data-params='{"status":""}' data-body="">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)"><span class="method GET">GET</span><span
+              class="endpoint-path">/api/v1/admin/affiliates/applications</span><span class="endpoint-desc">Admin: List Affiliate Applications</span><span class="endpoint-chevron">▾</span></div>
+          <div class="endpoint-body"></div>
+        </div>
+        <div class="endpoint" data-method="PUT" data-path="/api/v1/admin/affiliates/applications/:id/review" data-auth="bearer" data-role="Admin"
+          data-body='{"status":"APPROVED"}'>
+          <div class="endpoint-header" onclick="toggleEndpoint(this)"><span class="method PUT">PUT</span><span
+              class="endpoint-path">/api/v1/admin/affiliates/applications/<span class="param">:id</span>/review</span><span class="endpoint-desc">Admin: Review Affiliate Application</span><span class="endpoint-chevron">▾</span></div>
           <div class="endpoint-body"></div>
         </div>
       </section>

@@ -137,3 +137,18 @@ func (s *Service) SubmitKYC(ctx context.Context, userID, documentType, documentN
 func (s *Service) ReviewKYC(ctx context.Context, targetUserID, status, rejectionReason string) (int64, error) {
 	return s.repo.ReviewKYC(ctx, targetUserID, status, rejectionReason)
 }
+
+// --- Admin Operations ---
+
+func (s *Service) ListUsersAdmin(ctx context.Context, role, kycStatus, userStatus, search string, limit, offset int) ([]UserAdminListItem, int64, error) {
+	return s.repo.ListUsersAdmin(ctx, role, kycStatus, userStatus, search, limit, offset)
+}
+
+func (s *Service) UpdateUserRoleAdmin(ctx context.Context, targetUserID, newRole string) (int64, error) {
+	return s.repo.UpdateUserRoleAdmin(ctx, targetUserID, newRole)
+}
+
+func (s *Service) UpdateUserStatusAdmin(ctx context.Context, targetUserID, newStatus string) (int64, error) {
+	return s.repo.UpdateUserStatusAdmin(ctx, targetUserID, newStatus)
+}
+

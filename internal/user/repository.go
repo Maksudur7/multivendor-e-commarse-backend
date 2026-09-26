@@ -293,3 +293,110 @@ func (r *Repository) ReviewKYC(ctx context.Context, targetUserID, status, reason
 	}
 	return res.RowsAffected(), nil
 }
+
+type UserAdminListItem struct {
+	ID            string    `json:"id"`
+	Email         string    `json:"email"`
+	Phone         string    `json:"phone"`
+	FullName      string    `json:"full_name"`
+	Role          string    `json:"role"`
+	Status        string    `json:"status"`
+	KYCStatus      string    `json:"kyc_status"`
+	EmailVerified bool      `json:"email_verified"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
+func (r *Repository) ListUsersAdmin(ctx context.Context, role, kycStatus, userStatus, search string, limit, offset int) ([]UserAdminListItem, int64, error) {
+	if r.db == nil {
+		return []UserAdminListItem{}, 0, nil
+	}
+
+	whereClauses := []string{"1=1"}
+	args := []interface{}{}
+	argIdx := 1
+
+	if role != "" {
+		whereClauses = append(whereClauses, fmt.Sprintf("LOWER(role) = LOWER($%d)", argIdx))
+		args = append(args, role)
+		argIdx++
+	}
+	if kycStatus != "" {
+		whereClauses = append(whereClauses, fmt.Sprintf("LOWER(COALESCE(kyc_status, 'UNVERIFIED')) = LOWER($%d)", argIdx))
+		args = append(args, kycStatus)
+		argIdx++
+	}
+	if userStatus != "" {
+		whereClauses = append(whereClauses, fmt.Sprintf("LOWER(status) = LOWER($%d)", argIdx))
+		args = append(args, userStatus)
+		argIdx++
+	}
+	if search != "" {
+		whereClauses = append(whereClauses, fmt.Sprintf("(full_name ILIKE $%d OR email ILIKE $%d OR phone ILIKE $%d)", argIdx, argIdx, argIdx))
+		args = append(args, "%"+search+"%")
+		argIdx++
+	}
+
+	whereStmt := strings.Join(whereClauses, " AND ")
+
+	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM users WHERE %s", whereStmt)
+	var total int64
+	err := r.db.QueryRow(ctx, countQuery, args...).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if limit <= 0 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := fmt.Sprintf(`SELECT id::text, COALESCE(email, ''), COALESCE(phone, ''), full_name, role, status,
+	                             COALESCE(kyc_status, 'UNVERIFIED'), email_verified, created_at
+	                      FROM users
+	                      WHERE %s
+	                      ORDER BY created_at DESC
+	                      LIMIT $%d OFFSET $%d`, whereStmt, argIdx, argIdx+1)
+
+	args = append(args, limit, offset)
+
+	rows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	users := []UserAdminListItem{}
+	for rows.Next() {
+		var u UserAdminListItem
+		if err := rows.Scan(&u.ID, &u.Email, &u.Phone, &u.FullName, &u.Role, &u.Status, &u.KYCStatus, &u.EmailVerified, &u.CreatedAt); err != nil {
+			return nil, 0, err
+		}
+		users = append(users, u)
+	}
+
+	return users, total, nil
+}
+
+func (r *Repository) UpdateUserRoleAdmin(ctx context.Context, targetUserID, newRole string) (int64, error) {
+	if r.db == nil {
+		return 0, nil
+	}
+	res, err := r.db.Exec(ctx, "UPDATE users SET role = $1, updated_at = now() WHERE id::text = $2", strings.ToUpper(newRole), targetUserID)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected(), nil
+}
+
+func (r *Repository) UpdateUserStatusAdmin(ctx context.Context, targetUserID, newStatus string) (int64, error) {
+	if r.db == nil {
+		return 0, nil
+	}
+	res, err := r.db.Exec(ctx, "UPDATE users SET status = $1, updated_at = now() WHERE id::text = $2", strings.ToUpper(newStatus), targetUserID)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected(), nil
+}
