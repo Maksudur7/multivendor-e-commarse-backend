@@ -180,8 +180,6 @@ type EmailConfig struct {
 	Username string
 	Password string
 	From     string
-	APIKey   string
-	Provider string
 }
 
 type FCMConfig struct {
@@ -290,8 +288,6 @@ func Load() (*Config, error) {
 			Username: viper.GetString("EMAIL_USERNAME"),
 			Password: viper.GetString("EMAIL_PASSWORD"),
 			From:     viper.GetString("EMAIL_FROM"),
-			APIKey:   getAnyEnv("EMAIL_API_KEY", "RESEND_API_KEY", "SENDGRID_API_KEY", "BREVO_API_KEY"),
-			Provider: viper.GetString("EMAIL_PROVIDER"),
 		},
 		Google: GoogleOAuthConfig{
 			ClientID:     viper.GetString("GOOGLE_CLIENT_ID"),
@@ -319,13 +315,4 @@ func Load() (*Config, error) {
 // LoadConfig alias for Load to accept optional path string
 func LoadConfig(path ...string) (*Config, error) {
 	return Load()
-}
-
-func getAnyEnv(keys ...string) string {
-	for _, k := range keys {
-		if val := strings.TrimSpace(viper.GetString(k)); val != "" {
-			return val
-		}
-	}
-	return ""
 }
