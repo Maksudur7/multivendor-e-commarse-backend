@@ -168,6 +168,8 @@ type SMSConfig struct {
 }
 
 type WhatsAppConfig struct {
+	InstanceID    string
+	Token         string
 	PhoneNumberID string
 	AccessToken   string
 }
@@ -274,6 +276,12 @@ func Load() (*Config, error) {
 			APIKey:   viper.GetString("SMS_API_KEY"),
 			SenderID: viper.GetString("SMS_SENDER_ID"),
 		},
+		WhatsApp: WhatsAppConfig{
+			InstanceID:    viper.GetString("WHATSAPP_INSTANCE_ID"),
+			Token:         viper.GetString("WHATSAPP_TOKEN"),
+			PhoneNumberID: viper.GetString("WHATSAPP_PHONE_NUMBER_ID"),
+			AccessToken:   viper.GetString("WHATSAPP_ACCESS_TOKEN"),
+		},
 		Email: EmailConfig{
 			SMTPHost: viper.GetString("EMAIL_SMTP_HOST"),
 			SMTPPort: viper.GetInt("EMAIL_SMTP_PORT"),
@@ -288,9 +296,15 @@ func Load() (*Config, error) {
 		},
 	}
 
-	if cfg.App.Port == 0 {
-		cfg.App.Port = 8080
+	port := viper.GetInt("PORT")
+	if port == 0 {
+		port = viper.GetInt("APP_PORT")
 	}
+	if port == 0 {
+		port = 8080
+	}
+	cfg.App.Port = port
+	cfg.Server.Port = fmt.Sprintf("%d", port)
 	if cfg.CORS.AllowedOrigins == "" {
 		cfg.CORS.AllowedOrigins = "*"
 	}
