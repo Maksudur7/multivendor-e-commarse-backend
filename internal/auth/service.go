@@ -621,12 +621,12 @@ func (s *Service) PasswordResetRequest(ctx context.Context, email string) (*Pass
 
 	// Send password-reset OTP via email asynchronously in a background goroutine.
 	go func() {
-		bgCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		bgCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 		if err := s.email.SendPasswordResetOTP(bgCtx, email, otpCode); err != nil {
-			fmt.Printf("[EMAIL-ERR] Failed to send password reset email to %s: %v\n", email, err)
+			log.Error().Err(err).Str("to", email).Msg("🚨 [EMAIL DISPATCH FAILED]")
 		} else {
-			fmt.Printf("[EMAIL-OK] Password reset email sent to %s\n", email)
+			log.Info().Str("to", email).Msg("✅ [EMAIL DISPATCH SUCCESSFUL]")
 		}
 	}()
 
