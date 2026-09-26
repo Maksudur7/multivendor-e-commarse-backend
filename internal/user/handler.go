@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/yourusername/ecom-backend/pkg/middleware"
 	"github.com/yourusername/ecom-backend/pkg/response"
 )
 
@@ -36,7 +37,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 	u.Post("/kyc/submit", h.SubmitKYC)
 	u.Post("/change-password", h.ChangePassword)
 
-	admin := router.Group("/admin/kyc", authMiddleware)
+	admin := router.Group("/admin/kyc", authMiddleware, middleware.RequireRole("ADMIN", "SUPER_ADMIN", "ADMIN_OPS"))
 	admin.Put("/review/:userId", h.ReviewKYC)
 }
 
@@ -353,6 +354,11 @@ type KYCReviewReq struct {
 }
 
 func (h *Handler) ReviewKYC(c *fiber.Ctx) error {
+	role, _ := c.Locals("role").(string)
+	if role != "ADMIN" && role != "SUPER_ADMIN" && role != "ADMIN_OPS" {
+		return response.Forbidden(c, "Admin authorization required to review KYC documents")
+	}
+
 	targetUserID := c.Params("userId")
 	var req KYCReviewReq
 	if err := c.BodyParser(&req); err != nil {
