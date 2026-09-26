@@ -413,8 +413,13 @@ func (s *Service) EmailRegister(ctx context.Context, email string, phone *string
 	}
 
 	phoneStr := ""
-	if phone != nil {
-		phoneStr = *phone
+	if phone != nil && strings.TrimSpace(*phone) != "" {
+		if pkgsms.IsPhone(*phone) {
+			phoneStr = pkgsms.NormalizePhone(*phone)
+		} else {
+			phoneStr = strings.TrimSpace(*phone)
+		}
+		phone = &phoneStr
 	}
 	if s.repo.CheckDuplicateAccount(ctx, email, phoneStr) {
 		return nil, fmt.Errorf("duplicate: an account with this email or phone number already exists")

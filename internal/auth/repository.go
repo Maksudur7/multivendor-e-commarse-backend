@@ -143,6 +143,8 @@ func (r *Repository) FindOrCreateUserByPhone(ctx context.Context, phoneOrEmail s
 }
 
 // CheckDuplicateAccount returns true if a user with email or phone already exists.
+// Note: If a user exists with this phone but has NO email (created via OTP), it is not a conflict;
+// CreateEmailUser will merge the email credentials into that existing user record.
 func (r *Repository) CheckDuplicateAccount(ctx context.Context, email, phone string) bool {
 	if r.db == nil {
 		return false
@@ -151,18 +153,41 @@ func (r *Repository) CheckDuplicateAccount(ctx context.Context, email, phone str
 	err := r.db.QueryRow(ctx,
 		`SELECT id::text FROM users
 		 WHERE email = $1
-		    OR (phone IS NOT NULL AND phone = $2 AND $2 != '')`,
+		    OR (phone IS NOT NULL AND phone = $2 AND $2 != '' AND email IS NOT NULL AND email != '')`,
 		email, phone,
 	).Scan(&id)
 	return err == nil
 }
 
-// CreateEmailUser inserts a new user with email/password credentials.
+// CreateEmailUser inserts a new user with email/password credentials or links them to an existing OTP-created phone user.
 // email_verified is FALSE — the user must verify their email separately.
 func (r *Repository) CreateEmailUser(ctx context.Context, email string, phone *string, passHash, fullName, role string) (string, error) {
 	if r.db == nil {
 		return "", fmt.Errorf("database not connected")
 	}
+
+	// If phone is provided, check if a phone-only account (created via OTP) already exists.
+	if phone != nil && *phone != "" {
+		var existingID string
+		err := r.db.QueryRow(ctx,
+			`SELECT id::text FROM users WHERE phone = $1 AND (email IS NULL OR email = '')`,
+			*phone,
+		).Scan(&existingID)
+		if err == nil {
+			// Update/link the existing phone user with email credentials
+			_, err = r.db.Exec(ctx,
+				`UPDATE users
+				 SET email = $1, password_hash = $2, full_name = $3, role = $4, updated_at = now()
+				 WHERE id::text = $5`,
+				email, passHash, fullName, role, existingID,
+			)
+			if err != nil {
+				return "", fmt.Errorf("failed to link email to existing phone user: %w", err)
+			}
+			return existingID, nil
+		}
+	}
+
 	var userID string
 	err := r.db.QueryRow(ctx,
 		`INSERT INTO users
