@@ -68,9 +68,13 @@ func (h *Handler) GetProfile(c *fiber.Ctx) error {
 }
 
 type UpdateProfileReq struct {
-	FullName  string `json:"full_name"`
-	AvatarURL string `json:"avatar_url"`
-	Phone     string `json:"phone"`
+	FullName          string `json:"full_name"`
+	AvatarURL         string `json:"avatar_url"`
+	Phone             string `json:"phone"`
+	Email             string `json:"email"`
+	DateOfBirth       string `json:"date_of_birth"`
+	Gender            string `json:"gender"`
+	PreferredLanguage string `json:"preferred_language"`
 }
 
 func (h *Handler) UpdateProfile(c *fiber.Ctx) error {
@@ -79,21 +83,32 @@ func (h *Handler) UpdateProfile(c *fiber.Ctx) error {
 		return response.BadRequest(c, "Invalid request payload: "+err.Error())
 	}
 	req.FullName = strings.TrimSpace(req.FullName)
+	req.Email = strings.TrimSpace(req.Email)
 	userID := c.Locals("user_id").(string)
 
 	if h.db == nil {
 		return response.Error(c, fiber.StatusServiceUnavailable, "Database not connected", nil)
 	}
 
-	if err := h.service.UpdateProfile(c.Context(), userID, req.FullName, req.AvatarURL, req.Phone); err != nil {
+	if err := h.service.UpdateProfile(c.Context(), userID, req.FullName, req.AvatarURL, req.Phone, req.Email, req.DateOfBirth, req.Gender, req.PreferredLanguage); err != nil {
+		if strings.Contains(err.Error(), "users_email_key") {
+			return response.Conflict(c, "DUPLICATE_EMAIL", "This email address is already registered to another user account.")
+		}
+		if strings.Contains(err.Error(), "23505") || strings.Contains(err.Error(), "duplicate key") || strings.Contains(err.Error(), "users_phone_key") {
+			return response.Conflict(c, "DUPLICATE_PHONE", "This phone number is already registered to another user account.")
+		}
 		return response.Error(c, fiber.StatusInternalServerError, fmt.Sprintf("Failed to update profile: %v", err), nil)
 	}
 
 	return response.Success(c, fiber.StatusOK, "Profile updated successfully in NeonDB", fiber.Map{
-		"user_id":    userID,
-		"full_name":  req.FullName,
-		"avatar_url": req.AvatarURL,
-		"phone":      req.Phone,
+		"user_id":            userID,
+		"full_name":          req.FullName,
+		"avatar_url":         req.AvatarURL,
+		"phone":              req.Phone,
+		"email":              req.Email,
+		"date_of_birth":      req.DateOfBirth,
+		"gender":             req.Gender,
+		"preferred_language": req.PreferredLanguage,
 	})
 }
 

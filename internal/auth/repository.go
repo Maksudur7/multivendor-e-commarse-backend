@@ -89,19 +89,45 @@ func (r *Repository) DeleteOTP(ctx context.Context, target, purpose string) erro
 
 // ── User operations ──────────────────────────────────────────────────────────
 
-// FindOrCreateUserByPhone finds an existing user by phone or creates a new CUSTOMER.
-func (r *Repository) FindOrCreateUserByPhone(ctx context.Context, phone string) (string, error) {
+// MarkUserPhoneVerified sets phone_verified = TRUE and updates phone for a specific user ID.
+func (r *Repository) MarkUserPhoneVerified(ctx context.Context, userID, phone string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not connected")
+	}
+	_, err := r.db.Exec(ctx,
+		`UPDATE users 
+		 SET phone = COALESCE(NULLIF(phone, ''), $2), 
+		     phone_verified = TRUE, 
+		     updated_at = now() 
+		 WHERE id::text = $1`,
+		userID, phone,
+	)
+	return err
+}
+
+// FindOrCreateUserByPhone finds an existing user by phone or email, or creates a new CUSTOMER.
+func (r *Repository) FindOrCreateUserByPhone(ctx context.Context, phoneOrEmail string) (string, error) {
 	if r.db == nil {
 		return "", fmt.Errorf("database not connected")
 	}
 
-	// Try existing user first.
+	// Try existing user first by phone or by email.
 	var existingID string
 	err := r.db.QueryRow(ctx,
-		`SELECT id::text FROM users WHERE phone = $1`,
-		phone,
+		`SELECT id::text FROM users 
+		 WHERE (phone IS NOT NULL AND phone = $1 AND $1 != '') 
+		    OR (email IS NOT NULL AND email = $1 AND $1 != '')`,
+		phoneOrEmail,
 	).Scan(&existingID)
 	if err == nil {
+		_, _ = r.db.Exec(ctx,
+			`UPDATE users 
+			 SET phone = COALESCE(NULLIF(phone, ''), $2), 
+			     phone_verified = TRUE, 
+			     updated_at = now() 
+			 WHERE id::text = $1`,
+			existingID, phoneOrEmail,
+		)
 		return existingID, nil
 	}
 
@@ -111,7 +137,7 @@ func (r *Repository) FindOrCreateUserByPhone(ctx context.Context, phone string) 
 		`INSERT INTO users (phone, full_name, role, status, phone_verified)
 		 VALUES ($1, $2, 'CUSTOMER', 'ACTIVE', TRUE)
 		 RETURNING id::text`,
-		phone, "User-"+phone[max(0, len(phone)-4):],
+		phoneOrEmail, "User-"+phoneOrEmail[max(0, len(phoneOrEmail)-4):],
 	).Scan(&newID)
 	return newID, err
 }

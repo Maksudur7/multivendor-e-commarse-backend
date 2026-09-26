@@ -60,8 +60,8 @@ func (s *Service) GetProfile(ctx context.Context, userID string) (*UserProfile, 
 	return s.repo.GetProfileByID(ctx, userID)
 }
 
-func (s *Service) UpdateProfile(ctx context.Context, userID, fullName, avatarURL, phone string) error {
-	return s.repo.UpdateProfile(ctx, userID, fullName, avatarURL, phone)
+func (s *Service) UpdateProfile(ctx context.Context, userID, fullName, avatarURL, phone, email, dateOfBirth, gender, preferredLanguage string) error {
+	return s.repo.UpdateProfile(ctx, userID, fullName, avatarURL, phone, email, dateOfBirth, gender, preferredLanguage)
 }
 
 // --- Password operations ---

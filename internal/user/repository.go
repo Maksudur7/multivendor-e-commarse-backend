@@ -27,6 +27,9 @@ type UserProfile struct {
 	EmailVerified     bool      `json:"email_verified"`
 	PhoneVerified     bool      `json:"phone_verified"`
 	ProfilePictureURL string    `json:"profile_picture_url"`
+	DateOfBirth       string    `json:"date_of_birth,omitempty"`
+	Gender            string    `json:"gender,omitempty"`
+	PreferredLanguage string    `json:"preferred_language,omitempty"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }
@@ -36,27 +39,32 @@ func (r *Repository) GetProfileByID(ctx context.Context, userID string) (*UserPr
 		return nil, nil
 	}
 	var id, fullName, role, status string
-	var email, phone, profilePic *string
+	var email, phone, profilePic, dob, gender, prefLang *string
 	var emailVerified, phoneVerified bool
 	var createdAt, updatedAt time.Time
 
 	err := r.db.QueryRow(ctx,
 		`SELECT id::text, email, phone, full_name, role, status,
 		        email_verified, phone_verified, profile_picture_url,
+		        date_of_birth::text, gender, preferred_language,
 		        created_at, updated_at
 		 FROM users WHERE id::text = $1`,
 		userID,
 	).Scan(&id, &email, &phone, &fullName, &role, &status,
 		&emailVerified, &phoneVerified, &profilePic,
+		&dob, &gender, &prefLang,
 		&createdAt, &updatedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	emailStr, phoneStr, picStr := "", "", ""
+	emailStr, phoneStr, picStr, dobStr, genderStr, langStr := "", "", "", "", "", ""
 	if email != nil { emailStr = *email }
 	if phone != nil { phoneStr = *phone }
 	if profilePic != nil { picStr = *profilePic }
+	if dob != nil { dobStr = *dob }
+	if gender != nil { genderStr = *gender }
+	if prefLang != nil { langStr = *prefLang }
 
 	return &UserProfile{
 		ID:                id,
@@ -68,12 +76,15 @@ func (r *Repository) GetProfileByID(ctx context.Context, userID string) (*UserPr
 		EmailVerified:     emailVerified,
 		PhoneVerified:     phoneVerified,
 		ProfilePictureURL: picStr,
+		DateOfBirth:       dobStr,
+		Gender:            genderStr,
+		PreferredLanguage: langStr,
 		CreatedAt:         createdAt,
 		UpdatedAt:         updatedAt,
 	}, nil
 }
 
-func (r *Repository) UpdateProfile(ctx context.Context, userID, fullName, avatarURL, phone string) error {
+func (r *Repository) UpdateProfile(ctx context.Context, userID, fullName, avatarURL, phone, email, dateOfBirth, gender, preferredLanguage string) error {
 	if r.db == nil {
 		return nil
 	}
@@ -94,6 +105,26 @@ func (r *Repository) UpdateProfile(ctx context.Context, userID, fullName, avatar
 	if phone != "" {
 		setClauses = append(setClauses, fmt.Sprintf("phone = $%d", argIdx))
 		args = append(args, phone)
+		argIdx++
+	}
+	if email != "" {
+		setClauses = append(setClauses, fmt.Sprintf("email = $%d", argIdx))
+		args = append(args, email)
+		argIdx++
+	}
+	if dateOfBirth != "" {
+		setClauses = append(setClauses, fmt.Sprintf("date_of_birth = $%d::date", argIdx))
+		args = append(args, dateOfBirth)
+		argIdx++
+	}
+	if gender != "" {
+		setClauses = append(setClauses, fmt.Sprintf("gender = $%d", argIdx))
+		args = append(args, gender)
+		argIdx++
+	}
+	if preferredLanguage != "" {
+		setClauses = append(setClauses, fmt.Sprintf("preferred_language = $%d", argIdx))
+		args = append(args, preferredLanguage)
 		argIdx++
 	}
 
