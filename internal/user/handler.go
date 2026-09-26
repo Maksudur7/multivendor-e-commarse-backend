@@ -62,6 +62,9 @@ func (h *Handler) GetProfile(c *fiber.Ctx) error {
 		"email_verified":      profile.EmailVerified,
 		"phone_verified":      profile.PhoneVerified,
 		"profile_picture_url": profile.ProfilePictureURL,
+		"date_of_birth":       profile.DateOfBirth,
+		"gender":              profile.Gender,
+		"preferred_language": profile.PreferredLanguage,
 		"created_at":          profile.CreatedAt,
 		"updated_at":          profile.UpdatedAt,
 	})
