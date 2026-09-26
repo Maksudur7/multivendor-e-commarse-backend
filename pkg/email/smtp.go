@@ -107,6 +107,8 @@ func (c *Client) sendViaHTTPAPI(ctx context.Context, to, subject, htmlBody strin
 			provider = "sendgrid"
 		} else if strings.HasPrefix(c.apiKey, "xkeysib") {
 			provider = "brevo"
+		} else if strings.HasPrefix(c.apiKey, "bird") || strings.Contains(c.apiKey, "bird") {
+			provider = "bird"
 		} else {
 			provider = "resend"
 		}
@@ -119,6 +121,8 @@ func (c *Client) sendViaHTTPAPI(ctx context.Context, to, subject, htmlBody strin
 		return c.sendSendGrid(ctx, fromAddr, to, subject, htmlBody)
 	case "brevo":
 		return c.sendBrevo(ctx, fromAddr, to, subject, htmlBody)
+	case "bird":
+		return c.sendBird(ctx, fromAddr, to, subject, htmlBody)
 	default:
 		return c.sendResend(ctx, fromAddr, to, subject, htmlBody)
 	}
@@ -233,6 +237,48 @@ func (c *Client) sendBrevo(ctx context.Context, from, to, subject, htmlBody stri
 	if resp.StatusCode >= 400 {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("brevo returned HTTP %d: %s", resp.StatusCode, string(body))
+	}
+	return nil
+}
+
+// Bird HTTP API (https://bird.com)
+func (c *Client) sendBird(ctx context.Context, from, to, subject, htmlBody string) error {
+	if from == "" {
+		from = "no-reply@ecom.internal"
+	}
+	payload := map[string]interface{}{
+		"receiver": map[string]interface{}{
+			"contacts": []map[string]string{{"identifierValue": to}},
+		},
+		"body": map[string]interface{}{
+			"type": "html",
+			"html": map[string]string{
+				"text": htmlBody,
+				"title": subject,
+			},
+		},
+	}
+	jsonBytes, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.bird.com/v1/messages", bytes.NewReader(jsonBytes))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "AccessKey "+c.apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("bird returned HTTP %d: %s", resp.StatusCode, string(body))
 	}
 	return nil
 }
