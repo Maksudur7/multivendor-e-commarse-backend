@@ -413,7 +413,12 @@ func (h *Handler) VerifyEmail(c *fiber.Ctx) error {
 	wantsJSON := c.Get("Accept") == "application/json" || c.Query("format") == "json"
 
 	if token == "" || uid == "" {
-		debugMsg := fmt.Sprintf("Token and user ID are missing. [token='%s', uid='%s', origURL='%s']", token, uid, c.OriginalURL())
+		headerMap := make(map[string]string)
+		c.Request().Header.VisitAll(func(k, v []byte) {
+			headerMap[string(k)] = string(v)
+		})
+		debugMsg := fmt.Sprintf("Token and user ID are missing. [token='%s', uid='%s', origURL='%s', rawQuery='%s', requestURI='%s', headers=%v]",
+			token, uid, c.OriginalURL(), string(c.Request().URI().QueryString()), string(c.Request().Header.RequestURI()), headerMap)
 		if wantsJSON {
 			return response.BadRequest(c, debugMsg)
 		}
