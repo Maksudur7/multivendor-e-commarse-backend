@@ -34,19 +34,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// Ensure Vercel query string and original path are preserved for Fiber adaptor
 	if fwd := r.Header.Get("X-Forwarded-Uri"); fwd != "" {
 		if u, err := url.Parse(fwd); err == nil {
-			if u.Path != "" {
-				r.URL.Path = u.Path
-			}
-			if u.RawQuery != "" {
-				r.URL.RawQuery = u.RawQuery
-			}
+			r.URL = u
+			r.RequestURI = fwd
 		}
-	}
-
-	if r.URL.RawQuery == "" && r.RequestURI != "" {
-		if u, err := url.ParseRequestURI(r.RequestURI); err == nil && u.RawQuery != "" {
-			r.URL.RawQuery = u.RawQuery
-		}
+	} else if orig := r.Header.Get("X-Matched-Path"); orig != "" && r.URL.RawQuery != "" {
+		r.RequestURI = orig + "?" + r.URL.RawQuery
 	}
 
 	httpHandler(w, r)
