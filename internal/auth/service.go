@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/big"
 	"regexp"
+	"strings"
 	"time"
 	"unicode"
 
@@ -20,6 +21,7 @@ import (
 	pkgemail "github.com/yourusername/ecom-backend/pkg/email"
 	"github.com/yourusername/ecom-backend/pkg/oauth"
 	pkgsms "github.com/yourusername/ecom-backend/pkg/sms"
+	pkgwhatsapp "github.com/yourusername/ecom-backend/pkg/whatsapp"
 )
 
 // AuthUser is an alias for the repo DBUser to keep service layer clean.
@@ -41,6 +43,7 @@ type Service struct {
 	jwtRefreshExpiry time.Duration
 	redis            *redis.Client
 	sms              *pkgsms.Client
+	whatsapp         *pkgwhatsapp.Client
 	email            *pkgemail.Client
 	google           *oauth.GoogleClient
 	appBaseURL       string
@@ -59,6 +62,7 @@ func NewService(
 		jwtRefreshExpiry: cfg.JWT.RefreshExpiry,
 		redis:            redisClient,
 		sms:              pkgsms.NewClient(cfg.SMS.APIKey, cfg.SMS.SenderID),
+		whatsapp:         pkgwhatsapp.NewClient(cfg.WhatsApp.InstanceID, cfg.WhatsApp.Token),
 		email:            pkgemail.NewClient(cfg.Email),
 		google:           oauth.NewGoogleClient(cfg.Google.ClientID, cfg.Google.ClientSecret, cfg.Google.RedirectURL),
 		appBaseURL:       cfg.App.BaseURL,
@@ -207,14 +211,24 @@ func (s *Service) IsTokenBlacklisted(ctx context.Context, jti string) bool {
 
 // SendOTPResult is returned by SendOTP.
 type SendOTPResult struct {
-	ExpiresIn string
+	Target        string   `json:"target"`
+	ExpiresIn     int      `json:"expires_in"` // seconds
+	DispatchedVia []string `json:"dispatched_via"`
+	DevOTP        string   `json:"dev_otp,omitempty"`
+	IsDevMode     bool     `json:"is_dev_mode"`
 }
 
 // SendOTP generates a 6-digit OTP, SHA-256 hashes it, stores the hash,
-// and dispatches the raw OTP via SMS (for phone) or email.
-func (s *Service) SendOTP(ctx context.Context, target, purpose string) (*SendOTPResult, error) {
+// and dispatches the raw OTP via WhatsApp, SMS (for phone) or email.
+// channel optional: "WHATSAPP", "SMS", "AUTO" / ""
+func (s *Service) SendOTP(ctx context.Context, target, purpose, channel string) (*SendOTPResult, error) {
 	if s.repo.db == nil {
 		return nil, fmt.Errorf("service unavailable: database not connected")
+	}
+
+	// Normalize phone number if target is a phone number
+	if pkgsms.IsPhone(target) {
+		target = pkgsms.NormalizePhone(target)
 	}
 
 	otpCode := s.GenerateNumericOTP(6)
@@ -224,24 +238,74 @@ func (s *Service) SendOTP(ctx context.Context, target, purpose string) (*SendOTP
 		return nil, fmt.Errorf("failed to store OTP: %w", err)
 	}
 
-	// Dispatch OTP via SMS or Email depending on target format.
+	var dispatchedVia []string
+	channelUpper := strings.ToUpper(strings.TrimSpace(channel))
+	isDevMode := false
+
 	if pkgsms.IsPhone(target) {
-		go func() {
-			if err := s.sms.SendOTP(context.Background(), target, otpCode); err != nil {
-				fmt.Printf("[EMAIL-ERR] SMS send failed to %s: %v\n", target, err)
+		waLive := s.whatsapp.IsConfigured()
+		smsLive := s.sms.IsConfigured()
+
+		var sendErr error
+
+		// Dispatch WhatsApp if requested or AUTO (if live)
+		if channelUpper == "WHATSAPP" || channelUpper == "" || channelUpper == "AUTO" || channelUpper == "ALL" {
+			if waLive {
+				if err := s.whatsapp.SendOTP(ctx, target, otpCode); err != nil {
+					sendErr = err
+				} else {
+					dispatchedVia = append(dispatchedVia, "whatsapp")
+				}
 			}
-		}()
+		}
+
+		// Dispatch SMS if requested or AUTO (if live)
+		if channelUpper == "SMS" || channelUpper == "" || channelUpper == "AUTO" || channelUpper == "ALL" {
+			if smsLive {
+				if err := s.sms.SendOTP(ctx, target, otpCode); err != nil {
+					sendErr = err
+				} else {
+					dispatchedVia = append(dispatchedVia, "sms")
+				}
+			}
+		}
+
+		// Explicit channel validation & error handling
+		if channelUpper == "WHATSAPP" && !waLive {
+			return nil, fmt.Errorf("WhatsApp gateway (UltraMsg) is not configured with live API credentials")
+		}
+		if channelUpper == "SMS" && !smsLive {
+			return nil, fmt.Errorf("SMS gateway (Greenweb) is not configured with live API credentials")
+		}
+
+		// If no live gateways dispatched, fall back to dev mode
+		if len(dispatchedVia) == 0 {
+			if sendErr != nil {
+				return nil, fmt.Errorf("failed to send OTP: %w", sendErr)
+			}
+			isDevMode = true
+			dispatchedVia = append(dispatchedVia, "dev_console")
+			_ = s.sms.SendOTP(ctx, target, otpCode)
+			_ = s.whatsapp.SendOTP(ctx, target, otpCode)
+		}
 	} else {
-		go func() {
-			if err := s.email.SendOTP(context.Background(), target, otpCode); err != nil {
-				fmt.Printf("[EMAIL-ERR] Email OTP send failed to %s: %v\n", target, err)
-			} else {
-				fmt.Printf("[EMAIL-OK] OTP sent to %s\n", target)
-			}
-		}()
+		if err := s.email.SendOTP(ctx, target, otpCode); err != nil {
+			return nil, fmt.Errorf("failed to send Email OTP to %s: %w", target, err)
+		}
+		dispatchedVia = append(dispatchedVia, "email")
 	}
 
-	return &SendOTPResult{ExpiresIn: "300s"}, nil
+	res := &SendOTPResult{
+		Target:        target,
+		ExpiresIn:     300,
+		DispatchedVia: dispatchedVia,
+		IsDevMode:     isDevMode,
+	}
+	if isDevMode {
+		res.DevOTP = otpCode
+	}
+
+	return res, nil
 }
 
 // maxOTPAttempts is the maximum number of wrong OTP guesses before lockout.
@@ -261,6 +325,11 @@ type VerifyOTPResult struct {
 func (s *Service) VerifyOTP(ctx context.Context, target, otpCode, purpose string) (*VerifyOTPResult, error) {
 	if s.repo.db == nil {
 		return nil, fmt.Errorf("service unavailable: database not connected")
+	}
+
+	// Normalize phone number if target is a phone number
+	if pkgsms.IsPhone(target) {
+		target = pkgsms.NormalizePhone(target)
 	}
 
 	// Check attempt count BEFORE verifying (brute-force lockout).
@@ -537,26 +606,23 @@ func (s *Service) ResendVerificationEmail(ctx context.Context, userID string) er
 type PasswordResetRequestResult struct{}
 
 // PasswordResetRequest generates a reset OTP and sends it via email.
-// Always returns success to prevent email enumeration.
 func (s *Service) PasswordResetRequest(ctx context.Context, email string) (*PasswordResetRequestResult, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil || user == nil {
-		return &PasswordResetRequestResult{}, nil
+		return nil, fmt.Errorf("no account registered with email address: %s", email)
 	}
 
 	otpCode := s.GenerateNumericOTP(6)
 	hashedOTP := HashSHA256(otpCode)
 	expiresAt := time.Now().Add(15 * time.Minute)
-	_ = s.repo.InsertOTP(ctx, email, hashedOTP, "PASSWORD_RESET", expiresAt)
+	if err := s.repo.InsertOTP(ctx, email, hashedOTP, "PASSWORD_RESET", expiresAt); err != nil {
+		return nil, fmt.Errorf("failed to save reset OTP: %w", err)
+	}
 
-	// Send password-reset OTP via email asynchronously.
-	go func() {
-		if err := s.email.SendPasswordResetOTP(context.Background(), email, otpCode); err != nil {
-			fmt.Printf("[EMAIL-ERR] Password reset OTP failed to %s: %v\n", email, err)
-		} else {
-			fmt.Printf("[EMAIL-OK] Password reset OTP sent to %s\n", email)
-		}
-	}()
+	// Send password-reset OTP via email.
+	if err := s.email.SendPasswordResetOTP(ctx, email, otpCode); err != nil {
+		return nil, fmt.Errorf("failed to send password reset email to %s: %w", email, err)
+	}
 
 	return &PasswordResetRequestResult{}, nil
 }

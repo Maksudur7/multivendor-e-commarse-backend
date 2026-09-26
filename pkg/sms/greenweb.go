@@ -41,8 +41,8 @@ func NewClient(apiKey, senderID string) *Client {
 // Send delivers an SMS to the given phone number.
 // phone must be a Bangladeshi number (01XXXXXXXXX or +8801XXXXXXXXX).
 func (c *Client) Send(ctx context.Context, phone, message string) error {
-	if c.apiKey == "" {
-		log.Warn().Msg("sms: API key not configured — skipping SMS dispatch")
+	if c.apiKey == "" || strings.Contains(c.apiKey, "sample") {
+		log.Info().Str("to", phone).Msgf("📱 [SMS DEV MODE] Target: %s | Message: %s", phone, message)
 		return nil
 	}
 
@@ -110,8 +110,31 @@ func (c *Client) SendPasswordResetOTP(ctx context.Context, phone, otpCode string
 	return c.Send(ctx, phone, msg)
 }
 
+// IsConfigured returns true if a live SMS API key is configured.
+func (c *Client) IsConfigured() bool {
+	return c.apiKey != "" && !strings.Contains(c.apiKey, "sample")
+}
+
 // IsPhone returns true if the target looks like a phone number (not an email).
 func IsPhone(target string) bool {
-	target = strings.TrimPrefix(target, "+")
+	target = strings.TrimPrefix(strings.TrimSpace(target), "+")
 	return len(target) >= 10 && !strings.Contains(target, "@")
 }
+
+// NormalizePhone normalizes phone numbers to standard E.164 format (e.g. +8801XXXXXXXXX).
+func NormalizePhone(phone string) string {
+	phone = strings.TrimSpace(phone)
+	phone = strings.ReplaceAll(phone, " ", "")
+	phone = strings.ReplaceAll(phone, "-", "")
+	if strings.HasPrefix(phone, "01") && len(phone) == 11 {
+		return "+88" + phone
+	}
+	if strings.HasPrefix(phone, "8801") && len(phone) == 13 {
+		return "+" + phone
+	}
+	if !strings.HasPrefix(phone, "+") && len(phone) >= 10 && !strings.Contains(phone, "@") {
+		return "+" + phone
+	}
+	return phone
+}
+

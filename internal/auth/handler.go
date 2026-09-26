@@ -80,6 +80,7 @@ type sendOTPReq struct {
 	Target  string `json:"target"`
 	Phone   string `json:"phone"`
 	Purpose string `json:"purpose"`
+	Channel string `json:"channel"` // "WHATSAPP", "SMS", "EMAIL", "AUTO"
 }
 
 type verifyOTPReq struct {
@@ -118,7 +119,7 @@ type passwordResetReq struct {
 // ── Handlers ─────────────────────────────────────────────────────────────────
 
 // SendOTP requests an OTP for the given phone/email.
-// The OTP is delivered via SMS or email — NEVER in the API response.
+// The OTP is delivered via WhatsApp, SMS or email.
 func (h *Handler) SendOTP(c *fiber.Ctx) error {
 	var req sendOTPReq
 	if err := c.BodyParser(&req); err != nil {
@@ -137,17 +138,24 @@ func (h *Handler) SendOTP(c *fiber.Ctx) error {
 		req.Purpose = "LOGIN"
 	}
 
-	result, err := h.service.SendOTP(c.Context(), req.Target, req.Purpose)
+	result, err := h.service.SendOTP(c.Context(), req.Target, req.Purpose, req.Channel)
 	if err != nil {
 		return response.Error(c, fiber.StatusInternalServerError,
-			"Failed to send OTP. Please try again later.", nil)
+			"Failed to send OTP: "+err.Error(), nil)
 	}
 
-	return response.Success(c, fiber.StatusOK, "OTP sent successfully", fiber.Map{
-		"target":     req.Target,
-		"expires_in": result.ExpiresIn,
-		// OTP is dispatched via SMS/email — not included here.
-	})
+	resMap := fiber.Map{
+		"target":         result.Target,
+		"expires_in":     result.ExpiresIn,
+		"dispatched_via": result.DispatchedVia,
+	}
+	if result.IsDevMode {
+		resMap["dev_otp"] = result.DevOTP
+		resMap["dev_note"] = "Development mode: No live gateway configured for this target. OTP is logged to server console."
+	}
+
+	msg := fmt.Sprintf("OTP sent successfully via %s to %s", strings.Join(result.DispatchedVia, " & "), result.Target)
+	return response.Success(c, fiber.StatusOK, msg, resMap)
 }
 
 // VerifyOTP checks the submitted OTP and returns a token pair on success.
@@ -295,7 +303,6 @@ func (h *Handler) Logout(c *fiber.Ctx) error {
 }
 
 // PasswordResetRequest generates a reset OTP and dispatches it via email.
-// Always returns 200 regardless of whether the email exists.
 func (h *Handler) PasswordResetRequest(c *fiber.Ctx) error {
 	var req passwordResetRequestReq
 	if err := c.BodyParser(&req); err != nil {
@@ -306,10 +313,17 @@ func (h *Handler) PasswordResetRequest(c *fiber.Ctx) error {
 		return response.BadRequest(c, "Email is required")
 	}
 
-	_, _ = h.service.PasswordResetRequest(c.Context(), req.Email)
+	_, err := h.service.PasswordResetRequest(c.Context(), req.Email)
+	if err != nil {
+		if strings.Contains(err.Error(), "no account registered") {
+			return response.Error(c, fiber.StatusNotFound, err.Error(), nil)
+		}
+		return response.Error(c, fiber.StatusInternalServerError, err.Error(), nil)
+	}
 
 	return response.Success(c, fiber.StatusOK,
-		"If this email is registered, a password reset OTP has been sent.", fiber.Map{
+		"Password reset OTP sent successfully to "+req.Email, fiber.Map{
+			"email":      req.Email,
 			"status":     "DISPATCHED",
 			"expires_in": "900s",
 		})
@@ -395,12 +409,13 @@ func (h *Handler) GoogleAuthRedirect(c *fiber.Ctx) error {
 		return response.InternalError(c)
 	}
 
+	isSecure := c.Protocol() == "https"
 	c.Cookie(&fiber.Cookie{
 		Name:     "oauth_state",
 		Value:    state,
 		MaxAge:   300, // 5 minutes
 		HTTPOnly: true,
-		Secure:   true,
+		Secure:   isSecure,
 		SameSite: "Lax",
 	})
 
@@ -416,6 +431,7 @@ func (h *Handler) GoogleCallback(c *fiber.Ctx) error {
 			"Google OAuth is not configured.", nil)
 	}
 
+	isSecure := c.Protocol() == "https"
 	// Validate CSRF state.
 	state := c.Query("state")
 	cookieState := c.Cookies("oauth_state")
@@ -425,7 +441,7 @@ func (h *Handler) GoogleCallback(c *fiber.Ctx) error {
 	}
 
 	// Clear the state cookie.
-	c.Cookie(&fiber.Cookie{Name: "oauth_state", Value: "", MaxAge: -1})
+	c.Cookie(&fiber.Cookie{Name: "oauth_state", Value: "", MaxAge: -1, Secure: isSecure})
 
 	code := c.Query("code")
 	if code == "" {
