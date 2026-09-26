@@ -48,24 +48,43 @@ func (c *Client) IsConfigured() bool {
 	return c.host != "" && c.username != "" && c.password != ""
 }
 
-// send is the core SMTP dispatcher.
-func (c *Client) send(_ context.Context, to, subject, htmlBody string) error {
+// send is the core SMTP dispatcher with automatic port fallback.
+func (c *Client) send(ctx context.Context, to, subject, htmlBody string) error {
 	if !c.IsConfigured() {
 		log.Warn().Str("to", to).Msg("email: SMTP not configured — skipping email dispatch")
 		return nil
 	}
 
-	addr := fmt.Sprintf("%s:%d", c.host, c.port)
+	targetPort := c.port
+	if targetPort == 0 {
+		targetPort = 587
+	}
+
+	err := c.dispatchSingle(targetPort, to, subject, htmlBody)
+	if err != nil && targetPort != 587 {
+		log.Warn().Err(err).Int("failed_port", targetPort).Msg("email: Primary SMTP port failed, retrying via Port 587 STARTTLS...")
+		err = c.dispatchSingle(587, to, subject, htmlBody)
+	}
+
+	if err != nil {
+		log.Error().Err(err).Str("to", to).Msg("email: All SMTP dispatch attempts failed")
+		return err
+	}
+
+	log.Info().Str("to", to).Str("subject", subject).Msg("email: dispatched successfully")
+	return nil
+}
+
+func (c *Client) dispatchSingle(port int, to, subject, htmlBody string) error {
+	addr := fmt.Sprintf("%s:%d", c.host, port)
 	cleanPass := strings.ReplaceAll(c.password, " ", "")
 	auth := smtp.PlainAuth("", c.username, cleanPass, c.host)
 
-	// from header — use clean username to satisfy Gmail SPF/DMARC alignment
 	fromAddr := c.from
 	if fromAddr == "" {
 		fromAddr = c.username
 	}
 
-	// Build RFC 5322 compliant headers with domain matching sender
 	domain := "gmail.com"
 	if parts := strings.Split(c.username, "@"); len(parts) == 2 {
 		domain = parts[1]
@@ -87,19 +106,18 @@ func (c *Client) send(_ context.Context, to, subject, htmlBody string) error {
 
 	var err error
 
-	// Port 465 → implicit TLS; port 587/25 → STARTTLS
-	if c.port == 465 {
+	if port == 465 {
 		tlsCfg := &tls.Config{
 			InsecureSkipVerify: false,
 			ServerName:         c.host,
 			MinVersion:         tls.VersionTLS12,
 		}
 		conn, dialErr := tls.DialWithDialer(
-			&net.Dialer{Timeout: 10 * time.Second},
+			&net.Dialer{Timeout: 5 * time.Second},
 			"tcp", addr, tlsCfg,
 		)
 		if dialErr != nil {
-			return fmt.Errorf("email: TLS dial failed: %w", dialErr)
+			return fmt.Errorf("email: TLS dial failed on port 465: %w", dialErr)
 		}
 		defer conn.Close()
 
@@ -125,54 +143,47 @@ func (c *Client) send(_ context.Context, to, subject, htmlBody string) error {
 		if _, err = fmt.Fprint(w, msg); err != nil {
 			return fmt.Errorf("email: write message failed: %w", err)
 		}
-		err = w.Close()
-	} else {
-		// STARTTLS (port 587 / 2525) with explicit 10s timeout dialer
-		conn, dialErr := net.DialTimeout("tcp", addr, 10*time.Second)
-		if dialErr != nil {
-			return fmt.Errorf("email: STARTTLS TCP dial failed: %w", dialErr)
-		}
-		defer conn.Close()
-
-		client, clientErr := smtp.NewClient(conn, c.host)
-		if clientErr != nil {
-			return fmt.Errorf("email: SMTP client creation failed: %w", clientErr)
-		}
-		defer client.Quit()
-
-		tlsCfg := &tls.Config{
-			ServerName: c.host,
-			MinVersion: tls.VersionTLS12,
-		}
-		if err = client.StartTLS(tlsCfg); err != nil {
-			return fmt.Errorf("email: STARTTLS upgrade failed: %w", err)
-		}
-
-		if err = client.Auth(auth); err != nil {
-			return fmt.Errorf("email: SMTP auth failed: %w", err)
-		}
-		if err = client.Mail(c.username); err != nil {
-			return fmt.Errorf("email: MAIL FROM failed: %w", err)
-		}
-		if err = client.Rcpt(to); err != nil {
-			return fmt.Errorf("email: RCPT TO failed: %w", err)
-		}
-		w, wErr := client.Data()
-		if wErr != nil {
-			return fmt.Errorf("email: DATA command failed: %w", wErr)
-		}
-		if _, err = fmt.Fprint(w, msg); err != nil {
-			return fmt.Errorf("email: write message failed: %w", err)
-		}
-		err = w.Close()
+		return w.Close()
 	}
 
-	if err != nil {
-		return fmt.Errorf("email: send failed: %w", err)
+	// Port 587 / STARTTLS
+	conn, dialErr := net.DialTimeout("tcp", addr, 10*time.Second)
+	if dialErr != nil {
+		return fmt.Errorf("email: STARTTLS TCP dial failed on port %d: %w", port, dialErr)
+	}
+	defer conn.Close()
+
+	client, clientErr := smtp.NewClient(conn, c.host)
+	if clientErr != nil {
+		return fmt.Errorf("email: SMTP client creation failed: %w", clientErr)
+	}
+	defer client.Quit()
+
+	tlsCfg := &tls.Config{
+		ServerName: c.host,
+		MinVersion: tls.VersionTLS12,
+	}
+	if err = client.StartTLS(tlsCfg); err != nil {
+		return fmt.Errorf("email: STARTTLS upgrade failed: %w", err)
 	}
 
-	log.Info().Str("to", to).Str("subject", subject).Msg("email: dispatched successfully")
-	return nil
+	if err = client.Auth(auth); err != nil {
+		return fmt.Errorf("email: SMTP auth failed: %w", err)
+	}
+	if err = client.Mail(c.username); err != nil {
+		return fmt.Errorf("email: MAIL FROM failed: %w", err)
+	}
+	if err = client.Rcpt(to); err != nil {
+		return fmt.Errorf("email: RCPT TO failed: %w", err)
+	}
+	w, wErr := client.Data()
+	if wErr != nil {
+		return fmt.Errorf("email: DATA command failed: %w", wErr)
+	}
+	if _, err = fmt.Fprint(w, msg); err != nil {
+		return fmt.Errorf("email: write message failed: %w", err)
+	}
+	return w.Close()
 }
 
 // ── OTP Email ─────────────────────────────────────────────────────────────────
