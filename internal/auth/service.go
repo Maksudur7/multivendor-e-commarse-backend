@@ -619,10 +619,16 @@ func (s *Service) PasswordResetRequest(ctx context.Context, email string) (*Pass
 		return nil, fmt.Errorf("failed to save reset OTP: %w", err)
 	}
 
-	// Send password-reset OTP via email.
-	if err := s.email.SendPasswordResetOTP(ctx, email, otpCode); err != nil {
-		return nil, fmt.Errorf("failed to send password reset email to %s: %w", email, err)
-	}
+	// Send password-reset OTP via email asynchronously in a background goroutine.
+	go func() {
+		bgCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := s.email.SendPasswordResetOTP(bgCtx, email, otpCode); err != nil {
+			fmt.Printf("[EMAIL-ERR] Failed to send password reset email to %s: %v\n", email, err)
+		} else {
+			fmt.Printf("[EMAIL-OK] Password reset email sent to %s\n", email)
+		}
+	}()
 
 	return &PasswordResetRequestResult{}, nil
 }

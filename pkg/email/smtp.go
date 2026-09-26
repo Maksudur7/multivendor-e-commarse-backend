@@ -127,8 +127,44 @@ func (c *Client) send(_ context.Context, to, subject, htmlBody string) error {
 		}
 		err = w.Close()
 	} else {
-		// STARTTLS (port 587)
-		err = smtp.SendMail(addr, auth, c.username, []string{to}, []byte(msg))
+		// STARTTLS (port 587 / 2525) with explicit 10s timeout dialer
+		conn, dialErr := net.DialTimeout("tcp", addr, 10*time.Second)
+		if dialErr != nil {
+			return fmt.Errorf("email: STARTTLS TCP dial failed: %w", dialErr)
+		}
+		defer conn.Close()
+
+		client, clientErr := smtp.NewClient(conn, c.host)
+		if clientErr != nil {
+			return fmt.Errorf("email: SMTP client creation failed: %w", clientErr)
+		}
+		defer client.Quit()
+
+		tlsCfg := &tls.Config{
+			ServerName: c.host,
+			MinVersion: tls.VersionTLS12,
+		}
+		if err = client.StartTLS(tlsCfg); err != nil {
+			return fmt.Errorf("email: STARTTLS upgrade failed: %w", err)
+		}
+
+		if err = client.Auth(auth); err != nil {
+			return fmt.Errorf("email: SMTP auth failed: %w", err)
+		}
+		if err = client.Mail(c.username); err != nil {
+			return fmt.Errorf("email: MAIL FROM failed: %w", err)
+		}
+		if err = client.Rcpt(to); err != nil {
+			return fmt.Errorf("email: RCPT TO failed: %w", err)
+		}
+		w, wErr := client.Data()
+		if wErr != nil {
+			return fmt.Errorf("email: DATA command failed: %w", wErr)
+		}
+		if _, err = fmt.Fprint(w, msg); err != nil {
+			return fmt.Errorf("email: write message failed: %w", err)
+		}
+		err = w.Close()
 	}
 
 	if err != nil {
