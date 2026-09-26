@@ -39,6 +39,11 @@ func (h *Handler) RegisterRoutes(router fiber.Router, authMiddleware fiber.Handl
 
 	admin := router.Group("/admin/kyc", authMiddleware, middleware.RequireRole("ADMIN", "SUPER_ADMIN", "ADMIN_OPS"))
 	admin.Put("/review/:userId", h.ReviewKYC)
+
+	adminUsers := router.Group("/admin/users", authMiddleware, middleware.RequireRole("ADMIN", "SUPER_ADMIN", "ADMIN_OPS"))
+	adminUsers.Get("/", h.ListUsersAdmin)
+	adminUsers.Put("/:id/role", h.UpdateUserRoleAdmin)
+	adminUsers.Put("/:id/status", h.UpdateUserStatusAdmin)
 }
 
 func (h *Handler) GetProfile(c *fiber.Ctx) error {
@@ -386,3 +391,99 @@ func (h *Handler) ReviewKYC(c *fiber.Ctx) error {
 		"rejection_reason": req.RejectionReason,
 	})
 }
+
+func (h *Handler) ListUsersAdmin(c *fiber.Ctx) error {
+	role := c.Query("role")
+	kycStatus := c.Query("kyc_status")
+	userStatus := c.Query("status")
+	search := c.Query("search")
+	limit := c.QueryInt("limit", 20)
+	page := c.QueryInt("page", 1)
+	offset := (page - 1) * limit
+
+	users, total, err := h.service.ListUsersAdmin(c.Context(), role, kycStatus, userStatus, search, limit, offset)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to list users: "+err.Error(), nil)
+	}
+
+	return response.Success(c, fiber.StatusOK, "Admin users list fetched", fiber.Map{
+		"users": users,
+		"total": total,
+		"page":  page,
+		"limit": limit,
+	})
+}
+
+type UpdateUserRoleReq struct {
+	Role string `json:"role"`
+}
+
+func (h *Handler) UpdateUserRoleAdmin(c *fiber.Ctx) error {
+	targetUserID := c.Params("id")
+	var req UpdateUserRoleReq
+	if err := c.BodyParser(&req); err != nil {
+		return response.BadRequest(c, "Invalid input payload: "+err.Error())
+	}
+	if req.Role == "" {
+		return response.ValidationError(c, map[string]string{"role": "role is required"})
+	}
+
+	validRoles := map[string]bool{
+		"CUSTOMER": true, "VENDOR": true, "RESELLER": true, "AFFILIATE": true,
+		"RIDER": true, "SUPPORT_AGENT": true, "FINANCE_MANAGER": true,
+		"ADMIN": true, "SUPER_ADMIN": true, "ADMIN_OPS": true,
+	}
+
+	if !validRoles[strings.ToUpper(req.Role)] {
+		return response.BadRequest(c, "Invalid role name. Allowed roles: CUSTOMER, VENDOR, RESELLER, AFFILIATE, RIDER, SUPPORT_AGENT, FINANCE_MANAGER, ADMIN, SUPER_ADMIN, ADMIN_OPS")
+	}
+
+	affected, err := h.service.UpdateUserRoleAdmin(c.Context(), targetUserID, req.Role)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to update user role: "+err.Error(), nil)
+	}
+	if affected == 0 {
+		return response.NotFound(c, "User not found")
+	}
+
+	return response.Success(c, fiber.StatusOK, "User role updated successfully", fiber.Map{
+		"user_id":  targetUserID,
+		"new_role": strings.ToUpper(req.Role),
+	})
+}
+
+type UpdateUserStatusReq struct {
+	Status string `json:"status"`
+}
+
+func (h *Handler) UpdateUserStatusAdmin(c *fiber.Ctx) error {
+	targetUserID := c.Params("id")
+	var req UpdateUserStatusReq
+	if err := c.BodyParser(&req); err != nil {
+		return response.BadRequest(c, "Invalid input payload: "+err.Error())
+	}
+	if req.Status == "" {
+		return response.ValidationError(c, map[string]string{"status": "status is required"})
+	}
+
+	validStatuses := map[string]bool{
+		"ACTIVE": true, "SUSPENDED": true, "BANNED": true, "PENDING": true,
+	}
+	if !validStatuses[strings.ToUpper(req.Status)] {
+		return response.BadRequest(c, "Invalid status. Allowed values: ACTIVE, SUSPENDED, BANNED, PENDING")
+	}
+
+	affected, err := h.service.UpdateUserStatusAdmin(c.Context(), targetUserID, req.Status)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, "Failed to update user status: "+err.Error(), nil)
+	}
+	if affected == 0 {
+		return response.NotFound(c, "User not found")
+	}
+
+	return response.Success(c, fiber.StatusOK, "User status updated successfully", fiber.Map{
+		"user_id":    targetUserID,
+		"new_status": strings.ToUpper(req.Status),
+	})
+}
+

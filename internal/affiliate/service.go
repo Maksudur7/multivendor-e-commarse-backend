@@ -70,3 +70,12 @@ func (s *Service) UpdateProfile(ctx context.Context, userID string) error {
 func (s *Service) DeleteLink(ctx context.Context, linkID, userID string) error {
 	return s.repo.DeleteLink(ctx, linkID, userID)
 }
+
+func (s *Service) ListApplicationsAdmin(ctx context.Context, status string) ([]AffiliateAdminApplicationItem, error) {
+	return s.repo.ListApplicationsAdmin(ctx, status)
+}
+
+func (s *Service) ReviewApplicationAdmin(ctx context.Context, profileID, status string) (int64, error) {
+	return s.repo.ReviewApplicationAdmin(ctx, profileID, status)
+}
+

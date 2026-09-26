@@ -212,3 +212,55 @@ func (r *Repository) DeleteLink(ctx context.Context, linkID, userID string) erro
 		linkID, userID)
 	return err
 }
+
+type AffiliateAdminApplicationItem struct {
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	Status    string    `json:"status"`
+	RefCode   string    `json:"referral_code"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (r *Repository) ListApplicationsAdmin(ctx context.Context, status string) ([]AffiliateAdminApplicationItem, error) {
+	if r.db == nil {
+		return []AffiliateAdminApplicationItem{}, nil
+	}
+	whereClause := ""
+	args := []interface{}{}
+	if status != "" {
+		whereClause = " WHERE status = $1"
+		args = append(args, status)
+	}
+
+	rows, err := r.db.Query(ctx, "SELECT id::text, user_id::text, status, referral_code, created_at FROM affiliate_profiles"+whereClause+" ORDER BY created_at DESC", args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []AffiliateAdminApplicationItem{}
+	for rows.Next() {
+		var item AffiliateAdminApplicationItem
+		if err := rows.Scan(&item.ID, &item.UserID, &item.Status, &item.RefCode, &item.CreatedAt); err != nil {
+			return nil, err
+		}
+		list = append(list, item)
+	}
+	return list, nil
+}
+
+func (r *Repository) ReviewApplicationAdmin(ctx context.Context, profileID, status string) (int64, error) {
+	if r.db == nil {
+		return 0, nil
+	}
+	var userID string
+	err := r.db.QueryRow(ctx, "UPDATE affiliate_profiles SET status = $1, updated_at = now() WHERE id::text = $2 RETURNING user_id::text", status, profileID).Scan(&userID)
+	if err != nil {
+		return 0, err
+	}
+	if (status == "APPROVED" || status == "ACTIVE") && userID != "" {
+		_, _ = r.db.Exec(ctx, "UPDATE users SET role = 'AFFILIATE', updated_at = now() WHERE id::text = $1", userID)
+	}
+	return 1, nil
+}
+
