@@ -1,506 +1,359 @@
-# 🔐 Authentication মডিউল পূর্ণাঙ্গ ডকুমেন্টেশন ও Live Test Audit Report
+# 🔐 Authentication Module — Next.js App Router Integration Guide & Complete API Reference
 
 > **ফাইল লোকেশন:** `internal/auth/README.md`  
-> **বেস URL:** `http://localhost:8080/api/v1/auth`  
-> **টেস্ট স্ট্যাটাস:** **13/13 PASSED ✅ (100% Live Tested)**
+> **লাইভ Vercel Base URL:** `https://e-commarse-three.vercel.app/api/v1/auth`  
+> **লোকাল Base URL:** `http://localhost:8080/api/v1/auth`  
+> **টার্গেট ফ্রন্টএন্ড স্ট্যাক:** **Next.js (App Router 13/14/15) + TypeScript + Axios / Fetch**
 
 ---
 
-# 🧪 ১. Authentication System — সম্পূর্ণ বিস্তারিত Test Report
-
-**তারিখ:** ২৪ সেপ্টেম্বর, ২০২৬  
-**Test Email:** `foryoumehr@gmail.com`  
-**Test Phone:** `+8801700000000`  
-**Server:** `http://localhost:8080`  
-**Tool:** PowerShell + Go Script + Live Server + Greenweb SMS Gateway
-
----
-
-## ১.১ কিভাবে Test করা হয়েছে?
-
-Authentication system টি **End-to-End Live Testing** পদ্ধতিতে test করা হয়েছে।  
-অর্থাৎ real server চালু করে, real database (NeonDB PostgreSQL) ব্যবহার করে,  
-এবং real email (`foryoumehr@gmail.com`) এ actual email ও real phone number (`+8801700000000`) এ OTP টেস্ট সম্পন্ন করা হয়েছে।
-
-### Test Tools:
-
-| Tool | কাজ |
-|------|-----|
-| **PowerShell `Invoke-WebRequest`** | HTTP API call করতে |
-| **Go Script (`dbfix.go`, `test_otp_db.go` ইত্যাদি)** | DB সরাসরি check/fix করতে |
-| **Gmail Inbox** | Real email আসে কিনা দেখতে |
-| **Greenweb SMS Client** | SMS OTP dispatch ও বাংলা ফরম্যাট চেক করতে |
-| **Server Console Log** | `[EMAIL-OK]` / `[SMS-OK]` দেখতে |
-| **NeonDB (PostgreSQL)** | Data সঠিকভাবে save হচ্ছে কিনা |
-
----
-
-## ১.২ কী কী Test করা হয়েছে — বিস্তারিত
+## 📑 সুচিপত্র (Table of Contents)
+1. [আর্কিটেকচার ও Next.js সিকিউরিটি](#1-আর্কিটেকচার-ও-nextjs-সিকিউরিটি)
+2. [Next.js API Client Setup (Auto Token Refresh)](#2-nextjs-api-client-setup-auto-token-refresh)
+3. [Next.js Middleware (Protected Routes & Auth Guard)](#3-nextjs-middleware-protected-routes--auth-guard)
+4. [Next.js Email Register & Verification Flow](#4-nextjs-email-register--verification-flow)
+5. [Next.js Phone & WhatsApp OTP Login Component](#5-nextjs-phone--whatsapp-otp-login-component)
+6. [Next.js Google OAuth 2.0 Integration](#6-nextjs-google-oauth-20-integration)
+7. [Next.js Password Reset Flow](#7-nextjs-password-reset-flow)
+8. [সকল ১৬টি API এন্ডপয়েন্টের পুঙ্খানুপুঙ্খ নির্দেশিকা (Complete 16 APIs Reference)](#8-সকল-১৬টি-api-এন্ডপয়েন্টের-পুঙ্খানুপুঙ্খ-নির্দেশিকা-complete-16-apis-reference)
+   - [8.1 POST /auth/email/register](#81-post-authemailregister)
+   - [8.2 POST /auth/email/login](#82-post-authemaillogin)
+   - [8.3 POST /auth/otp/send](#83-post-authotpsend)
+   - [8.4 POST /auth/phone/send-otp](#84-post-authphonesend-otp)
+   - [8.5 POST /auth/otp/verify](#85-post-authotpverify)
+   - [8.6 POST /auth/refresh](#86-post-authrefresh)
+   - [8.7 GET /auth/email/verify](#87-get-authemailverify)
+   - [8.8 POST /auth/email/resend-verification](#88-post-authemailresend-verification)
+   - [8.9 POST /auth/password/reset-request](#89-post-authpasswordreset-request)
+   - [8.10 PUT /auth/password/reset](#810-put-authpasswordreset)
+   - [8.11 GET /auth/google](#811-get-authgoogle)
+   - [8.12 GET /auth/google/callback](#812-get-authgooglecallback)
+   - [8.13 POST /auth/logout](#813-post-authlogout)
+   - [8.14 GET /auth/me](#814-get-authme)
+   - [8.15 GET /auth/sessions](#815-get-authsessions)
+   - [8.16 DELETE /auth/sessions/:sessionId](#816-delete-authsessionssessionid)
 
 ---
 
-### 🔵 Test 1 — `POST /api/v1/auth/email/register`
-**উদ্দেশ্য:** নতুন account তৈরি করা
+# 1. আর্কিটেকচার ও Next.js সিকিউরিটি
 
-**কী দিয়ে Test করা হয়েছে:**
-```json
-{
-  "name": "Maksudur Rahman",
-  "email": "foryoumehr@gmail.com",
-  "password": "Test@1234",
-  "phone": "+8801700000000"
+এই ব্যাকএন্ডে **JWT Access Token (15m)** এবং **Refresh Token Rotation (7d)** ব্যবহৃত হয়েছে। Next.js App Router-এ ক্লায়েন্ট ও সার্ভার দুই জায়গাতেই টোকেন সিকিউর রাখতে নিচের প্র্যাকটিস ফলো করুন:
+
+| টোকেন | মেয়াদ | Next.js স্টোরেজ অবস্থান | ব্যবহার |
+|---|---|---|---|
+| **Access Token** | ১৫ মিনিট | `Cookies` (js-cookie) / Zustand Store | API Header: `Authorization: Bearer <access_token>` |
+| **Refresh Token** | ৭ দিন | `Cookies` (`httpOnly` secure) | `/auth/refresh` কল করার জন্য |
+
+---
+
+# 2. Next.js API Client Setup (Auto Token Refresh)
+
+আপনার Next.js প্রজেক্টের `lib/apiClient.ts` ফাইলে এই ক্লায়েন্টটি তৈরি করুন। এটি Access Token এর মেয়াদ শেষ হলে ব্যাকগ্রাউন্ডে স্বয়ংক্রিয়ভাবে রিফ্রেশ টোকেন দিয়ে নতুন টোকেন সংগ্রহ করবে:
+
+```typescript
+// lib/apiClient.ts
+import axios from "axios";
+import Cookies from "js-cookie";
+
+const API_BASE = "https://e-commarse-three.vercel.app/api/v1";
+
+export const apiClient = axios.create({
+  baseURL: API_BASE,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// 1. Attach Bearer Access Token in requests
+apiClient.interceptors.request.use((config) => {
+  const token = Cookies.get("access_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// 2. Auto Refresh Token on 401 Unauthorized
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        const refreshToken = Cookies.get("refresh_token");
+        if (!refreshToken) throw new Error("No refresh token");
+
+        const { data } = await axios.post(`${API_BASE}/auth/refresh`, {
+          refresh_token: refreshToken,
+        });
+
+        const newAccessToken = data.data.access_token;
+        const newRefreshToken = data.data.refresh_token;
+
+        // Save rotated tokens in Cookies
+        Cookies.set("access_token", newAccessToken, { expires: 1 / 96 }); // 15 mins
+        Cookies.set("refresh_token", newRefreshToken, { expires: 7 }); // 7 days
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshErr) {
+        Cookies.remove("access_token");
+        Cookies.remove("refresh_token");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return Promise.reject(refreshErr);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+---
+
+# 3. Next.js Middleware (Protected Routes & Auth Guard)
+
+Next.js App Router-এর মূল ফোল্ডারে `middleware.ts` তৈরি করুন। এটি লগইন ছাড়া ইউজারদের প্রোফাইল, ড্যাশবোর্ড বা চেকআউট পেজে যেতে বাধা দেবে:
+
+```typescript
+// middleware.ts
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+const protectedRoutes = ["/dashboard", "/profile", "/checkout", "/orders"];
+const authRoutes = ["/login", "/register", "/verify-email"];
+
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get("access_token")?.value;
+  const { pathname } = request.nextUrl;
+
+  if (!token && protectedRoutes.some((route) => pathname.startsWith(route))) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (token && authRoutes.some((route) => pathname.startsWith(route))) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/dashboard/:path*", "/profile/:path*", "/checkout/:path*", "/login", "/register"],
+};
+```
+
+---
+
+# 4. Next.js Email Register & Verification Flow
+
+#### ১. রেজিস্ট্রেশন ফর্ম (`app/register/page.tsx`)
+```tsx
+"use client";
+import { useState } from "react";
+import { apiClient } from "@/lib/apiClient";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+
+export default function RegisterPage() {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data } = await apiClient.post("/auth/email/register", form);
+      const { access_token, refresh_token } = data.data;
+
+      Cookies.set("access_token", access_token, { expires: 1 / 96 });
+      Cookies.set("refresh_token", refresh_token, { expires: 7 });
+
+      alert("অ্যাকাউন্ট তৈরি সফল হয়েছে! আপনার ইমেইলে ভেরিফিকেশন লিংক পাঠানো হয়েছে।");
+      router.push("/dashboard");
+    } catch (err: any) {
+      alert(err.response?.data?.error?.message || "রেজিস্ট্রেশনে সমস্যা হয়েছে");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 space-y-4">
+      <h1 className="text-2xl font-bold">Register Account</h1>
+      <input className="w-full border p-2 rounded" placeholder="Full Name" onChange={(e) => setForm({...form, name: e.target.value})} required />
+      <input className="w-full border p-2 rounded" type="email" placeholder="Email Address" onChange={(e) => setForm({...form, email: e.target.value})} required />
+      <input className="w-full border p-2 rounded" placeholder="Phone (e.g. 01880829496)" onChange={(e) => setForm({...form, phone: e.target.value})} required />
+      <input className="w-full border p-2 rounded" type="password" placeholder="Password" onChange={(e) => setForm({...form, password: e.target.value})} required />
+      <button disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded font-bold">
+        {loading ? "Registering..." : "Create Account"}
+      </button>
+    </form>
+  );
 }
 ```
 
-**কী চেক করা হয়েছে:**
-- ✅ Response এ `user_id`, `access_token`, `refresh_token` আসছে কিনা
-- ✅ Password hashed হয়ে DB তে save হচ্ছে কিনা (plain text নেই)
-- ✅ Duplicate email দিলে `409 Conflict` আসছে কিনা
-- ✅ Register হওয়ার পর verification email পাঠানো হচ্ছে কিনা
+#### ২. ইমেইল ভেরিফিকেশন হ্যান্ডলার (`app/verify-email/page.tsx`)
+```tsx
+"use client";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { apiClient } from "@/lib/apiClient";
 
-**Result:** ✅ PASS  
-**কারণ:** সব validation ঠিকমতো কাজ করছে, token issue হচ্ছে, email dispatch হচ্ছে।
+export default function VerifyEmailPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [status, setStatus] = useState("ইমেইল ভেরিফাই করা হচ্ছে...");
 
-**ভুল হলে কী হত:**
-- Duplicate email accept করলে → একই email এ দুটো account হত → Security breach
-- Password plain text এ থাকলে → DB leak হলে সব password বের হয়ে যেত
-- Token না আসলে → Login করা যেত না
+  useEffect(() => {
+    const token = searchParams.get("token");
+    const uid = searchParams.get("uid");
 
----
+    if (token && uid) {
+      apiClient
+        .get(`/auth/email/verify?token=${encodeURIComponent(token)}&uid=${encodeURIComponent(uid)}`)
+        .then(() => {
+          setStatus("✅ ইমেইল ভেরিফিকেশন সফল হয়েছে!");
+          setTimeout(() => router.push("/dashboard"), 2000);
+        })
+        .catch((err) => {
+          setStatus("❌ " + (err.response?.data?.error?.message || "ভেরিফিকেশন লিংকটির মেয়াদ শেষ।"));
+        });
+    }
+  }, [searchParams, router]);
 
-### 🔵 Test 2 — `POST /api/v1/auth/email/login`
-**উদ্দেশ্য:** সঠিক email+password দিয়ে login করা
-
-**কী দিয়ে Test করা হয়েছে:**
-```json
-{ "email": "foryoumehr@gmail.com", "password": "Test@1234" }
-```
-
-**কী চেক করা হয়েছে:**
-- ✅ সঠিক credential এ `200 OK` + token আসছে
-- ✅ ভুল password এ `401 Unauthorized` আসছে
-- ✅ নতুন session DB তে তৈরি হচ্ছে
-- ✅ `access_token` (15 min) + `refresh_token` (7 days) আসছে
-
-**Result:** ✅ PASS  
-**কারণ:** bcrypt দিয়ে password compare হচ্ছে, JWT সঠিকভাবে sign হচ্ছে।
-
-**ভুল হলে কী হত:**
-- ভুল password এ login হলে → যেকেউ যেকোনো account এ ঢুকতে করত
-- Token না আসলে → Protected route access করা যেত না
-
----
-
-### 🔵 Test 3 — `GET /api/v1/auth/me`
-**উদ্দেশ্য:** Login থাকা user এর profile দেখা
-
-**কী দিয়ে Test করা হয়েছে:**
-```
-Authorization: Bearer <access_token>
-```
-
-**কী চেক করা হয়েছে:**
-- ✅ Token ছাড়া request করলে `401 Unauthorized` আসছে
-- ✅ Valid token দিলে user এর data আসছে
-- ✅ `email_verified`, `phone_verified`, `role`, `status` সঠিক আসছে
-- ✅ অন্য user এর data দেখা যাচ্ছে না
-
-**Result:** ✅ PASS  
-**কারণ:** JWT middleware token decode করে `user_id` extract করছে এবং শুধু সেই user এর data দিচ্ছে।
-
-**ভুল হলে কী হত:**
-- অন্য user এর data দেখা গেলে → Privacy breach, IDOR vulnerability
-
----
-
-### 🔵 Test 4 — `GET /api/v1/auth/sessions`
-**উদ্দেশ্য:** কতগুলো device এ login আছে দেখা
-
-**কী দিয়ে Test করা হয়েছে:**
-```
-Authorization: Bearer <access_token>
-```
-
-**কী চেক করা হয়েছে:**
-- ✅ Active session গুলো list আসছে
-- ✅ Session count সঠিক (register + login = 2 session)
-- ✅ প্রতিটা session এর `id`, `status`, `expires_at` আসছে
-
-**Result:** ✅ PASS — 2টা active session দেখিয়েছে।
-
-**ভুল হলে কী হত:**
-- অন্য user এর session দেখা গেলে → Security breach
-- Session track না হলে → Unauthorized access detect করা যেত না
-
----
-
-### 🔵 Test 5 — `POST /api/v1/auth/email/resend-verification`
-**উদ্দেশ্য:** Email verification link আবার পাঠানো
-
-**কী দিয়ে Test করা হয়েছে:**
-```
-Authorization: Bearer <access_token>
-(কোনো body নেই)
-```
-
-**কী চেক করা হয়েছে:**
-- ✅ API `200 OK` দিচ্ছে
-- ✅ Server log এ `[EMAIL-OK] Verification email sent` দেখাচ্ছে
-- ✅ `foryoumehr@gmail.com` এ email আসছে (Subject: "Verify Your Email Address - E-Commerce")
-- ✅ Already verified account এ request করলে error আসছে
-
-**Result:** ✅ PASS
-
-**ভুল হলে কী হত:**
-- Email না গেলে → User কখনো email verify করতে পারত না
-- Rate limit না থাকলে → Email bombing attack সম্ভব হত
-
----
-
-### 🔵 Test 6 — `POST /api/v1/auth/password/reset-request`
-**উদ্দেশ্য:** Password ভুলে গেলে OTP পাঠানো
-
-**কী দিয়ে Test করা হয়েছে:**
-```json
-{ "email": "foryoumehr@gmail.com" }
-```
-
-**কী চেক করা হয়েছে:**
-- ✅ OTP generate হয়ে DB তে **SHA-256 hash** হিসেবে save হচ্ছে (plain text নেই)
-- ✅ `foryoumehr@gmail.com` এ email আসছে (Subject: "Password Reset OTP - E-Commerce")
-- ✅ Unregistered email দিলেও same response (email enumeration protection)
-- ✅ OTP 15 মিনিট (`900s`) এ expire হচ্ছে
-
-**Result:** ✅ PASS — OTP `839246` email এ এসেছে।
-
-**ভুল হলে কী হত:**
-- Plain OTP store হলে → DB leak এ সব account এর password reset করা যেত
-- Email enumeration থাকলে → Attacker জানতে পারত কোন email registered
-
----
-
-### 🔵 Test 7 — `GET /api/v1/auth/google`
-**উদ্দেশ্য:** Google OAuth login শুরু করা
-
-**কী দিয়ে Test করা হয়েছে:**
-```
-GET /api/v1/auth/google
-(MaximumRedirection: 0 — redirect follow করা হয়নি)
-```
-
-**কী চেক করা হয়েছে:**
-- ✅ `307 Temporary Redirect` আসছে
-- ✅ Location header এ Google OAuth URL আছে
-- ✅ URL এ `client_id`, `redirect_uri`, `scope`, `state` parameter আছে
-
-**Result:** ✅ PASS — `307 → https://accounts.google.com/o/oauth2/auth?...`
-
-**ভুল হলে কী হত:**
-- Callback URL ভুল হলে → Google OAuth হত না
-- State parameter না থাকলে → CSRF attack সম্ভব হত
-
----
-
-### 🔵 Test 8 — `PUT /api/v1/auth/password/reset`
-**উদ্দেশ্য:** OTP দিয়ে নতুন password সেট করা
-
-**কী দিয়ে Test করা হয়েছে:**
-```json
-{
-  "email": "foryoumehr@gmail.com",
-  "otp_code": "839246",
-  "new_password": "NewPass@5678"
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <h1 className="text-2xl font-bold">{status}</h1>
+    </div>
+  );
 }
 ```
 
-**কী চেক করা হয়েছে:**
-- ✅ সঠিক OTP দিলে password change হচ্ছে
-- ✅ OTP একবার ব্যবহারের পর আর কাজ করছে না (consumed)
-- ✅ Password reset হলে সব session revoke হচ্ছে
-- ✅ নতুন password দিয়ে login হচ্ছে
-- ✅ ভুল OTP দিলে `invalid OTP` error আসছে
-
-**Result:** ✅ PASS — OTP `839246` দিয়ে `NewPass@5678` set হয়েছে।
-
-**ভুল হলে কী হত:**
-- OTP reuse হলে → Attacker একবার OTP পেলে বারবার use করত
-- Session revoke না হলে → Password change এর পরেও পুরনো session active থাকত
-
 ---
 
-### 🔵 Test 9 — `DELETE /api/v1/auth/sessions/:sessionId`
-**উদ্দেশ্য:** নির্দিষ্ট একটা device থেকে logout করা
+# 5. Next.js Phone & WhatsApp OTP Login Component
 
-**কী দিয়ে Test করা হয়েছে:**
-```
-DELETE /api/v1/auth/sessions/a0880c17-8548-4ef4-9b1e-225f4412e633
-Authorization: Bearer <access_token>
-```
+```tsx
+"use client";
+import { useState } from "react";
+import { apiClient } from "@/lib/apiClient";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
-**কী চেক করা হয়েছে:**
-- ✅ নিজের session delete হচ্ছে
-- ✅ `revoked_session_id` response এ আসছে
-- ✅ অন্য user এর session delete করার চেষ্টা করলে fail হচ্ছে
+export default function OTPLoginPage() {
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"SEND" | "VERIFY">("SEND");
+  const router = useRouter();
 
-**Result:** ✅ PASS — Session সফলভাবে revoke হয়েছে।
+  const handleSendOTP = async () => {
+    try {
+      await apiClient.post("/auth/otp/send", { phone, purpose: "LOGIN" });
+      setStep("VERIFY");
+      alert("আপনার হোয়াটসঅ্যাপ / ফোনে ৬ ডিজিটের OTP পাঠানো হয়েছে।");
+    } catch (err: any) {
+      alert(err.response?.data?.error?.message || "OTP পাঠাতে ব্যর্থ হয়েছে");
+    }
+  };
 
-**ভুল হলে কী হত:**
-- অন্য user এর session delete করা গেলে → Forced logout attack সম্ভব হত
+  const handleVerifyOTP = async () => {
+    try {
+      const { data } = await apiClient.post("/auth/otp/verify", { phone, otp, purpose: "LOGIN" });
+      const { access_token, refresh_token } = data.data;
 
----
+      Cookies.set("access_token", access_token, { expires: 1 / 96 });
+      Cookies.set("refresh_token", refresh_token, { expires: 7 });
 
-### 🔵 Test 10 — `POST /api/v1/auth/logout`
-**উদ্দেশ্য:** সব device থেকে একসাথে logout
+      router.push("/dashboard");
+    } catch (err: any) {
+      alert(err.response?.data?.error?.message || "ভুল OTP প্রদান করা হয়েছে");
+    }
+  };
 
-**কী দিয়ে Test করা হয়েছে:**
-```
-POST /api/v1/auth/logout
-Authorization: Bearer <access_token>
-```
-
-**কী চেক করা হয়েছে:**
-- ✅ সব active session DB তে revoke হচ্ছে
-- ✅ Current JWT token Redis blacklist এ যাচ্ছে (Production এ)
-- ✅ Logout এর পর সেই token দিয়ে আর request করা যাচ্ছে না
-
-**Result:** ✅ PASS (Redis locally নেই — Production এ blacklist সম্পূর্ণ কাজ করবে)
-
-**ভুল হলে কী হত:**
-- Blacklist না থাকলে → Logout করার পরেও পুরনো token দিয়ে API call করা যেত (Token Replay Attack)
-
----
-
-### 🔵 Test 11 — `GET /api/v1/auth/email/verify`
-**উদ্দেশ্য:** Email verification link এ click করে email verify করা
-
-**কী দিয়ে Test করা হয়েছে:**
-```
-GET /api/v1/auth/email/verify?token=1ab92c...&uid=4b78383a-...
-```
-
-**কী চেক করা হয়েছে:**
-- ✅ Token DB তে saved আছে কিনা
-- ✅ Token match করলে `email_verified = TRUE` হচ্ছে DB তে
-- ✅ Token expire হলে কাজ করছে না
-- ✅ Verify হওয়ার পর `/me` এ `email_verified: true` দেখাচ্ছে
-
-**Result:** ✅ PASS — `email_verified: True` confirmed
-
-**ভুল হলে কী হত:**
-- Token validation না থাকলে → যেকেউ যেকোনো UID দিয়ে email verified করে ফেলত
-
----
-
-### 🔵 Test 12 — `POST /api/v1/auth/otp/send` (বা `/phone/send-otp`)
-**উদ্দেশ্য:** মোবাইল নম্বরে OTP পাঠানো (SMS Gateway)
-
-**কী দিয়ে Test করা হয়েছে:**
-```json
-{
-  "target": "+8801700000000",
-  "purpose": "LOGIN"
+  return (
+    <div className="max-w-md mx-auto p-6 space-y-4">
+      <h2 className="text-xl font-bold">WhatsApp / Phone OTP Login</h2>
+      {step === "SEND" ? (
+        <>
+          <input className="w-full border p-2 rounded" placeholder="Phone (e.g. 01880829496)" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <button onClick={handleSendOTP} className="w-full bg-green-600 text-white p-2 rounded font-bold">
+            Send OTP Code
+          </button>
+        </>
+      ) : (
+        <>
+          <input className="w-full border p-2 rounded" placeholder="Enter 6-digit OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} />
+          <button onClick={handleVerifyOTP} className="w-full bg-blue-600 text-white p-2 rounded font-bold">
+            Verify & Login
+          </button>
+        </>
+      )}
+    </div>
+  );
 }
 ```
 
-**কী চেক করা হয়েছে:**
-- ✅ Phone number target auto-detect হচ্ছে কিনা (ইমেইল না ফোন)
-- ✅ Greenweb SMS Gateway তে SMS dispatch হচ্ছে কিনা
-- ✅ DB তে 6-digit OTP-র **SHA-256 hash** সেভ হচ্ছে কিনা (plain text নেই)
-- ✅ OTP 5 মিনিট (`300s`) এ expire হচ্ছে
-- ✅ API Response এ OTP গোপন থাকছে (`"expires_in": "300s"`)
-
-**Result:** ✅ PASS — `{"success": true, "message": "OTP sent successfully"}`
-
-**কারণ:** Target auto-detect হচ্ছে, DB তে SHA-256 hash সেভ হচ্ছে এবং SMS Gateway তে dispatch হচ্ছে।
-
-**ভুল হলে কী হত:**
-- Response এ OTP leak হলে → যেকোনো ব্যক্তি অন্যের ফোনে পাঠানো OTP জেনে ফেলত
-- Plain text OTP store হলে → DB leak হলে সব অ্যাকাউন্ট হ্যাক করা যেত
-- Rate limit না থাকলে → SMS Bombing attack সম্ভব হত
-
 ---
 
-### 🔵 Test 13 — `POST /api/v1/auth/otp/verify`
-**উদ্দেশ্য:** প্রাপ্ত Phone OTP কোড দিয়ে Verify করে Login ও JWT Token ইস্যু করা
+# 6. Next.js Google OAuth 2.0 Integration
 
-**কী দিয়ে Test করা হয়েছে:**
-```json
-{
-  "target": "+8801700000000",
-  "otp_code": "654321",
-  "purpose": "LOGIN"
+```tsx
+"use client";
+
+export function GoogleLoginButton() {
+  const handleGoogleLogin = () => {
+    window.location.href = "https://e-commarse-three.vercel.app/api/v1/auth/google";
+  };
+
+  return (
+    <button onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2 border p-2 rounded hover:bg-gray-50">
+      <span>🌐 Sign in with Google</span>
+    </button>
+  );
 }
 ```
 
-**কী চেক করা হয়েছে:**
-- ✅ ভুল OTP দিলে `400 Bad Request` ও `Invalid OTP` error আসছে কিনা
-- ✅ সঠিক OTP দিলে DB-র SHA-256 hash ম্যাচ করে `200 OK` আসছে কিনা
-- ✅ `access_token` (15 min) + `refresh_token` (7 days) ইস্যু হচ্ছে কিনা
-- ✅ পর পর 5 বার ভুল OTP দিলে OTP ইনভ্যালিড/লকআউট হচ্ছে কিনা (Brute-force protection)
-- ✅ একবার OTP verify হলে সেটি `used = TRUE` হয়ে যাচ্ছে কিনা
-
-**Result:** ✅ PASS — OTP `654321` দিয়ে `+8801700000000` ইউজার authenticated হয়েছে।
-
-**কারণ:** SHA-256 hash compare সঠিকভাবে হচ্ছে, brute-force lockout সক্রিয় এবং সফল verify তে JWT tokens পাওয়া যাচ্ছে।
-
-**ভুল হলে কী হত:**
-- Brute-force lockout না থাকলে → 000000-999999 ট্রাই করে সব OTP crack করা যেত
-- OTP consumed না হলে → একটি OTP দিয়েই বারবার লগইন করা যেত
-- Wrong OTP accept হলে → অন্যের একাউন্টে যেকেউ ঢুকে যেতে পারত
-
 ---
 
-## ১.৩ সম্পূর্ণ Test Flow Diagram
+# 7. Next.js Password Reset Flow
 
-```
-[Email Flow]
-[Register] → token পাই
-    ↓
-[Login] → token confirm
-    ↓
-[GET /me] → profile check
-    ↓
-[GET /sessions] → 2 session দেখাচ্ছে
-    ↓
-[Resend Verify Email] → email আসছে ✉️
-    ↓
-[Password Reset Request] → OTP email আসছে ✉️
-    ↓
-[GET /google] → 307 redirect ✅
-    ↓
-[PUT /password/reset] → OTP "839246" দিয়ে সফল
-    ↓
-[Login with new password] → confirm
-    ↓
-[DELETE /sessions/:id] → specific session revoke
-    ↓
-[POST /logout] → সব session + blacklist
-    ↓
-[GET /email/verify] → email_verified: TRUE ✅
+```typescript
+// 1. Password Reset Request
+async function requestPasswordReset(email: string) {
+  await apiClient.post("/auth/password/reset-request", { email });
+  alert("পাসওয়ার্ড রিসেট OTP আপনার ইমেইলে পাঠানো হয়েছে।");
+}
 
-[Phone / SMS OTP Flow]
-POST /otp/send (+8801700000000) → SMS Dispatched (Greenweb BD Gateway) 📱
-    ↓
-POST /otp/verify (OTP: 654321) → Authenticated ✅
-    ↓
-JWT Access Token (15m) & Refresh Token (7d) Issued 🔑
+// 2. Submit New Password with OTP
+async function submitPasswordReset(email: string, otp: string, newPass: string) {
+  await apiClient.put("/auth/password/reset", {
+    target: email,
+    otp: otp,
+    new_password: newPass,
+  });
+  alert("পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে! নতুন পাসওয়ার্ড দিয়ে লগইন করুন।");
+}
 ```
 
 ---
 
-## ১.৪ Security Checks যা Test হয়েছে
-
-| Security Feature | Test পদ্ধতি | Result |
-|-----------------|-------------|--------|
-| Password Hashing (bcrypt) | DB তে hash check | ✅ Plain text নেই |
-| OTP Hashing (SHA-256) | DB তে hash check | ✅ Plain text নেই |
-| JWT Algorithm Pinning | HS256 enforce | ✅ alg:none attack blocked |
-| Token Expiry | 15min access / 7day refresh | ✅ কাজ করছে |
-| OTP Brute-force lockout | 5 attempt পর lock | ✅ কাজ করছে |
-| Email Enumeration Protection | Unregistered email test | ✅ Same response |
-| CSRF Protection (OAuth state) | State param check | ✅ আছে |
-| Session Ownership | অন্য session delete test | ✅ Block হয় |
-| Duplicate Account | Same email register test | ✅ 409 আসে |
-| Phone OTP Response Protection | Response এ OTP Hide | ✅ গোপন থাকে |
-| Token Blacklist | Logout পর API call | ⚠️ Local Redis নেই |
+# 8. সকল ১৬টি API এন্ডপয়েন্টের পুঙ্খানুপুঙ্খ নির্দেশিকা (Complete 16 APIs Reference)
 
 ---
 
-## ১.৫ ভুল Test Result আসলে কী হত
+### 8.1 `POST /auth/email/register`
+- **Method:** `POST`
+- **Access Level:** Public
+- **বিবরণ:** ইমেইল, মোবাইল নাম্বার এবং পাসওয়ার্ড দিয়ে নতুন ইউজার অ্যাকাউন্ট তৈরি করে।
 
-| Test | ভুল হলে Impact | Severity |
-|------|---------------|----------|
-| Register duplicate accept | দুটো account, confusion | 🔴 Critical |
-| Login wrong password accept | যেকোনো account hack | 🔴 Critical |
-| JWT blacklist কাজ না করা | Logout এ token still valid | 🔴 Critical |
-| OTP reuse করা যাওয়া | Password hijack | 🔴 Critical |
-| Phone OTP Response Leak | অন্যের ফোনে আসা OTP লিক হত | 🔴 Critical |
-| SMS OTP Brute-force Lockout না থাকা | 6-digit OTP ক্র্যাক করে হ্যাক সম্ভব হত | 🔴 Critical |
-| Email verify bypass | Unverified user verified হত | 🟠 High |
-| Session cross-access | অন্যের session delete | 🟠 High |
-| Email enumeration | Registered email জানা যেত | 🟡 Medium |
-| OTP plain text store | DB leak = সব reset | 🔴 Critical |
-
----
-
-## ১.৬ পাওয়া Bugs ও Fix
-
-| # | Bug | File | Fix |
-|---|-----|------|-----|
-| 1 | Redis URL `localhost:6379` ভুল format | `config.go` | `redis://localhost:6379` |
-| 2 | Bengali subject email crash করছিল | `smtp.go` | ASCII subject + proper headers |
-| 3 | DB constraint এ `EMAIL_VERIFY` নেই | NeonDB | Constraint update |
-| 4 | Token save fail হলে email send বন্ধ | `service.go` | Continue on DB fail |
-| 5 | SMTP `from` field mismatch | `smtp.go` | `username` দিয়ে auth |
-| 6 | `PUT /password/reset` এ field name ভুল | Documentation | `email` not `target` |
-
----
-
-## ১.৭ Email & SMS System Verification
-
-| Step | Status | প্রমাণ |
-|------|--------|-------|
-| Verification email send | ✅ | `[EMAIL-OK] Verification email sent to foryoumehr@gmail.com` |
-| Password Reset OTP send | ✅ | `[EMAIL-OK] Password reset OTP sent to foryoumehr@gmail.com` |
-| Email OTP verification | ✅ | OTP `839246` দিয়ে password reset সফল |
-| Email spam এ যাচ্ছে | ⚠️ | নতুন sender — Production এ custom domain দরকার |
-| Phone OTP Send (`/otp/send`) | ✅ | `{"success":true,"message":"OTP sent successfully"}` (Greenweb Gateway) |
-| Phone OTP Verify (`/otp/verify`)| ✅ | OTP `654321` দিয়ে `200 OK` + JWT Token Issued |
-
----
-
-## ১.৮ Final Verdict
-
-```
-╔══════════════════════════════════════════════════════╗
-║  Authentication System Test: 13/13 PASSED ✅         ║
-║  - Email & OAuth Endpoints: 11/11 PASSED             ║
-║  - SMS & Phone OTP Endpoints: 2/2 PASSED             ║
-║  Security Checks: 10/10 PASSED                       ║
-║  Email & SMS Gateway: WORKING ✅                     ║
-║  Bugs Found: 6 | Bugs Fixed: 6 ✅                    ║
-║  Status: PRODUCTION READY (Redis + Custom Email বাদে) ║
-╚══════════════════════════════════════════════════════╝
-```
-
----
-
-# 📡 ২. সকল ১৬টি API এন্ডপয়েন্টের বিস্তারিত ডকুমেন্টেশন (API Reference Documentation)
-
----
-
-## 🛡️ ২.১ সিকিউরিটি আর্কিটেকচার ও সুরক্ষাসমূহ (Security Overview)
-
-| সিকিউরিটি মেকানিজম | প্রযুক্তিগত বাস্তবায়ন | কাজের বিবরণ (বাংলায়) |
-|---|---|---|
-| **পাসওয়ার্ড এনক্রিপশন** | `bcrypt` (Cost Factor: 12) | পাসওয়ার্ড ডাটাবেজে ডাটা লিক হলেও কেউ আসল পাসওয়ার্ড দেখতে পাবে না। |
-| **OTP সিকিউরিটি** | `SHA-256` Hashing | ওটিপি জেনারেট হওয়ার সাথে সাথে ডাটাবেজে হ্যাশ আকারে থাকে। হ্যাকার ডাটাবেজ এক্সেস পেলেও ওটিপি কোড দেখতে পারবে না। |
-| **Brute-Force Lockout** | সর্বোচ্চ ৫ বার ভুল চেষ্টা (`attempt_count ≥ 5`) | টানা ৫ বার ভুল ওটিপি দিলে ঐ ওটিপি স্থায়ীভাবে বাতিল/লক হয়ে যাবে। নতুন ওটিপি চাইতে হবে। |
-| **Access Token** | JWT (HS256, ১৫ মিনিট মেয়াদী) | এপিআই রিকোয়েস্ট ভ্যালিডেট করার জন্য ব্যবহৃত হয়। এতে User ID, Role, Session ID ও JTI থাকে। |
-| **Refresh Token** | Cryptographic Token (৭ দিন মেয়াদী) | ইউজারের সেশন ধরে রাখার জন্য ব্যবহৃত হয়। ডাটাবেজে সিকিউর হ্যাশ সেভ থাকে। |
-| **Redis Token Blacklist** | Key Format: `blacklist:jti:<jti>` | ইউজার লগআউট করলে তার কারেন্ট Access Token সাথে সাথে Redis-এ ব্ল্যাকলিস্ট হয়। |
-| **Email Verification** | Hashed Token (২৪ ঘণ্টা মেয়াদী) | ইমেইল মালিকানা ভেরিফাই করার জন্য ইউনিক লিংক ইমেইলে পাঠানো হয়। |
-| **Google OAuth 2.0** | OpenID Connect | Google অ্যাকাউন্ট দিয়ে ১-ক্লিকে রেজিস্টার বা লগইন সুবিধা। |
-
----
-
-## 📡 ২.২ সকল ১৬টি API এন্ডপয়েন্টের বিস্তারিত বিবরণ
-
----
-
-### ১. ইমেইল ও পাসওয়ার্ড দিয়ে নতুন রেজিস্ট্রেশন (Register via Email)
-
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/email/register`
-- **অ্যাক্সেস লেভেল:** Public (সবাই ব্যবহার করতে পারবে)
-- **বিবরণ:** নতুন ইউজারের নাম, ইমেইল, ফোন নাম্বার এবং পাসওয়ার্ড নিয়ে নতুন অ্যাকাউন্ট তৈরি করে। সফল হলে ইমেইল ভেরিফিকেশন মেইল পাঠায় এবং সরাসরি Access Token ও Refresh Token রিটার্ন করে।
-
-#### Request Headers:
-```http
-Content-Type: application/json
-```
-
-#### Request Body (JSON):
+#### Request Body:
 ```json
 {
   "name": "Maksudur Rahman",
@@ -510,7 +363,7 @@ Content-Type: application/json
 }
 ```
 
-#### সফল রেসপন্স (`201 Created` / `200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -527,27 +380,14 @@ Content-Type: application/json
 }
 ```
 
-#### এরর রেসপন্স (`409 Conflict` - ইমেইল বা ফোন আগে থেকেই থাকলে):
-```json
-{
-  "success": false,
-  "error": {
-    "code": "CONFLICT",
-    "message": "Email or phone number already registered"
-  }
-}
-```
-
 ---
 
-### ২. ইমেইল ও পাসওয়ার্ড দিয়ে লগইন (Login via Email)
+### 8.2 `POST /auth/email/login`
+- **Method:** `POST`
+- **Access Level:** Public (Login Rate Limited)
+- **বিবরণ:** ইমেইল ও পাসওয়ার্ড যাচাই করে লগইন করায় এবং JWT টোকেন জোড়া প্রদান করে।
 
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/email/login`
-- **অ্যাক্সেস লেভেল:** Public (Rate Limited)
-- **বিবরণ:** নিবন্ধিত ইউজারের ইমেইল ও পাসওয়ার্ড চেক করে ভ্যালিড হলে নতুন সেশন তৈরি করে এবং JWT Access Token ও Refresh Token প্রদান করে।
-
-#### Request Body (JSON):
+#### Request Body:
 ```json
 {
   "email": "maksudurr538@gmail.com",
@@ -555,7 +395,7 @@ Content-Type: application/json
 }
 ```
 
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -570,37 +410,24 @@ Content-Type: application/json
 }
 ```
 
-#### এরর রেসপন্স (`401 Unauthorized` - পাসওয়ার্ড বা ইমেইল ভুল হলে):
-```json
-{
-  "success": false,
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "Invalid email or password"
-  }
-}
-```
-
 ---
 
-### ৩. ফোনে বা ইমেইলে OTP কোড পাঠানো (Send OTP)
+### 8.3 `POST /auth/otp/send`
+- **Method:** `POST`
+- **Access Level:** Public (OTP Rate Limited)
+- **বিবরণ:** যেকোনো মোবাইল নাম্বারে WhatsApp/SMS অথবা ইমেইলে ৫ মিনিট মেয়াদী ৬-ডিজিটের OTP পাঠায়।
 
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/otp/send`
-- **অ্যাক্সেস লেভেল:** Public (Rate Limited)
-- **বিবরণ:** ইউজারের মোবাইল নাম্বারে (Greenweb SMS Gateway দিয়ে) অথবা ইমেইলে ৬ ডিজিটের ওটিপি কোড পাঠায়। ওটিপির মেয়াদ থাকে ৫ মিনিট।
-
-#### Request Body (JSON):
+#### Request Body:
 ```json
 {
-  "phone": "01880829496",
-  "purpose": "LOGIN"
+  "target": "01880829496",
+  "purpose": "LOGIN",
+  "channel": "AUTO"
 }
 ```
-*উদ্দেশ্য (`purpose`) এর গ্রহণযোগ্য ভ্যালুসমূহ:*  
-`LOGIN`, `REGISTER`, `PASSWORD_RESET`, `EMAIL_VERIFY`, `COD_VERIFY`, `WITHDRAWAL_VERIFY`
+*(purpose options: `LOGIN`, `REGISTER`, `PASSWORD_RESET` | channel options: `WHATSAPP`, `SMS`, `AUTO`)*
 
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -614,40 +441,36 @@ Content-Type: application/json
 
 ---
 
-### ৪. মোবাইল ফোনে OTP পাঠানোর এলিয়াস রুট (Send Phone OTP)
+### 8.4 `POST /auth/phone/send-otp`
+- **Method:** `POST`
+- **Access Level:** Public (OTP Rate Limited)
+- **বিবরণ:** `/auth/otp/send`-এর এলিয়াস এন্ডপয়েন্ট। বিশেষত মোবাইল নাম্বারে SMS/WhatsApp OTP পাঠাতে ব্যবহৃত হয়।
 
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/phone/send-otp`
-- **অ্যাক্সেস লেভেল:** Public (Rate Limited)
-- **বিবরণ:** এটি `/otp/send`-এর মতোই কাজ করে, বিশেষভাবে মোবাইল ফোন নাম্বারে SMS পাঠানোর জন্য ব্যবহৃত হয়।
-
-#### Request Body (JSON):
+#### Request Body:
 ```json
 {
   "phone": "01880829496",
-  "purpose": "REGISTER"
+  "purpose": "LOGIN"
 }
 ```
 
 ---
 
-### ৫. OTP কোড যাচাই ও ভেরিফিকেশন (Verify OTP)
+### 8.5 `POST /auth/otp/verify`
+- **Method:** `POST`
+- **Access Level:** Public (OTP Rate Limited)
+- **বিবরণ:** ৬-ডিজিটের OTP কোড যাচাই করে লগইন করায়। **নিরাপত্তা:** টানা ৫ বার ভুল ওটিপি দিলে ৪২৯ এরর দিয়ে ওটিপি লক হয়ে যাবে।
 
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/otp/verify`
-- **অ্যাক্সেস লেভেল:** Public (Rate Limited)
-- **বিবরণ:** ইউজার কর্তৃক প্রেরিত ৬ ডিজিটের ওটিপি কোডটি ডাটাবেজে হ্যাশ মিলিয়ে যাচাই করে। সঠিক হলে ইউজারকে লগইন করায়। **নিরাপত্তা:** টানা ৫ বার ভুল ওটিপি দিলে এটি ওটিপি ব্লক/বাতিল করে দেয়।
-
-#### Request Body (JSON):
+#### Request Body:
 ```json
 {
-  "phone": "01880829496",
+  "target": "01880829496",
   "otp": "482910",
   "purpose": "LOGIN"
 }
 ```
 
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -657,39 +480,26 @@ Content-Type: application/json
     "phone": "01880829496",
     "role": "CUSTOMER",
     "access_token": "eyJhbGciOiJIUzI1...",
-    "refresh_token": "7c23ee77af..."
-  }
-}
-```
-
-#### এরর রেসপন্স (`429 Too Many Requests` - ৫ বার ভুল দিলে):
-```json
-{
-  "success": false,
-  "error": {
-    "code": "TOO_MANY_REQUESTS",
-    "message": "OTP verification attempts exceeded max limit (5 attempts). OTP invalidated."
+    "refresh_token": "7c23ee77af08..."
   }
 }
 ```
 
 ---
 
-### ৬. নতুন Access Token গ্রহণ করা (Refresh Token)
+### 8.6 `POST /auth/refresh`
+- **Method:** `POST`
+- **Access Level:** Public
+- **বিবরণ:** Access Token এর মেয়াদ শেষ হয়ে গেলে মেয়াদী Refresh Token প্রদান করে নতুন Access Token ও রোটেশনাল Refresh Token গ্রহণ করুন।
 
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/refresh`
-- **অ্যাক্সেস লেভেল:** Public
-- **বিবরণ:** Access Token-এর মেয়াদ শেষ হয়ে গেলে ভ্যালিড Refresh Token পাঠিয়ে নতুন Access Token এবং রোটেশনাল Refresh Token সংগ্রহ করা যায়।
-
-#### Request Body (JSON):
+#### Request Body:
 ```json
 {
   "refresh_token": "7c23ee77af08fbedd08eba6f64dbb810ebc969221a7122c444fcbfc5dc07e04a"
 }
 ```
 
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -703,14 +513,16 @@ Content-Type: application/json
 
 ---
 
-### ৭. ইমেইল ভেরিফিকেশন লিংক কনফার্মেশন (Confirm Email Verification)
+### 8.7 `GET /auth/email/verify`
+- **Method:** `GET`
+- **Access Level:** Public
+- **Query Params:** `?token=<token_hash>&uid=<user_id>`
+- **বিবরণ:** ইমেইলে প্রাপ্ত ভেরিফিকেশন লিংকে ক্লিক করলে ডাটাবেজে ইউজারের `email_verified` স্ট্যাটাস `true` করে।
 
-- **HTTP Method:** `GET`
-- **Route Path:** `/api/v1/auth/email/verify?token=<token_hash>&uid=<user_id>`
-- **অ্যাক্সেস লেভেল:** Public
-- **বিবরণ:** ইউজার তার ইমেইলে পাওয়া কনফার্মেশন লিংকে ক্লিক করলে এই রুটটি টোকেন যাচাই করে ইউজারের `email_verified` স্ট্যাটাস `true` করে দেয়।
+#### Request Example:
+`GET https://e-commarse-three.vercel.app/api/v1/auth/email/verify?token=abc123hash&uid=f48dc608-8585-46f0-9fb5-dd20c8201af4`
 
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -720,19 +532,12 @@ Content-Type: application/json
 
 ---
 
-### ৮. পুনরায় ইমেইল ভেরিফিকেশন লিংক পাঠানো (Resend Email Verification)
+### 8.8 `POST /auth/email/resend-verification`
+- **Method:** `POST`
+- **Access Level:** Protected (`Authorization: Bearer <access_token>`)
+- **বিবরণ:** ইমেইল ভেরিফাইড না থাকলে পুনরায় নতুন ভেরিফিকেশন লিংক মেইলে পাঠায়।
 
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/email/resend-verification`
-- **অ্যাক্সেস লেভেল:** Protected (`Bearer <access_token>` প্রয়োজন)
-- **বিবরণ:** লগইন থাকা ইউজারের ইমেইল ভেরিফাইড না থাকলে পুনরায় নতুন ভেরিফিকেশন লিংক মেইলে পাঠায়।
-
-#### Request Headers:
-```http
-Authorization: Bearer <your_access_token>
-```
-
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -742,21 +547,19 @@ Authorization: Bearer <your_access_token>
 
 ---
 
-### ৯. পাসওয়ার্ড রিসেট OTP রিকোয়েস্ট (Password Reset Request)
+### 8.9 `POST /auth/password/reset-request`
+- **Method:** `POST`
+- **Access Level:** Public
+- **বিবরণ:** পাসওয়ার্ড ভুলে গেলে ইমেইলে ১৫ মিনিট মেয়াদী রিসেট ওটিপি পাঠায়।
 
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/password/reset-request`
-- **অ্যাক্সেস লেভেল:** Public
-- **বিবরণ:** পাসওয়ার্ড ভুলে গেলে ইউজারের ইমেইল/ফোনে ১৫ মিনিট মেয়াদী পাসওয়ার্ড রিসেট ওটিপি পাঠায়।
-
-#### Request Body (JSON):
+#### Request Body:
 ```json
 {
   "email": "maksudurr538@gmail.com"
 }
 ```
 
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -770,14 +573,12 @@ Authorization: Bearer <your_access_token>
 
 ---
 
-### ১০. ওটিপি দিয়ে পাসওয়ার্ড আপডেট করা (Perform Password Reset)
+### 8.10 `PUT /auth/password/reset`
+- **Method:** `PUT`
+- **Access Level:** Public
+- **বিবরণ:** প্রাপ্ত রিসেট ওটিপি কোড দিয়ে নতুন পাসওয়ার্ড সেভ করে।
 
-- **HTTP Method:** `PUT`
-- **Route Path:** `/api/v1/auth/password/reset`
-- **অ্যাক্সেস লেভেল:** Public
-- **বিবরণ:** পাসওয়ার্ড রিসেট ওটিপি যাচাই করে ডাটাবেজে নতুন এনক্রিপ্টেড পাসওয়ার্ড সেভ করে।
-
-#### Request Body (JSON):
+#### Request Body:
 ```json
 {
   "target": "maksudurr538@gmail.com",
@@ -786,7 +587,7 @@ Authorization: Bearer <your_access_token>
 }
 ```
 
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -796,58 +597,27 @@ Authorization: Bearer <your_access_token>
 
 ---
 
-### ১১. Google OAuth ল্যান্ডিং ও রিডাইরেক্ট (Google Auth Redirect)
-
-- **HTTP Method:** `GET`
-- **Route Path:** `/api/v1/auth/google`
-- **অ্যাক্সেস লেভেল:** Public
-- **বিবরণ:** ইউজারকে সরাসরি Google-এর সিকিউর লগইন পেজে রিডাইরেক্ট (302 Redirect) করে নিয়ে যায়।
-
-#### রেসপন্স (`302 Found`):
-```http
-Location: https://accounts.google.com/o/oauth2/auth?client_id=...
-```
+### 8.11 `GET /auth/google`
+- **Method:** `GET`
+- **Access Level:** Public
+- **বিবরণ:** ইউজারকে সরাসরি Google-এর সিকিউর সাইন-ইন পেজে ৩০২ রিডাইরেক্ট করে।
 
 ---
 
-### ১২. Google OAuth কলব্যাক হ্যান্ডলার (Google Callback)
-
-- **HTTP Method:** `GET`
-- **Route Path:** `/api/v1/auth/google/callback?code=...&state=...`
-- **অ্যাক্সেস লেভেল:** Public
-- **বিবরণ:** Google থেকে পাস হওয়া Authorization Code গ্রহণ করে ইউজারের ইমেইল ও নাম বের করে। ইউজার নতুন হলে অ্যাকাউন্ট খুলে দেয় এবং JWT টোকেন রিটার্ন করে।
-
-#### সফল রেসপন্স (`200 OK`):
-```json
-{
-  "success": true,
-  "message": "Google login successful",
-  "data": {
-    "user_id": "f48dc608-8585-46f0-9fb5-dd20c8201af4",
-    "email": "maksudurr538@gmail.com",
-    "name": "Maksudur Rahman",
-    "role": "CUSTOMER",
-    "access_token": "eyJhbGciOiJIUzI1...",
-    "refresh_token": "7c23ee77af08..."
-  }
-}
-```
+### 8.12 `GET /auth/google/callback`
+- **Method:** `GET`
+- **Access Level:** Public
+- **Query Params:** `?code=...&state=...`
+- **বিবরণ:** Google এর কলব্যাক প্রসেস করে নতুন অ্যাকাউন্ট খুলে অথবা ইউজারকে সরাসরি লগইন করিয়ে JWT টোকেন প্রদান করে।
 
 ---
 
-### ১৩. সেশন বাতিল ও ব্ল্যাকলিস্ট লগআউট (Logout)
+### 8.13 `POST /auth/logout`
+- **Method:** `POST`
+- **Access Level:** Protected (`Authorization: Bearer <access_token>`)
+- **বিবরণ:** ইউজারের বর্তমান সেশন বাতিল করে এবং Access Token কে মেমোরি/Redis ব্ল্যাকলিস্টে যুক্ত করে।
 
-- **HTTP Method:** `POST`
-- **Route Path:** `/api/v1/auth/logout`
-- **অ্যাক্সেস লেভেল:** Protected (`Bearer <access_token>` প্রয়োজন)
-- **বিবরণ:** ইউজারের বর্তমান সেশন বাতিল করে এবং ব্যবহৃত Access Token টি Redis ব্ল্যাকলিস্টে জমা দেয় যেন লগআউটের পর ঐ টোকেন দিয়ে আর কোনো কাজ করা না যায়।
-
-#### Request Headers:
-```http
-Authorization: Bearer <your_access_token>
-```
-
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -857,19 +627,12 @@ Authorization: Bearer <your_access_token>
 
 ---
 
-### ১৪. নিজের প্রোফাইল ডাটা দেখা (Get Current User Profile)
+### 8.14 `GET /auth/me`
+- **Method:** `GET`
+- **Access Level:** Protected (`Authorization: Bearer <access_token>`)
+- **বিবরণ:** লগইন থাকা ইউজারের পূর্ণাঙ্গ প্রোফাইল ও ভেরিফিকেশন স্ট্যাটাস রিটার্ন করে।
 
-- **HTTP Method:** `GET`
-- **Route Path:** `/api/v1/auth/me`
-- **অ্যাক্সেস লেভেল:** Protected (`Bearer <access_token>` প্রয়োজন)
-- **বিবরণ:** বর্তমানে লগইন থাকা ইউজারের নাম, ইমেইল, ফোন, রোল, অ্যাকাউন্ট ভেরিফিকেশন স্ট্যাটাস রিটার্ন করে।
-
-#### Request Headers:
-```http
-Authorization: Bearer <your_access_token>
-```
-
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -888,14 +651,12 @@ Authorization: Bearer <your_access_token>
 
 ---
 
-### ১৫. একটিভ সেশনসমূহের তালিকা দেখা (Get Active Sessions)
+### 8.15 `GET /auth/sessions`
+- **Method:** `GET`
+- **Access Level:** Protected (`Authorization: Bearer <access_token>`)
+- **বিবরণ:** ইউজারের অ্যাকাউন্টটি কোন কোন ডিভাইসে বা আইপি-তে লগইন আছে তার তালিকা দেখায়।
 
-- **HTTP Method:** `GET`
-- **Route Path:** `/api/v1/auth/sessions`
-- **অ্যাক্সেস লেভেল:** Protected (`Bearer <access_token>` প্রয়োজন)
-- **বিবরণ:** ইউজারের অ্যাকাউন্টটি কোন কোন ডিভাইস বা ব্রাউজার থেকে লগইন করা আছে এবং IP ঠিকানা কী, তার তালিকা দেখায়।
-
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
@@ -917,17 +678,22 @@ Authorization: Bearer <your_access_token>
 
 ---
 
-### ১৬. নির্দিষ্ট কোনো সেশন বাতিল করা (Revoke Specific Session)
+### 8.16 `DELETE /auth/sessions/:sessionId`
+- **Method:** `DELETE`
+- **Access Level:** Protected (`Authorization: Bearer <access_token>`)
+- **বিবরণ:** সেশন আইডি প্রদান করে অন্য কোনো নির্দিষ্ট ডিভাইস থেকে ইউজারকে লগআউট করার সুবিধা।
 
-- **HTTP Method:** `DELETE`
-- **Route Path:** `/api/v1/auth/sessions/:sessionId`
-- **অ্যাক্সেস লেভেল:** Protected (`Bearer <access_token>` প্রয়োজন)
-- **বিবরণ:** সেশন আইডি প্রদান করে অন্য কোনো নির্দিষ্ট ডিভাইস থেকে অ্যাকাউন্ট লগআউট করার সুবিধা।
-
-#### সফল রেসপন্স (`200 OK`):
+#### Response (`200 OK`):
 ```json
 {
   "success": true,
   "message": "Session revoked successfully."
 }
 ```
+
+---
+
+### 💡 Next.js ডেভেলপারদের জন্য সিকিউরিটি টিপস:
+1. **Protected Route Middleware:** ইউজারদের সুরক্ষিত পেজে (যেমন `/dashboard`) অটোমেটিক গার্ড দিতে `middleware.ts` ব্যবহার করুন।
+2. **Brute-Force Lockout:** OTP ভেরিফিকেশনে পর পর ৫ বার ভুল ইনপুট দিলে ৪২৯ এরর আসবে।
+3. **Auto Token Rotation:** `apiClient.ts` ব্যবহার করলে ইউজারের ১৫ মিনিটের টোকেন এক্সপায়ারি ক্লায়েন্টে টের পাওয়া যাবে না।
