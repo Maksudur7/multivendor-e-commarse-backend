@@ -436,8 +436,8 @@ func (s *Service) EmailRegister(ctx context.Context, email string, phone *string
 		return nil, fmt.Errorf("failed to save session: %w", err)
 	}
 
-	// Send email verification asynchronously.
-	go s.sendEmailVerificationLink(context.Background(), userID, email, fullName)
+	// Send email verification synchronously (serverless platforms freeze background goroutines)
+	s.sendEmailVerificationLink(ctx, userID, email, fullName)
 
 	return &RegisterResult{UserID: userID, AccessToken: accToken, RefToken: rawRefToken}, nil
 }
@@ -596,7 +596,7 @@ func (s *Service) ResendVerificationEmail(ctx context.Context, userID string) er
 	if user.EmailVerified {
 		return fmt.Errorf("email is already verified")
 	}
-	go s.sendEmailVerificationLink(context.Background(), userID, user.Email, user.FullName)
+	s.sendEmailVerificationLink(ctx, userID, user.Email, user.FullName)
 	return nil
 }
 
@@ -619,16 +619,12 @@ func (s *Service) PasswordResetRequest(ctx context.Context, email string) (*Pass
 		return nil, fmt.Errorf("failed to save reset OTP: %w", err)
 	}
 
-	// Send password-reset OTP via email asynchronously in a background goroutine.
-	go func() {
-		bgCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
-		if err := s.email.SendPasswordResetOTP(bgCtx, email, otpCode); err != nil {
-			fmt.Printf("[EMAIL-ERR] Failed to send password reset email to %s: %v\n", email, err)
-		} else {
-			fmt.Printf("[EMAIL-OK] Password reset email sent to %s\n", email)
-		}
-	}()
+	// Send password-reset OTP via email synchronously
+	if err := s.email.SendPasswordResetOTP(ctx, email, otpCode); err != nil {
+		fmt.Printf("[EMAIL-ERR] Failed to send password reset email to %s: %v\n", email, err)
+	} else {
+		fmt.Printf("[EMAIL-OK] Password reset email sent to %s\n", email)
+	}
 
 	return &PasswordResetRequestResult{}, nil
 }
