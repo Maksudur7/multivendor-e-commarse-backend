@@ -173,7 +173,8 @@ func (h *Handler) VerifyOTP(c *fiber.Ctx) error {
 		req.Purpose = "LOGIN"
 	}
 
-	result, err := h.service.VerifyOTP(c.Context(), req.Target, req.OTPCode, req.Purpose)
+	currentUserID, _ := c.Locals("user_id").(string)
+	result, err := h.service.VerifyOTP(c.Context(), req.Target, req.OTPCode, req.Purpose, currentUserID)
 	if err != nil {
 		return response.Error(c, fiber.StatusBadRequest, err.Error(), nil)
 	}

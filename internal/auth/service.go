@@ -322,7 +322,7 @@ type VerifyOTPResult struct {
 
 // VerifyOTP verifies the submitted OTP against the stored hash.
 // After maxOTPAttempts wrong guesses, the OTP is invalidated (brute-force lockout).
-func (s *Service) VerifyOTP(ctx context.Context, target, otpCode, purpose string) (*VerifyOTPResult, error) {
+func (s *Service) VerifyOTP(ctx context.Context, target, otpCode, purpose string, currentUserID ...string) (*VerifyOTPResult, error) {
 	if s.repo.db == nil {
 		return nil, fmt.Errorf("service unavailable: database not connected")
 	}
@@ -359,9 +359,16 @@ func (s *Service) VerifyOTP(ctx context.Context, target, otpCode, purpose string
 	}
 
 	// OTP valid — find or create the user.
-	userID, err := s.repo.FindOrCreateUserByPhone(ctx, target)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create user: %w", err)
+	var userID string
+	if len(currentUserID) > 0 && currentUserID[0] != "" {
+		userID = currentUserID[0]
+		_ = s.repo.MarkUserPhoneVerified(ctx, userID, target)
+	} else {
+		var err error
+		userID, err = s.repo.FindOrCreateUserByPhone(ctx, target)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create user: %w", err)
+		}
 	}
 
 	// Consume the OTP so it cannot be reused.
