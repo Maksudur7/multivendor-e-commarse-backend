@@ -38,6 +38,7 @@ import (
 	"github.com/yourusername/ecom-backend/pkg/database"
 	"github.com/yourusername/ecom-backend/pkg/middleware"
 	"github.com/yourusername/ecom-backend/pkg/response"
+	"github.com/yourusername/ecom-backend/public"
 )
 
 // BuildApp initializes database pools, Redis, middleware, and registers all 23 domain controllers.
@@ -116,13 +117,16 @@ func BuildApp(cfg *config.Config) (*fiber.App, error) {
 	})
 
 	app.Get("/docs", func(c *fiber.Ctx) error {
-		return c.SendFile("./public/docs.html")
+		c.Type("html", "utf-8")
+		return c.SendString(public.DocsHTML)
 	})
 	app.Get("/documentation", func(c *fiber.Ctx) error {
-		return c.SendFile("./public/documentation.html")
+		c.Type("html", "utf-8")
+		return c.SendString(public.DocsHTML)
 	})
 	app.Get("/auth/docs", func(c *fiber.Ctx) error {
-		return c.SendFile("./internal/auth/documentation.html")
+		c.Type("html", "utf-8")
+		return c.SendString(public.DocsHTML)
 	})
 
 	v1 := app.Group("/api/v1")
