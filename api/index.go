@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"net/url"
 	"sync"
 
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -29,5 +30,10 @@ func initApp() {
 // Handler is the Vercel Serverless Function entry point.
 func Handler(w http.ResponseWriter, r *http.Request) {
 	once.Do(initApp)
+	if fwd := r.Header.Get("X-Forwarded-Uri"); fwd != "" {
+		if u, err := url.Parse(fwd); err == nil {
+			r.URL = u
+		}
+	}
 	httpHandler(w, r)
 }
