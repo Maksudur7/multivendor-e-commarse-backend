@@ -27,11 +27,11 @@
               "raw": "{\"target\": \"+8801712345678\", \"purpose\": \"LOGIN\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/otp/send",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/otp/send",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -62,11 +62,11 @@
               "raw": "{\"target\": \"+8801712345678\", \"otp\": \"123456\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/otp/verify",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/otp/verify",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -97,11 +97,11 @@
               "raw": "{\"email\": \"customer@example.com\", \"password\": \"Password123!\", \"full_name\": \"Test Customer\", \"phone\": \"+8801712345678\", \"role\": \"CUSTOMER\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/email/register",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/email/register",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -132,11 +132,11 @@
               "raw": "{\"email\": \"customer@example.com\", \"password\": \"Password123!\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/email/login",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/email/login",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -163,11 +163,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/google/callback",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/google/callback",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -198,11 +198,11 @@
               "raw": "{\"refresh_token\": \"sample_refresh_token\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/refresh",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/refresh",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -236,11 +236,11 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/logout",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/logout",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -270,11 +270,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/me",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/me",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -304,11 +304,11 @@
               "raw": "{\"email\": \"customer@example.com\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/password/reset-request",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/password/reset-request",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -339,11 +339,11 @@
               "raw": "{\"email\": \"customer@example.com\", \"otp_code\": \"123456\", \"new_password\": \"NewPassword123!\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/password/reset",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/password/reset",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -374,11 +374,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/auth/sessions",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/auth/sessions",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -409,11 +409,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/products",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/catalog/products",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -439,11 +439,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/products/sample-product-slug",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/catalog/products/sample-product-slug",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -470,11 +470,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/categories",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/catalog/categories",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -500,11 +500,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/categories/sample-category-slug",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/catalog/categories/sample-category-slug",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -531,11 +531,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/brands",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/catalog/brands",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -561,11 +561,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/brands/sample-brand-slug",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/catalog/brands/sample-brand-slug",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -592,11 +592,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/products/101/variants",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/catalog/products/101/variants",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -624,11 +624,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/catalog/products/101/reviews",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/catalog/products/101/reviews",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -660,11 +660,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/catalog/products",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -699,11 +699,11 @@
               "raw": "{\"name\": \"Seller New Shoe\", \"category_id\": \"44444444-4444-4444-4444-444444444441\", \"brand_id\": \"55555555-5555-5555-5555-555555555551\", \"description\": \"High quality shoe\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/catalog/products",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -734,11 +734,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/catalog/products/101",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -774,11 +774,11 @@
               "raw": "{\"name\": \"Updated Shoe Name\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/catalog/products/101",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -814,11 +814,11 @@
               "raw": "{\"status\": \"PENDING_APPROVAL\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101/status",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/catalog/products/101/status",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -855,11 +855,11 @@
               "raw": "{\"sku\": \"SHOE-RED-42\", \"price\": 1500.00}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101/variants",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/catalog/products/101/variants",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -896,11 +896,11 @@
               "raw": "{\"price\": 1450.00}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/variants/501",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/catalog/variants/501",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -932,11 +932,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/catalog/products/101",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/catalog/products/101",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -968,11 +968,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/products",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/catalog/products",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1003,11 +1003,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/products/pending",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/catalog/products/pending",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1043,11 +1043,11 @@
               "raw": "{\"approved\": true, \"reason\": \"Approved by admin\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/products/101/approval",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/catalog/products/101/approval",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1084,11 +1084,11 @@
               "raw": "{\"name\": \"Electronics\", \"slug\": \"electronics\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/categories",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/catalog/categories",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1123,11 +1123,11 @@
               "raw": "{\"name\": \"Electronics \u0026 Tech\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/categories/1",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/catalog/categories/1",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1163,11 +1163,11 @@
               "raw": "{\"name\": \"Nike\", \"slug\": \"nike\", \"is_verified\": true}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/brands",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/catalog/brands",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1202,11 +1202,11 @@
               "raw": "{\"name\": \"Color\", \"code\": \"color\", \"type\": \"SELECT\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/attributes",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/catalog/attributes",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1241,11 +1241,11 @@
               "raw": "{\"attribute_id\": \"attr_123\", \"value\": \"Red\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/catalog/attributes/options",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/catalog/attributes/options",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1282,11 +1282,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/variants/501",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/inventory/variants/501",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1321,11 +1321,11 @@
               "raw": "{\"warehouse_id\": 1, \"quantity\": 100}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/variants/501",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/inventory/variants/501",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1360,11 +1360,11 @@
               "raw": "{\"variant_id\": 501, \"quantity\": 2}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/reserve",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/inventory/reserve",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1398,11 +1398,11 @@
               "raw": "{\"reservation_id\": \"res_12345\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/release",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/inventory/release",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1432,11 +1432,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/warehouses",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/inventory/warehouses",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1470,11 +1470,11 @@
               "raw": "{\"name\": \"Dhaka Hub\", \"location\": \"Dhaka\", \"type\": \"LOCAL_BD\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/warehouses",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/inventory/warehouses",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1504,11 +1504,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/movements",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/inventory/movements",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1542,11 +1542,11 @@
               "raw": "{\"file_url\": \"https://storage.cdn/inventory.csv\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/inventory/bulk-sync",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/inventory/bulk-sync",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1581,11 +1581,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/cart",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1618,11 +1618,11 @@
               "raw": "{\"variant_id\": 501, \"quantity\": 1}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/items",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/cart/items",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1656,11 +1656,11 @@
               "raw": "{\"quantity\": 3}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/items/item_123",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/cart/items/item_123",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1691,11 +1691,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/items/item_123",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/cart/items/item_123",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1726,11 +1726,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/clear",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/cart/clear",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1764,11 +1764,11 @@
               "raw": "{\"guest_cart_id\": \"guest_98765\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/merge",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/cart/merge",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1802,11 +1802,11 @@
               "raw": "{\"code\": \"SAVE10\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/coupons/apply",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/cart/coupons/apply",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1837,11 +1837,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/cart/coupons/remove",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/cart/coupons/remove",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1877,11 +1877,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/customer/orders",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1911,11 +1911,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/ord_1001",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/customer/orders/ord_1001",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1946,11 +1946,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/ord_1001/track",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/customer/orders/ord_1001/track",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -1982,11 +1982,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/ord_1001/invoice",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/customer/orders/ord_1001/invoice",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2022,11 +2022,11 @@
               "raw": "{\"shipping_address_id\": \"77777777-7777-7777-7777-777777777771\", \"payment_method\": \"SSLCOMMERZ\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/checkout",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/customer/orders/checkout",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2061,11 +2061,11 @@
               "raw": "{\"reason\": \"Changed my mind\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/customer/orders/ord_1001/cancel",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/customer/orders/ord_1001/cancel",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2097,11 +2097,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/orders",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/orders",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2135,11 +2135,11 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/orders/sub_2001/pack",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/orders/sub_2001/pack",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2175,11 +2175,11 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/seller/orders/sub_2001/print-label",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/seller/orders/sub_2001/print-label",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2211,11 +2211,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/orders",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/orders",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2249,11 +2249,11 @@
               "raw": "{\"status\": \"PROCESSING\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/orders/ord_1001/status",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/orders/ord_1001/status",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2290,11 +2290,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/methods",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/payments/methods",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2324,11 +2324,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/status/pay_9001",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/payments/status/pay_9001",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2363,11 +2363,11 @@
               "raw": "{\"master_order_id\": \"ord_1001\", \"payment_gateway\": \"SSLCOMMERZ\", \"amount\": 1500.00}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/initiate",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/payments/initiate",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2401,11 +2401,11 @@
               "raw": "{\"transaction_id\": \"tx_987654\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/verify",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/payments/verify",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2439,11 +2439,11 @@
               "raw": "{\"order_id\": \"ord_1001\", \"amount\": 1500.00}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/refunds",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/payments/refunds",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2473,11 +2473,11 @@
               "raw": "{\"paymentID\": \"bk_123\", \"status\": \"Completed\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/webhooks/bkash",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/payments/webhooks/bkash",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2508,11 +2508,11 @@
               "raw": "{\"tran_id\": \"tx_987654\", \"status\": \"VALID\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/webhooks/sslcommerz",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/payments/webhooks/sslcommerz",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2543,11 +2543,11 @@
               "raw": "{\"payment_ref_id\": \"ng_123\", \"status\": \"Success\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/payments/webhooks/nagad",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/payments/webhooks/nagad",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2587,11 +2587,11 @@
               "raw": "{\"sub_order_id\": \"sub_2001\", \"courier_name\": \"STEADFAST\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/create-consignment",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/shipping/create-consignment",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2621,11 +2621,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/track/csg_5001",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/shipping/track/csg_5001",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2656,11 +2656,11 @@
               "raw": "{\"weight_kg\": 1.5, \"destination_city\": \"Chittagong\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/calculate-rate",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/shipping/calculate-rate",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2690,11 +2690,11 @@
               "raw": "{\"consignment_id\": \"p_123\", \"order_status\": \"Delivered\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/webhooks/pathao",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/shipping/webhooks/pathao",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2725,11 +2725,11 @@
               "raw": "{\"consignment_id\": 123, \"status\": \"delivered\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/webhooks/steadfast",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/shipping/webhooks/steadfast",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2760,11 +2760,11 @@
               "raw": "{\"tracking_id\": \"pf_123\", \"status\": \"DELIVERED\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/shipping/webhooks/paperfly",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/shipping/webhooks/paperfly",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2796,11 +2796,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/store/karim-shop",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reseller/store/karim-shop",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2831,11 +2831,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/profile",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reseller/profile",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2869,11 +2869,11 @@
               "raw": "{\"shop_name\": \"Rahim Store\", \"nid_number\": \"1234567890\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/setup",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reseller/setup",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2903,11 +2903,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/catalog",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reseller/catalog",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2941,11 +2941,11 @@
               "raw": "{\"variant_id\": 501, \"customer_price\": 2000.00}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/margin/calculate",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reseller/margin/calculate",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -2980,11 +2980,11 @@
               "raw": "{\"product_id\": \"101\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reseller/share-link",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reseller/share-link",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3019,11 +3019,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/profile",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/affiliate/profile",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3053,11 +3053,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/links",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/affiliate/links",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3087,11 +3087,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/conversions",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/affiliate/conversions",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3121,11 +3121,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/clicks",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/affiliate/clicks",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3155,11 +3155,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/earnings",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/affiliate/earnings",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3193,11 +3193,11 @@
               "raw": "{\"website\": \"myblog.com\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/apply",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/affiliate/apply",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3231,11 +3231,11 @@
               "raw": "{\"target_url\": \"/product/sample-product\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/links",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/affiliate/links",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3269,11 +3269,11 @@
               "raw": "{\"amount\": 1000.00}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/affiliate/withdraw",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/affiliate/withdraw",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3312,11 +3312,11 @@
               "raw": "{\"product_id\": \"101\", \"rating\": 5, \"comment\": \"Excellent quality!\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reviews",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3341,11 +3341,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews/product/101",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reviews/product/101",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3380,11 +3380,11 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews/rev_1/helpful",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reviews/rev_1/helpful",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3419,11 +3419,11 @@
               "raw": "{\"reply\": \"Thank you for your feedback!\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews/rev_1/seller-reply",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reviews/rev_1/seller-reply",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3450,11 +3450,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/reviews/seller/sel_1/rating",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/reviews/seller/sel_1/rating",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3491,11 +3491,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/notifications",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/notifications",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3528,11 +3528,11 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/notifications/notif_1/read",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/notifications/notif_1/read",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3567,11 +3567,11 @@
               "raw": "{\"sms_enabled\": true}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/notifications/preferences",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/notifications/preferences",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3602,11 +3602,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/search?q=shoe",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/search?q=shoe",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3631,11 +3631,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/search/suggestions?q=nik",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/search/suggestions?q=nik",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3670,11 +3670,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/analytics/gmv",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/analytics/gmv",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3704,11 +3704,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/analytics/couriers",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/analytics/couriers",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3738,11 +3738,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/analytics/live-visitors",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/analytics/live-visitors",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3781,11 +3781,11 @@
               "raw": "{\"file_name\": \"product_image.jpg\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/media/presigned-url",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/media/presigned-url",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3819,11 +3819,11 @@
               "raw": "{\"file_key\": \"products/product_image.jpg\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/media/confirm-upload",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/media/confirm-upload",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3858,11 +3858,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/finance/escrow/pending",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/finance/escrow/pending",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3898,11 +3898,11 @@
               "raw": "{\"escrow_entry_id\": \"esc_1001\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/finance/escrow/release",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/finance/escrow/release",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3939,11 +3939,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/fraud/risk-profile/user_1",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/fraud/risk-profile/user_1",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -3979,11 +3979,11 @@
               "raw": "{\"phone\": \"+8801700000000\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/fraud/blacklist/phone",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/fraud/blacklist/phone",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -4020,11 +4020,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/admin/settings",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/admin/settings",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -4059,11 +4059,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/china/batches",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/china/batches",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -4098,11 +4098,11 @@
               }
             ],
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/wallet/balance",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/wallet/balance",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -4136,11 +4136,11 @@
               "raw": "{\"order_id\": \"ord_1001\", \"reason\": \"Damaged goods\"}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/disputes",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/disputes",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
@@ -4173,11 +4173,11 @@
               "raw": "{\"code\": \"SUMMER20\", \"discount_percentage\": 20.0}"
             },
             "url": {
-              "raw": "https://multivendor-e-commarse-backend.onrender.com/api/v1/promotions/coupons",
+              "raw": "https://e-commarse-three.vercel.app/api/v1/promotions/coupons",
               "host": [
                 "https:",
                 "",
-                "multivendor-e-commarse-backend.onrender.com"
+                "e-commarse-three.vercel.app"
               ],
               "path": [
                 "api",
