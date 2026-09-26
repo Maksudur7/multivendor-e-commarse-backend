@@ -34,12 +34,13 @@ type Client struct {
 
 // NewClient constructs an email client from config.
 func NewClient(cfg config.EmailConfig) *Client {
+	cleanPass := strings.TrimSpace(strings.ReplaceAll(cfg.Password, " ", ""))
 	return &Client{
-		host:     cfg.SMTPHost,
+		host:     strings.TrimSpace(cfg.SMTPHost),
 		port:     cfg.SMTPPort,
-		username: cfg.Username,
-		password: cfg.Password,
-		from:     cfg.From,
+		username: strings.TrimSpace(cfg.Username),
+		password: cleanPass,
+		from:     strings.TrimSpace(cfg.From),
 	}
 }
 
