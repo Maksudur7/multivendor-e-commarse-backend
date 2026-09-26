@@ -372,11 +372,23 @@ func (h *Handler) VerifyEmail(c *fiber.Ctx) error {
 		uid = strings.TrimSpace(c.Query("amp;uid"))
 	}
 
-	// Fallback: Parse query parameters directly from OriginalURL (fixes Vercel serverless query string rewriting)
+	// Fallback: Parse query parameters directly from multiple candidate sources (fixes Vercel serverless query string rewriting)
 	if token == "" || uid == "" {
-		origURL := c.OriginalURL()
-		if idx := strings.Index(origURL, "?"); idx != -1 {
-			qStr := origURL[idx+1:]
+		candidates := []string{
+			c.OriginalURL(),
+			string(c.Request().URI().QueryString()),
+			string(c.Request().URI().FullURI()),
+			c.Get("x-forwarded-uri"),
+			c.Get("x-matched-path"),
+		}
+		for _, raw := range candidates {
+			if raw == "" {
+				continue
+			}
+			qStr := raw
+			if idx := strings.Index(raw, "?"); idx != -1 {
+				qStr = raw[idx+1:]
+			}
 			parsed, err := url.ParseQuery(qStr)
 			if err == nil {
 				if token == "" {
@@ -391,6 +403,9 @@ func (h *Handler) VerifyEmail(c *fiber.Ctx) error {
 						uid = strings.TrimSpace(parsed.Get("amp;uid"))
 					}
 				}
+			}
+			if token != "" && uid != "" {
+				break
 			}
 		}
 	}
