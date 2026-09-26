@@ -523,12 +523,18 @@ func (r *Repository) SaveEmailVerificationToken(ctx context.Context, userID, has
 	if r.db == nil {
 		return fmt.Errorf("database not connected")
 	}
+	// Ensure phone column in otp_requests can store 36-char UUIDs or long email strings
+	_, _ = r.db.Exec(ctx, `ALTER TABLE otp_requests ALTER COLUMN phone TYPE VARCHAR(255)`)
+
 	// Upsert into otp_requests table using purpose='EMAIL_VERIFY'.
 	_, err := r.db.Exec(ctx,
 		`INSERT INTO otp_requests (phone, otp_hash, purpose, expires_at)
 		 VALUES ($1, $2, 'EMAIL_VERIFY', $3)`,
 		userID, hashedToken, expiresAt,
 	)
+	if err != nil {
+		fmt.Printf("[EMAIL-VERIFY-ERR] SaveEmailVerificationToken failed for userID=%s: %v\n", userID, err)
+	}
 	return err
 }
 

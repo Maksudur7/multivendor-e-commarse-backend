@@ -298,9 +298,9 @@ func (c *Client) SendVerificationEmail(ctx context.Context, to, name, verificati
 		return fmt.Errorf("email: template parse error: %w", err)
 	}
 	var buf bytes.Buffer
-	if err := tpl.Execute(&buf, map[string]string{
+	if err := tpl.Execute(&buf, map[string]interface{}{
 		"Name": name,
-		"Link": verificationLink,
+		"Link": template.URL(verificationLink),
 	}); err != nil {
 		return fmt.Errorf("email: template execute error: %w", err)
 	}
