@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"net/url"
 	"sync"
 
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -31,14 +30,13 @@ func initApp() {
 func Handler(w http.ResponseWriter, r *http.Request) {
 	once.Do(initApp)
 
-	// Ensure Vercel query string and original path are preserved for Fiber adaptor
-	if fwd := r.Header.Get("X-Forwarded-Uri"); fwd != "" {
-		if u, err := url.Parse(fwd); err == nil {
-			r.URL = u
-			r.RequestURI = fwd
+	// Reconstruct r.RequestURI from r.URL so adaptor.FiberApp passes full path and query string to Fiber
+	if r.URL != nil {
+		if r.URL.RawQuery != "" {
+			r.RequestURI = r.URL.Path + "?" + r.URL.RawQuery
+		} else if r.URL.Path != "" {
+			r.RequestURI = r.URL.Path
 		}
-	} else if orig := r.Header.Get("X-Matched-Path"); orig != "" && r.URL.RawQuery != "" {
-		r.RequestURI = orig + "?" + r.URL.RawQuery
 	}
 
 	httpHandler(w, r)
