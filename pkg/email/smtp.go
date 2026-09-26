@@ -1,17 +1,19 @@
-// Package email provides an SMTP & HTTP REST API email client for transactional emails.
-// Supports Resend API, SendGrid API, Brevo API (over HTTPS Port 443) and SMTP (Ports 587/465).
+// Package email provides an SMTP email client for transactional emails.
+// Supports TLS (port 465) and STARTTLS (port 587) connections.
+//
+// Usage:
+//
+//	client := email.NewClient(cfg.Email)
+//	err := client.SendOTP(ctx, "user@example.com", "482910")
 package email
 
 import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"html/template"
-	"io"
 	"net"
-	"net/http"
 	"net/smtp"
 	"strings"
 	"time"
@@ -21,280 +23,49 @@ import (
 	"github.com/yourusername/ecom-backend/config"
 )
 
-// Client is an email client supporting HTTP REST API & SMTP.
+// Client is an SMTP email client.
 type Client struct {
 	host     string
 	port     int
 	username string
 	password string
 	from     string
-	apiKey   string
-	provider string
-	http     *http.Client
 }
 
 // NewClient constructs an email client from config.
 func NewClient(cfg config.EmailConfig) *Client {
-	cleanPass := strings.TrimSpace(strings.ReplaceAll(cfg.Password, " ", ""))
 	return &Client{
-		host:     strings.TrimSpace(cfg.SMTPHost),
+		host:     cfg.SMTPHost,
 		port:     cfg.SMTPPort,
-		username: strings.TrimSpace(cfg.Username),
-		password: cleanPass,
-		from:     strings.TrimSpace(cfg.From),
-		apiKey:   strings.TrimSpace(cfg.APIKey),
-		provider: strings.ToLower(strings.TrimSpace(cfg.Provider)),
-		http:     &http.Client{Timeout: 15 * time.Second},
+		username: cfg.Username,
+		password: cfg.Password,
+		from:     cfg.From,
 	}
 }
 
-// IsConfigured returns true if email credentials (API Key or SMTP) are set.
+// IsConfigured returns true if SMTP credentials are set.
 func (c *Client) IsConfigured() bool {
-	return c.apiKey != "" || (c.host != "" && c.username != "" && c.password != "")
+	return c.host != "" && c.username != "" && c.password != ""
 }
 
-// send is the core email dispatcher with HTTP API priority & SMTP fallback.
-func (c *Client) send(ctx context.Context, to, subject, htmlBody string) error {
+// send is the core SMTP dispatcher.
+func (c *Client) send(_ context.Context, to, subject, htmlBody string) error {
 	if !c.IsConfigured() {
-		log.Warn().Str("to", to).Msg("email: Email not configured — missing EMAIL_API_KEY, RESEND_API_KEY, or SMTP credentials")
-		return fmt.Errorf("email: credentials missing (EMAIL_API_KEY or SMTP credentials empty)")
+		log.Warn().Str("to", to).Msg("email: SMTP not configured — skipping email dispatch")
+		return nil
 	}
 
-	// 1. Try HTTP REST API first if API key is provided (Port 443 - NEVER blocked by cloud firewalls)
-	if c.apiKey != "" {
-		if err := c.sendViaHTTPAPI(ctx, to, subject, htmlBody); err == nil {
-			log.Info().Str("to", to).Str("subject", subject).Msg("email: dispatched successfully via HTTP REST API (Port 443)")
-			return nil
-		} else {
-			log.Warn().Err(err).Msg("email: HTTP REST API dispatch failed, attempting SMTP fallback...")
-		}
-	}
-
-	// 2. Try SMTP with port fallback (587 STARTTLS / 465)
-	targetPort := c.port
-	if targetPort == 0 {
-		targetPort = 587
-	}
-
-	err := c.dispatchSingleSMTP(targetPort, to, subject, htmlBody)
-	if err != nil && targetPort != 587 {
-		log.Warn().Err(err).Int("failed_port", targetPort).Msg("email: Primary SMTP port failed, retrying via Port 587 STARTTLS...")
-		err = c.dispatchSingleSMTP(587, to, subject, htmlBody)
-	}
-
-	if err != nil {
-		log.Error().Err(err).Str("to", to).Msg("email: All email dispatch attempts failed")
-		return err
-	}
-
-	log.Info().Str("to", to).Str("subject", subject).Msg("email: dispatched successfully via SMTP")
-	return nil
-}
-
-// ── HTTP REST API Dispatchers (Port 443 HTTPS) ─────────────────────────────
-
-func (c *Client) sendViaHTTPAPI(ctx context.Context, to, subject, htmlBody string) error {
-	fromAddr := c.from
-	if fromAddr == "" {
-		fromAddr = c.username
-	}
-
-	provider := c.provider
-	if provider == "" {
-		if strings.HasPrefix(c.apiKey, "re_") {
-			provider = "resend"
-		} else if strings.HasPrefix(c.apiKey, "SG.") {
-			provider = "sendgrid"
-		} else if strings.HasPrefix(c.apiKey, "xkeysib") {
-			provider = "brevo"
-		} else if strings.HasPrefix(c.apiKey, "bird") || strings.Contains(c.apiKey, "bird") {
-			provider = "bird"
-		} else {
-			provider = "resend"
-		}
-	}
-
-	switch provider {
-	case "resend":
-		return c.sendResend(ctx, fromAddr, to, subject, htmlBody)
-	case "sendgrid":
-		return c.sendSendGrid(ctx, fromAddr, to, subject, htmlBody)
-	case "brevo":
-		return c.sendBrevo(ctx, fromAddr, to, subject, htmlBody)
-	case "bird":
-		return c.sendBird(ctx, fromAddr, to, subject, htmlBody)
-	default:
-		return c.sendResend(ctx, fromAddr, to, subject, htmlBody)
-	}
-}
-
-// Resend HTTP API (https://resend.com) — 3,000 free emails/month
-func (c *Client) sendResend(ctx context.Context, from, to, subject, htmlBody string) error {
-	if from == "" || strings.Contains(from, "gmail.com") {
-		from = "onboarding@resend.dev" // Default testing sender if domain not verified
-	}
-
-	payload := map[string]interface{}{
-		"from":    from,
-		"to":      []string{to},
-		"subject": subject,
-		"html":    htmlBody,
-	}
-	jsonBytes, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.resend.com/emails", bytes.NewReader(jsonBytes))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("resend returned HTTP %d: %s", resp.StatusCode, string(body))
-	}
-	return nil
-}
-
-// SendGrid HTTP API (https://sendgrid.com) — 100 free emails/day
-func (c *Client) sendSendGrid(ctx context.Context, from, to, subject, htmlBody string) error {
-	if from == "" {
-		from = "no-reply@ecom.internal"
-	}
-	payload := map[string]interface{}{
-		"personalizations": []map[string]interface{}{
-			{"to": []map[string]string{{"email": to}}},
-		},
-		"from":    map[string]string{"email": from},
-		"subject": subject,
-		"content": []map[string]string{
-			{"type": "text/html", "value": htmlBody},
-		},
-	}
-	jsonBytes, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.sendgrid.com/v3/mail/send", bytes.NewReader(jsonBytes))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("sendgrid returned HTTP %d: %s", resp.StatusCode, string(body))
-	}
-	return nil
-}
-
-// Brevo HTTP API (https://brevo.com) — 300 free emails/day
-func (c *Client) sendBrevo(ctx context.Context, from, to, subject, htmlBody string) error {
-	if from == "" {
-		from = "no-reply@ecom.internal"
-	}
-	payload := map[string]interface{}{
-		"sender":      map[string]string{"email": from},
-		"to":          []map[string]string{{"email": to}},
-		"subject":     subject,
-		"htmlContent": htmlBody,
-	}
-	jsonBytes, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.brevo.com/v3/smtp/email", bytes.NewReader(jsonBytes))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("api-key", c.apiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("brevo returned HTTP %d: %s", resp.StatusCode, string(body))
-	}
-	return nil
-}
-
-// Bird HTTP API (https://bird.com)
-func (c *Client) sendBird(ctx context.Context, from, to, subject, htmlBody string) error {
-	if from == "" {
-		from = "no-reply@ecom.internal"
-	}
-	payload := map[string]interface{}{
-		"receiver": map[string]interface{}{
-			"contacts": []map[string]string{{"identifierValue": to}},
-		},
-		"body": map[string]interface{}{
-			"type": "html",
-			"html": map[string]string{
-				"text": htmlBody,
-				"title": subject,
-			},
-		},
-	}
-	jsonBytes, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.bird.com/v1/messages", bytes.NewReader(jsonBytes))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", "AccessKey "+c.apiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("bird returned HTTP %d: %s", resp.StatusCode, string(body))
-	}
-	return nil
-}
-
-// ── Standard SMTP Dispatcher (Ports 587/465) ────────────────────────────────
-
-func (c *Client) dispatchSingleSMTP(port int, to, subject, htmlBody string) error {
-	addr := fmt.Sprintf("%s:%d", c.host, port)
+	addr := fmt.Sprintf("%s:%d", c.host, c.port)
 	cleanPass := strings.ReplaceAll(c.password, " ", "")
 	auth := smtp.PlainAuth("", c.username, cleanPass, c.host)
 
+	// from header — use clean username to satisfy Gmail SPF/DMARC alignment
 	fromAddr := c.from
 	if fromAddr == "" {
 		fromAddr = c.username
 	}
 
+	// Build RFC 5322 compliant headers with domain matching sender
 	domain := "gmail.com"
 	if parts := strings.Split(c.username, "@"); len(parts) == 2 {
 		domain = parts[1]
@@ -316,18 +87,19 @@ func (c *Client) dispatchSingleSMTP(port int, to, subject, htmlBody string) erro
 
 	var err error
 
-	if port == 465 {
+	// Port 465 → implicit TLS; port 587/25 → STARTTLS
+	if c.port == 465 {
 		tlsCfg := &tls.Config{
 			InsecureSkipVerify: false,
 			ServerName:         c.host,
 			MinVersion:         tls.VersionTLS12,
 		}
 		conn, dialErr := tls.DialWithDialer(
-			&net.Dialer{Timeout: 5 * time.Second},
+			&net.Dialer{Timeout: 10 * time.Second},
 			"tcp", addr, tlsCfg,
 		)
 		if dialErr != nil {
-			return fmt.Errorf("email: TLS dial failed on port 465: %w", dialErr)
+			return fmt.Errorf("email: TLS dial failed: %w", dialErr)
 		}
 		defer conn.Close()
 
@@ -353,47 +125,54 @@ func (c *Client) dispatchSingleSMTP(port int, to, subject, htmlBody string) erro
 		if _, err = fmt.Fprint(w, msg); err != nil {
 			return fmt.Errorf("email: write message failed: %w", err)
 		}
-		return w.Close()
+		err = w.Close()
+	} else {
+		// STARTTLS (port 587 / 2525) with explicit 10s timeout dialer
+		conn, dialErr := net.DialTimeout("tcp", addr, 10*time.Second)
+		if dialErr != nil {
+			return fmt.Errorf("email: STARTTLS TCP dial failed: %w", dialErr)
+		}
+		defer conn.Close()
+
+		client, clientErr := smtp.NewClient(conn, c.host)
+		if clientErr != nil {
+			return fmt.Errorf("email: SMTP client creation failed: %w", clientErr)
+		}
+		defer client.Quit()
+
+		tlsCfg := &tls.Config{
+			ServerName: c.host,
+			MinVersion: tls.VersionTLS12,
+		}
+		if err = client.StartTLS(tlsCfg); err != nil {
+			return fmt.Errorf("email: STARTTLS upgrade failed: %w", err)
+		}
+
+		if err = client.Auth(auth); err != nil {
+			return fmt.Errorf("email: SMTP auth failed: %w", err)
+		}
+		if err = client.Mail(c.username); err != nil {
+			return fmt.Errorf("email: MAIL FROM failed: %w", err)
+		}
+		if err = client.Rcpt(to); err != nil {
+			return fmt.Errorf("email: RCPT TO failed: %w", err)
+		}
+		w, wErr := client.Data()
+		if wErr != nil {
+			return fmt.Errorf("email: DATA command failed: %w", wErr)
+		}
+		if _, err = fmt.Fprint(w, msg); err != nil {
+			return fmt.Errorf("email: write message failed: %w", err)
+		}
+		err = w.Close()
 	}
 
-	// Port 587 / STARTTLS
-	conn, dialErr := net.DialTimeout("tcp", addr, 10*time.Second)
-	if dialErr != nil {
-		return fmt.Errorf("email: STARTTLS TCP dial failed on port %d: %w", port, dialErr)
-	}
-	defer conn.Close()
-
-	client, clientErr := smtp.NewClient(conn, c.host)
-	if clientErr != nil {
-		return fmt.Errorf("email: SMTP client creation failed: %w", clientErr)
-	}
-	defer client.Quit()
-
-	tlsCfg := &tls.Config{
-		ServerName: c.host,
-		MinVersion: tls.VersionTLS12,
-	}
-	if err = client.StartTLS(tlsCfg); err != nil {
-		return fmt.Errorf("email: STARTTLS upgrade failed: %w", err)
+	if err != nil {
+		return fmt.Errorf("email: send failed: %w", err)
 	}
 
-	if err = client.Auth(auth); err != nil {
-		return fmt.Errorf("email: SMTP auth failed: %w", err)
-	}
-	if err = client.Mail(c.username); err != nil {
-		return fmt.Errorf("email: MAIL FROM failed: %w", err)
-	}
-	if err = client.Rcpt(to); err != nil {
-		return fmt.Errorf("email: RCPT TO failed: %w", err)
-	}
-	w, wErr := client.Data()
-	if wErr != nil {
-		return fmt.Errorf("email: DATA command failed: %w", wErr)
-	}
-	if _, err = fmt.Fprint(w, msg); err != nil {
-		return fmt.Errorf("email: write message failed: %w", err)
-	}
-	return w.Close()
+	log.Info().Str("to", to).Str("subject", subject).Msg("email: dispatched successfully")
+	return nil
 }
 
 // ── OTP Email ─────────────────────────────────────────────────────────────────
