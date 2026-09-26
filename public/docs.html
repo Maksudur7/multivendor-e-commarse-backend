@@ -1430,6 +1430,22 @@
           <div class="endpoint-body"></div>
         </div>
 
+        <div class="endpoint" data-method="GET" data-path="/api/v1/auth/email/verify" data-auth="public" data-body="">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)">
+            <span class="method GET">GET</span><span class="endpoint-path">/api/v1/auth/email/verify</span>
+            <span class="endpoint-desc">Verify email with token & uid params</span><span class="endpoint-chevron">▾</span>
+          </div>
+          <div class="endpoint-body"></div>
+        </div>
+
+        <div class="endpoint" data-method="POST" data-path="/api/v1/auth/email/resend-verification" data-auth="bearer" data-body="">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)">
+            <span class="method POST">POST</span><span class="endpoint-path">/api/v1/auth/email/resend-verification</span>
+            <span class="endpoint-desc">Resend email verification link</span><span class="endpoint-chevron">▾</span>
+          </div>
+          <div class="endpoint-body"></div>
+        </div>
+
         <div class="endpoint" data-method="POST" data-path="/api/v1/auth/refresh" data-auth="public"
           data-body='{"refresh_token":"eyJ..."}'>
           <div class="endpoint-header" onclick="toggleEndpoint(this)">
