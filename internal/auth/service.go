@@ -469,8 +469,13 @@ func (s *Service) sendEmailVerificationLink(ctx context.Context, userID, email, 
 		// Still try to send the email even if token storage fails
 	}
 
+	baseURL := strings.TrimRight(s.appBaseURL, "/")
+	if baseURL == "" || strings.Contains(baseURL, "localhost") {
+		baseURL = "https://e-commarse-three.vercel.app"
+	}
+
 	link := fmt.Sprintf("%s/api/v1/auth/email/verify?token=%s&uid=%s",
-		s.appBaseURL, token, userID)
+		baseURL, token, userID)
 	if err := s.email.SendVerificationEmail(ctx, email, fullName, link); err != nil {
 		fmt.Printf("[EMAIL-ERR] Verification email failed to %s: %v\n", email, err)
 	} else {
