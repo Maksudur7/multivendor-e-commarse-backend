@@ -398,11 +398,12 @@ func (h *Handler) VerifyEmail(c *fiber.Ctx) error {
 	wantsJSON := c.Get("Accept") == "application/json" || c.Query("format") == "json"
 
 	if token == "" || uid == "" {
+		debugMsg := fmt.Sprintf("Token and user ID are missing. [token='%s', uid='%s', origURL='%s']", token, uid, c.OriginalURL())
 		if wantsJSON {
-			return response.BadRequest(c, "token and uid query parameters are required")
+			return response.BadRequest(c, debugMsg)
 		}
 		c.Set("Content-Type", "text/html; charset=utf-8")
-		return c.Status(fiber.StatusBadRequest).SendString(renderVerificationResultHTML(false, "Token and user ID are missing from the verification link."))
+		return c.Status(fiber.StatusBadRequest).SendString(renderVerificationResultHTML(false, debugMsg))
 	}
 
 	if err := h.service.VerifyEmail(c.Context(), uid, token); err != nil {
