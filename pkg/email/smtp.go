@@ -51,8 +51,8 @@ func (c *Client) IsConfigured() bool {
 // send is the core SMTP dispatcher with automatic port fallback.
 func (c *Client) send(ctx context.Context, to, subject, htmlBody string) error {
 	if !c.IsConfigured() {
-		log.Warn().Str("to", to).Msg("email: SMTP not configured — skipping email dispatch")
-		return nil
+		log.Warn().Str("to", to).Msg("email: SMTP not configured — missing EMAIL_SMTP_HOST, EMAIL_USERNAME, or EMAIL_PASSWORD")
+		return fmt.Errorf("email: SMTP credentials missing (EMAIL_SMTP_HOST, EMAIL_USERNAME, or EMAIL_PASSWORD empty in environment)")
 	}
 
 	targetPort := c.port
