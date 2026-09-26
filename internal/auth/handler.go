@@ -413,17 +413,11 @@ func (h *Handler) VerifyEmail(c *fiber.Ctx) error {
 	wantsJSON := c.Get("Accept") == "application/json" || c.Query("format") == "json"
 
 	if token == "" || uid == "" {
-		headerMap := make(map[string]string)
-		c.Request().Header.VisitAll(func(k, v []byte) {
-			headerMap[string(k)] = string(v)
-		})
-		debugMsg := fmt.Sprintf("Token and user ID are missing. [token='%s', uid='%s', origURL='%s', rawQuery='%s', requestURI='%s', headers=%v]",
-			token, uid, c.OriginalURL(), string(c.Request().URI().QueryString()), string(c.Request().Header.RequestURI()), headerMap)
 		if wantsJSON {
-			return response.BadRequest(c, debugMsg)
+			return response.BadRequest(c, "token and uid query parameters are required")
 		}
 		c.Set("Content-Type", "text/html; charset=utf-8")
-		return c.Status(fiber.StatusBadRequest).SendString(renderVerificationResultHTML(false, debugMsg))
+		return c.Status(fiber.StatusBadRequest).SendString(renderVerificationResultHTML(false, "Token and user ID are missing from the verification link."))
 	}
 
 	if err := h.service.VerifyEmail(c.Context(), uid, token); err != nil {
